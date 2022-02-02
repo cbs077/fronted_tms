@@ -1,0 +1,39 @@
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+    "primary": (
+      "base": #020202,
+    ),
+  ),
+  $border-color: (
+    "base": #7f7f7f,
+  ),
+  $border-color-hover: rgb(234 0 44)
+);
+
+@use "element-plus/theme-chalk/src/index.scss" as *;
+
+* {
+  --el-text-color-primary: #020202;
+  --el-text-color-regular: #020202;
+}
+.el-menu {
+  --el-menu-hover-bg-color: rgb(234 0 44 / 0.7);
+
+  .el-menu-item:hover {
+    color: white !important;
+  }
+}
+
+.el-menu:hover {
+  color: white !important;
+}
+
+.el-table {
+  --el-table-row-hover-bg-color: rgb(234 0 44 / 0.7);
+  --el-table-header-text-color: black;
+  --el-table-header-bg-color: #bfbfbf;
+  --el-table-text-color: black;
+}
+.el-input {
+  --el-input-border-color: black;
+}
