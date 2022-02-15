@@ -1,0 +1,23 @@
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+    "primary": (
+      "base": black,
+    ),
+  ),
+  $border-color: (
+    "base": #7f7f7f,
+  ),
+  $border-color-hover: rgb(234 0 44)
+);
+
+@use "element-plus/theme-chalk/src/index.scss" as *;
+
+.el-table {
+  --el-table-row-hover-bg-color: rgb(234 0 44 / 0.5);
+  --el-table-header-text-color: black;
+  --el-table-header-bg-color: #bfbfbf;
+  --el-table-text-color: black;
+}
+.el-input {
+  --el-input-border-color: black;
+}
