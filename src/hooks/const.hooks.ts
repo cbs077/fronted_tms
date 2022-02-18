@@ -60,10 +60,10 @@ const gnbs: INavMenuItem[] = [
 const lnbs = (isUser = true) => (isUser ? userLnbs : adminLnbs);
 
 const searchOptions = [
-  { id: 1, value: "S/W Group 코드" },
-  { id: 2, value: "S/W Version" },
-  { id: 3, value: "단말기 번호" },
-  { id: 4, value: "단말기 모델" },
+  { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+  { id: 2, key: "sw_version", value: "S/W Version" },
+  { id: 3, key: "cat_serial_no", value: "단말기 번호" },
+  { id: 4, key: "cat_model_id", value: "단말기 모델" },
 ];
 
 const deviceModels = [{ value: "3001" }, { value: "3002" }, { value: "3003" }];

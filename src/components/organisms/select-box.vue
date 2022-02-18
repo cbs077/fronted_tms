@@ -90,6 +90,7 @@ export default defineComponent({
   setup(properties, { emit }) {
     const selectedOption = ref(properties.items[0]);
     watch(selectedOption, (newValue) => {
+      console.log("newValue", newValue)
       emit("update:select", newValue);
     });
 

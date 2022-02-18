@@ -3,11 +3,11 @@
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6">검색조건</div>
 
-      <select-box :items="searchOptions" class="ml-6 mr-6 w-72 bg-white" />
+      <select-box @update:select="onSelect" :items="searchOptions" class="ml-6 mr-6 w-72 bg-white" />
 
       <div class="my-auto mr-6">검색어</div>
 
-      <base-input class="bg-white" />
+      <base-input @update:modelValue="onInput" modelValue="searchVal" id="search" class="bg-white" />
     </div>
 
     <div class="my-6 flex flex-row">
@@ -26,7 +26,7 @@
 
     <div class="my-3 text-center">
       <base-button text="초기화" class="mr-1" />
-      <base-button text="검색" class="ml-1 bg-sk-lightgray" />
+      <base-button text="검색" class="ml-1 bg-sk-lightgray" @click="onSearch"/>
     </div>
   </div>
 
@@ -99,6 +99,8 @@ import DeviceRegisterModal from "~/components/templates/device-register.modal.vu
 import ResultModal from "~/components/templates/result.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+//import { ApiTt } from "~/api";
+import { ref } from "vue";
 
 export default defineComponent({
   name: "DeviceRegistrations",
@@ -113,13 +115,14 @@ export default defineComponent({
     BaseInput,
   },
   setup() {
-    const { registrationHeaders: headers, devices } = useDevice();
+    //const search 
+    const { registrationHeaders: headers, devices, getTerminal } = useDevice();
     const { searchOptions } = useConst();
-
-    // eslint-disable-next-line unicorn/consistent-function-scoping
     const handleSelectionChange = (value: IDevice[]) => {
       console.log(value);
     };
+    let searchKey = {"key": "sw_group_id"};
+    let searchVal = "bb";
 
     const deviceRegistration = reactive({
       modal: false,
@@ -158,14 +161,42 @@ export default defineComponent({
       }, 1000);
     };
 
+    const onSelect = (event) => {
+      searchKey = event
+      console.log("onSelect", event)
+    };
+
+    const onInput = (event) => {
+      searchVal = event
+      console.log("onInput", event)
+    };
+
+    const selectCategory = (event) => {
+      console.log(event.target.value);
+      console.log("this.selected", this.selectedOption.value);
+      //useDevice.getTerminal("aaaa");
+    };
+
+    const onSearch = (event) => {
+      console.log("onSearch", searchVal);
+      getTerminal(searchKey.key+ "=" +searchVal);
+    };
+
     return {
+      searchKey,
+      searchVal,
       onRegistration,
+      onSelect,
+      onInput,
       headers,
       devices,
+      getTerminal,
       searchOptions,
       deviceRegistration,
       registrationResult,
       handleSelectionChange,
+      selectCategory, 
+      onSearch
     };
   },
 });

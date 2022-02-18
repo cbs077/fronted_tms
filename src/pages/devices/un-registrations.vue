@@ -109,6 +109,7 @@
     title="Confirm"
     positive-text="삭제"
     negative-text="취소"
+    @click:positive="onRegistration"
     :text="deviceUnRegistration.text"
   ></confirm-modal>
 </template>
@@ -150,6 +151,11 @@ export default defineComponent({
       text: "선택한 항목을 삭제 하시겠습니까?",
     });
 
+    const onRegistration = () => {
+      console.log("aaaa")
+      console.log(event)
+    };
+    
     return {
       update,
       deviceUnRegistration,
@@ -158,6 +164,7 @@ export default defineComponent({
       devices,
       searchOptions,
       displayOptions,
+      onRegistration
     };
   },
 });
