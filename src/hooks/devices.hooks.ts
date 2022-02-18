@@ -1,7 +1,9 @@
 import { reactive } from "vue";
+import  axios, { AxiosResponse } from "axios";
 
 import { IDataTableHeader } from "~/interfaces/data-table.interface";
 import { dateFormat } from "~/utils/filter";
+import { info } from "console";
 
 export interface IDevice {
   van: string;
@@ -46,6 +48,7 @@ export const useDevice = () => {
   ];
 
   const update = (newDevices: IDevice[]) => {
+    console.log("newDevices", newDevices)
     devices.length = 0;
     devices.push(
       ...newDevices.map((device) => {
@@ -58,54 +61,114 @@ export const useDevice = () => {
     );
   };
 
-  // TODO: 이 아래 코드는 더미 데이터 입니다. 프로덕션 개발시 삭제 해주세요.
-  const temporary: IDevice = {
-    deviceNumberFrom: "Z118120500",
-    deviceNumberTo: "Z118120600",
-    modelName: "MPOS",
-    swVersion: "1.0",
-    applicationDate: new Date(),
-    deviceNumber: "Z118120500",
-    lastAccessDate: new Date(),
-    modelCode: "3001",
-    status: "초기1111상태",
-    swGroupCode: "9998",
-    van: "퍼스트데이터",
-    applicationUser: "SK TMS",
-    deviceCount: 10,
-    init: 3,
-    running: 8,
-    idle: 10,
-    swDownload: 20,
+  const login = (firstName: string) => {
+    const response = 
+      axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=abc1')
+      .then(response => {
+          //console.log(response.data);
+      });
+    console.log(response);
+    return firstName;
   };
 
-  const temporaryData = [
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-  ];
+  let renmeObjectKey = (object: any) => {
+    const temporary: IDevice = {   
+      deviceNumberFrom: "Z118120500",
+      deviceNumberTo: "Z118120600",
+      modelName: object.CAT_MODEL_ID,
+      swVersion: "1.0",
+      applicationDate:  object.REG_DT,
+      deviceNumber:  object.CAT_SERIAL_NO,
+      lastAccessDate: object.UPDATE_DT,
+      modelCode: "3001",
+      status: object.STATUS,
+      swGroupCode: object.SW_GROUP_ID,
+      van: object.VAN_ID,
+      applicationUser: "SK TMS",
+      deviceCount: 10,
+      init: 3,
+      running: 8,
+      idle: 10,
+      swDownload: 20,
+    };
 
-  update(temporaryData);
+    console.log("temporary", temporary)
+    //delete object.CAT_SERIAL_NO;
+    return temporary
+  };
+
+  const getTerminal = (firstName: string) => {
+    let data: any[] = [];
+
+    axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?page=1&page_count=2')
+    .then(response => {
+      var list = response.data.list
+      //console.log("list", response.data.list);
+
+      for (var object of list){
+        //console.log("object", object);
+        var obj = renmeObjectKey(object);
+        data.push(obj);
+      }     
+      //console.log("getTerminal1", data)   
+      update(data); 
+    });
+
+    //console.log("getTerminal", data)
+    //return data;
+  };
+
+  // TODO: 이 아래 코드는 더미 데이터 입니다. 프로덕션 개발시 삭제 해주세요.
+  // const temporary: IDevice = {
+  //   deviceNumberFrom: "Z118120500",
+  //   deviceNumberTo: "Z118120600",
+  //   modelName: "MPOS",
+  //   swVersion: "1.0",
+  //   applicationDate: new Date(),
+  //   deviceNumber: "Z118120500",
+  //   lastAccessDate: new Date(),
+  //   modelCode: "3001",
+  //   status: "초기1111상태",
+  //   swGroupCode: "9998",
+  //   van: "퍼스트데이터",
+  //   applicationUser: "SK TMS",
+  //   deviceCount: 10,
+  //   init: 3,
+  //   running: 8,
+  //   idle: 10,
+  //   swDownload: 20,
+  // };
+
+  // const temporaryData = [
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  //   temporary,
+  // ];
+
+  login("aa");
+  getTerminal("aa")
 
   return {
     registrationHeaders,
     logHeaders,
     devices,
     update,
+    login,
+    getTerminal
   };
 };
