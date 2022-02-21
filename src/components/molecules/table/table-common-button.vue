@@ -14,7 +14,7 @@
         v-for="item in take.available"
         :key="item.value"
         :label="item.value"
-        :value="item.value"
+        :value="item.key"
       />
     </el-select>
   </div>
@@ -32,7 +32,10 @@ export default defineComponent({
     const { take } = useConst();
     watch(
       () => take.select,
-      (newValue) => emit("update:take", newValue)
+      (newValue) => {
+        console.log("newValue", newValue)
+        emit("update:take", newValue)
+      }
     );
 
     return { take };

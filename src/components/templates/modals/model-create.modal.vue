@@ -86,6 +86,30 @@ export default defineComponent({
       { key: "status", value: "상태" },
     ];
 
+
+    const getTerminal = (param: string) => {
+      console.log("getTerminal",param)
+      var token= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NDYwODQ0LCJleHAiOjE2NDU0NjY4NDR9.LUoksT9S08QQlAFgTM1I5nap0wdoUGOJg_qTmClxPfg"
+      window.localStorage.setItem("token", token)
+      token = window.localStorage.getItem(key)
+      let data: any[] = [];
+
+      axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?page=1&page_count=2&' + param,
+        {headers: {
+          Authorization: token, // header의 속성
+        }},
+      )
+      .then(response => {
+        var list = response.data.list
+
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          data.push(obj);
+        }     
+        update(data); 
+      });
+    };
+
     return {
       header,
       isOpen,

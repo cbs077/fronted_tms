@@ -13,15 +13,11 @@
     "lint:prettier": "prettier --check .",
     "lint:fix": "prettier --write --list-different . && yarn lint:js --fix && yarn lint:style --fix"
   },
-  "engines": {
-    "node": "14.x",
-    "yarn": "^1.22",
-    "npm": "NOT-ALLOWED"
-  },
   "dependencies": {
     "@headlessui/vue": "^1.4.3",
     "@heroicons/vue": "^1.0.5",
     "@tailwindcss/forms": "^0.4.0",
+    "axios": "^0.26.0",
     "dayjs": "^1.10.7",
     "element-plus": "^2.0.2",
     "vue": "^3.2.25",

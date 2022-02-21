@@ -3,6 +3,7 @@ import { reactive } from "vue";
 import { IDataTableHeader } from "~/interfaces/data.interface";
 import { dateFormat } from "~/utils/filter";
 
+
 export interface IDevice {
   van: string;
   modelCode: string;
@@ -46,7 +47,7 @@ export const useDevice = () => {
   ];
 
   const update = (newDevices: IDevice[]) => {
-    devices.length = 0;
+    devices.length = 30;
     devices.push(
       ...newDevices.map((device) => {
         return {
@@ -58,54 +59,37 @@ export const useDevice = () => {
     );
   };
 
-  // TODO: 이 아래 코드는 더미 데이터 입니다. 프로덕션 개발시 삭제 해주세요.
-  const temporary: IDevice = {
-    deviceNumberFrom: "Z118120500",
-    deviceNumberTo: "Z118120600",
-    modelName: "MPOS",
-    swVersion: "1.0",
-    applicationDate: new Date(),
-    deviceNumber: "Z118120500",
-    lastAccessDate: new Date(),
-    modelCode: "3001",
-    status: "초기1111상태",
-    swGroupCode: "9998",
-    van: "퍼스트데이터",
-    applicationUser: "SK TMS",
-    deviceCount: 10,
-    init: 3,
-    running: 8,
-    idle: 10,
-    swDownload: 20,
+  let renmeObjectKey = (object: any) => {
+    const temporary: IDevice = {   
+      deviceNumberFrom: "Z118120500",
+      deviceNumberTo: "Z118120600",
+      modelName: object.CAT_MODEL_NM,
+      swVersion: object.SW_VERSION,
+      applicationDate:  object.REG_DT,
+      deviceNumber:  object.CAT_SERIAL_NO,
+      lastAccessDate: object.UPDATE_DT,
+      modelCode: object.CAT_MODEL_ID,
+      status: object.STATUS,
+      swGroupCode: object.SW_GROUP_ID,
+      van: object.VAN_ID,
+      applicationUser: "SK TMS",
+      deviceCount: 10,
+      init: 3,
+      running: 8,
+      idle: 10,
+      swDownload: 20,
+    };
+
+    //console.log("temporary", temporary)
+    //delete object.CAT_SERIAL_NO;
+    return temporary
   };
-
-  const temporaryData = [
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-    temporary,
-  ];
-
-  update(temporaryData);
 
   return {
     registrationHeaders,
     logHeaders,
     devices,
     update,
+    renmeObjectKey    
   };
 };

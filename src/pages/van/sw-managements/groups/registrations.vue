@@ -65,7 +65,7 @@
       background
       class="my-6"
       layout="prev, pager, next"
-      :total="1000"
+      :total="10"
     />
   </div>
 

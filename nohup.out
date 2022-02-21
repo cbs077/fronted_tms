@@ -1,0 +1,22 @@
+INFO: Accepting connections at http://localhost:8080
+INFO: Accepting connections at http://localhost:40663
+yarn run v1.22.17
+$ vite
+
+  vite v2.8.2 dev server running at:
+
+  > Local:    http://localhost:8080/
+  > Network:  http://172.31.12.210:8080/
+
+  ready in 337ms.
+
+yarn run v1.22.17
+$ vite
+
+  vite v2.8.2 dev server running at:
+
+  > Local:    http://localhost:8080/
+  > Network:  http://172.31.12.210:8080/
+
+  ready in 426ms.
+

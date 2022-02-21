@@ -63,7 +63,7 @@ export default defineComponent({
     const { lnbs, gnbs } = useConst();
     const userName = "SK TMS";
 
-    const isVan = false;
+    const isVan = true;
 
     const displayLnbs = computed(() => {
       const { path } = router.currentRoute.value;

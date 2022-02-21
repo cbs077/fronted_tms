@@ -6,6 +6,7 @@
 
       <div class="my-auto w-5/12 pr-5">
         <el-select
+          @update:select="onSelect" 
           v-model="selectOption"
           clearable
           placeholder="선택"
@@ -16,20 +17,16 @@
             v-for="item in searchOptions"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
 
-      <div class="my-auto mr-6 w-1/12 text-center">검색어</div>
-
-      <div class="w-5/12 pr-5">
-        <el-input
-          size="large"
-          placeholder="Please Input"
-          :suffix-icon="Search"
-        />
+      <div class="my-auto w-1/12 text-center">검색어</div>
+      <div class="w-80 w-5/12">
+        <el-input v-model="query" size="large" />
       </div>
+
     </div>
 
     <div class="my-6 flex flex-row">
@@ -43,11 +40,14 @@
         />
       </div>
     </div>
-
-    <options-search-button />
+    <options-search-button
+      @click:search="onSearch"
+    />
   </div>
 
-  <table-common-button>
+  <table-common-button
+    @update:take="onTake"
+  >
     <template #body>
       <div class="grow" />
       <excel-button class="mr-1" />
@@ -81,11 +81,23 @@
 
   <div class="flex justify-center">
     <el-pagination
+      @current-change="paginate"
       background
       class="my-6"
       layout="prev, pager, next"
-      :total="1000"
-    />
+      :page-size="20"
+      :pager-count="11"
+      :total="totalCount"
+    /> 
+    <!-- v-model:page-count="totalCount"
+         v-model:page-size="10"
+         @update:page-size="handleSizeChange" -->
+    <!--
+    <pagination
+      :total="totalCount"
+      :page.sync="10"
+      @pagination="getList" 
+    />-->
   </div>
 
   <device-register-modal
@@ -106,8 +118,11 @@
   />
 </template>
 <script lang="ts">
+import  axios, { AxiosResponse } from "axios";
 import { Search } from "@element-plus/icons-vue";
-import { ElTable, ElTableColumn } from "element-plus";
+import { ElTable, ElTableColumn, ElPagination } from "element-plus";
+import Pagination from '@/components/Pagination'
+
 import { defineComponent, reactive, ref } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -124,23 +139,32 @@ export default defineComponent({
     TableCommonButton,
     ResultModal,
     ElTableColumn,
+    ElPagination,
     DeviceRegisterModal,
     ElTable,
     BaseButton,
     DeviceDetailModal,
   },
   setup() {
-    const { registrationHeaders: headers, devices } = useDevice();
+    const { registrationHeaders: headers, devices, update, renmeObjectKey} = useDevice();
     const { searchOptions } = useConst();
 
     const deviceRegistration = reactive({
       modal: false,
     });
-
+    const query = ref("");
     const deviceDetail = reactive({
       modal: false,
       data: {},
     });
+
+    let searchKey = {"key": "sw_group_id"};
+    let searchVal = "bb";
+    let pageVal = {
+      page: 1,
+      pageCount: 10,
+      total: 30
+    }
 
     const registrationResult = reactive({
       modal: false,
@@ -180,19 +204,115 @@ export default defineComponent({
       deviceDetail.modal = true;
     };
 
-    const selectOption = ref();
+// 없애야 함.
+    const onSelect = (event) => {
+      searchKey = event
+      console.log("onSelect", event)
+    };
+    const onInput = (event) => {
+      console.log("onInput", event)
+    };
+    const selectCategory = (event) => {
+      console.log(event.target.value);
+      console.log("this.selected", this.selectedOption.value);
+    };
 
+    const onSearch = (event) => {
+      totalCount = 30
+      console.log("onSearch", query.value);
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      getTerminal(param);
+    };
+
+    const paginate = (page) => {
+      console.log("paginate", page);
+      pageVal.page = page
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      getTerminal(param);
+    }; 
+
+    const onTake = (pageCount) => {
+      console.log("onTake", pageCount)
+      pageVal.pageCount = pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      getTerminal(param);
+    }; 
+    const seTtotalCount = (pageCount) => {
+      console.log("aa")
+      totalCount = 30
+    }
+
+    const handleSizeChange = (pageCount) => {
+      console.log("aa")
+      totalCount = 30
+    }
+
+    async function getTerminal(param) {
+      console.log("getTerminal",param)
+      var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NDc2MDY4LCJleHAiOjE2NDU0ODIwNjh9.0N10gnfnYGntzduvPy6gefaPhfV7qk8g64WTDhaI9kQ"
+      window.localStorage.setItem("token", tokena)
+      var token = window.localStorage.getItem("token")
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let response = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        var list = response.data.list
+
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          data.push(obj);
+        }   
+        console.log("totalCount")
+        totalCount = 50  
+        update(data); 
+        return response.data.total_count;
+      });
+      console.log("response", response)
+      totalCount = 20
+      seTtotalCount(30)
+      return response
+    };
+
+    const selectOption = ref();
+    var totalCount = 5;
+
+    getTerminal("page=1&page_count=10")
+    
     return {
+      searchKey,
+      searchVal,
+      pageVal,
+      totalCount,
       selectOption,
       onRowClicked,
       onRegistration,
       deviceDetail,
       headers,
+      query,
       devices,
+      update,
       searchOptions,
       deviceRegistration,
       registrationResult,
       Search,
+      onSelect,
+      onInput,
+      selectCategory,
+      onSearch,
+      paginate,
+      onTake,
+      handleSizeChange
     };
   },
 });

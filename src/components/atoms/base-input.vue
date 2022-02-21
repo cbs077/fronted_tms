@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-between rounded border border-sk-gray ring-sk-red focus-within:border-sk-red">
     <input
-      :value="query"
+      v-model="query"
       class="m-1 h-8 flex-1 appearance-none border-none px-2 py-0 focus:outline-none focus:ring-0"
     >
     <button
@@ -29,12 +29,17 @@ export default defineComponent({
   emits: ["click:cancel", "update:modelValue"],
   setup(properties, { emit }) {
     const query = computed({
-      get: () => properties.modelValue,
+      get: () => {
+        console.log("properties.modelValue", properties.modelValue) 
+        return properties.modelValue
+      },
       set: (value) => {
+        console.log("query_set", value)
+        //return value
         emit("update:modelValue", value);
+        return value;
       },
     });
-
     return { query };
   },
 });
