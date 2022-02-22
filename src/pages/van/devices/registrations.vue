@@ -6,7 +6,6 @@
 
       <div class="my-auto w-5/12 pr-5">
         <el-select
-          @update:select="onSelect" 
           v-model="selectOption"
           clearable
           placeholder="선택"
@@ -32,12 +31,14 @@
     <div class="my-6 flex flex-row">
       <div class="my-auto mr-6 block w-1/12 align-middle">결과 데이터</div>
       <div class="w-11/12">
-        <el-checkbox
-          v-for="header in headers"
-          :key="`filter-${header.key}`"
-          :label="header.value"
-          size="large"
-        />
+          <el-checkbox
+            v-for="header in headers"
+            v-model="tableHeader.checkAll[header.key]"
+            :key="`filter-${header.key}`"
+            :label="header.value"
+            @change="onCheckbox(header.key, tableHeader.checkAll[header.key])"
+            size="large"
+          />
       </div>
     </div>
     <options-search-button
@@ -60,18 +61,20 @@
   </table-common-button>
   <div class="rounded border border-sk-gray">
     <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
-      <el-table-column prop="van" label="VAN사명" align="center" />
-      <el-table-column prop="modelCode" label="단말기모델코드" align="center" />
-      <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
+      <el-table-column v-if="tableHeader.van==true" prop="van" label="VAN사명" align="center" />
+      <el-table-column v-if="tableHeader.modelCode==true" prop="modelCode" label="단말기모델코드" align="center" />
+      <el-table-column v-if="tableHeader.deviceNumber==true"  prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column
+        v-if="tableHeader.swGroupCode==true"
         prop="swGroupCode"
         label="S/W Group 코드"
         align="center"
       />
-      <el-table-column prop="swVersion" label="S/W Version" align="center" />
-      <el-table-column prop="status" label="상태" align="center" />
-      <el-table-column prop="applicationDate" label="등록일" align="center" />
+      <el-table-column v-if="tableHeader.swVersion==true" prop="swVersion" label="S/W Version" align="center" />
+      <el-table-column v-if="tableHeader.status==true" prop="status" label="상태" align="center" />
+      <el-table-column v-if="tableHeader.applicationDate==true" prop="applicationDate" label="등록일" align="center" />
       <el-table-column
+        v-if="tableHeader.lastAccessDate==true"
         prop="lastAccessDate"
         label="최종접속일"
         align="center"
@@ -85,12 +88,14 @@
       background
       class="my-6"
       layout="prev, pager, next"
-      :page-size="20"
-      :pager-count="11"
-      :total="totalCount"
+      :page-count="pageVal.total"
+      
     /> 
     <!-- v-model:page-count="totalCount"
          v-model:page-size="10"
+         :page-size="30"
+         :total="pageVal.total"
+         :pager-count="10"
          @update:page-size="handleSizeChange" -->
     <!--
     <pagination
@@ -160,11 +165,24 @@ export default defineComponent({
 
     let searchKey = {"key": "sw_group_id"};
     let searchVal = "bb";
-    let pageVal = {
+    let pageVal = reactive({
       page: 1,
       pageCount: 10,
-      total: 30
-    }
+      total: 10
+    })
+
+    let tableHeader = reactive({
+      van: true,
+      modelCode: true,
+      deviceNumber: true,
+      swGroupCode: true,
+      status: true,
+      applicationDate: true,
+      lastAccessDate: true,
+      checkAll: []
+    })
+
+
 
     const registrationResult = reactive({
       modal: false,
@@ -218,7 +236,6 @@ export default defineComponent({
     };
 
     const onSearch = (event) => {
-      totalCount = 30
       console.log("onSearch", query.value);
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -241,25 +258,26 @@ export default defineComponent({
       getTerminal(param);
     }; 
     const seTtotalCount = (pageCount) => {
-      console.log("aa")
-      totalCount = 30
+      pageVal.total = pageCount
+      console.log("seTtotalCount", pageVal.total)
     }
 
-    const handleSizeChange = (pageCount) => {
-      console.log("aa")
-      totalCount = 30
+    const onCheckbox = (name, tst) => {
+      tableHeader[name] = tst
+      checkAll["van"] = true
+      tableHeader.checkAll["van"] = true
     }
 
-    async function getTerminal(param) {
+    function getTerminal(param) {
       console.log("getTerminal",param)
-      var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NDc2MDY4LCJleHAiOjE2NDU0ODIwNjh9.0N10gnfnYGntzduvPy6gefaPhfV7qk8g64WTDhaI9kQ"
+      var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NTQ3OTczLCJleHAiOjE2NDU1NTM5NzN9.F9HANrtW2ookIrac1KXLcUh8bVl1edjXkLpX6Sv0Ay8"
       window.localStorage.setItem("token", tokena)
       var token = window.localStorage.getItem("token")
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let response = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
         {
           headers: {
               Authorization: token
@@ -274,30 +292,40 @@ export default defineComponent({
           data.push(obj);
         }   
         console.log("totalCount")
-        totalCount = 50  
+        seTtotalCount(response.data.total_count)
         update(data); 
+        
         return response.data.total_count;
       });
       console.log("response", response)
-      totalCount = 20
-      seTtotalCount(30)
       return response
     };
 
+    function defaultCheckbox() {
+      tableHeader.checkAll["van"] = true
+      tableHeader.checkAll["modelCode"] = true
+      tableHeader.checkAll["deviceNumber"] = true
+      tableHeader.checkAll["swGroupCode"] = true
+      tableHeader.checkAll["swVersion"] = true
+      tableHeader.checkAll["status"] = true
+      tableHeader.checkAll["applicationDate"] = true
+      tableHeader.checkAll["lastAccessDate"] = true
+    }
+
     const selectOption = ref();
-    var totalCount = 5;
 
     getTerminal("page=1&page_count=10")
-    
+    defaultCheckbox()
+
     return {
       searchKey,
       searchVal,
       pageVal,
-      totalCount,
       selectOption,
       onRowClicked,
       onRegistration,
       deviceDetail,
+      tableHeader,
       headers,
       query,
       devices,
@@ -312,7 +340,7 @@ export default defineComponent({
       onSearch,
       paginate,
       onTake,
-      handleSizeChange
+      onCheckbox
     };
   },
 });

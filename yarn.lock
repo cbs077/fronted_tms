@@ -479,7 +479,7 @@
   "resolved" "https://registry.npmjs.org/@vue/shared/-/shared-3.2.31.tgz"
   "version" "3.2.31"
 
-"@vueuse/core@^7.6.0":
+"@vueuse/core@^7.5.5":
   "integrity" "sha512-bjAbXJVJO6aElMaZtDz2B70C0L6jFk/jGVqJxWZS5huffxA6dW5DN6tQQJwzOnx9B9rDhePHJIFKsix0qZIH2Q=="
   "resolved" "https://registry.npmjs.org/@vueuse/core/-/core-7.6.2.tgz"
   "version" "7.6.2"
@@ -1120,20 +1120,18 @@
   "resolved" "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.57.tgz"
   "version" "1.4.57"
 
-"element-plus@^2.0.2":
-  "integrity" "sha512-URjC0HwwiqtlLxqTmHXQ31WXrdAq4ChWyyn52OcQs3PRsnMPfahGVq2AWnfzzlzlhVeI5lY3HQiuB1zDathS+g=="
-  "resolved" "https://registry.npmjs.org/element-plus/-/element-plus-2.0.2.tgz"
-  "version" "2.0.2"
+"element-plus@2.0.0":
+  "integrity" "sha512-bLt/Ahn0ejOKuYA4HR3iuGLHTt4pRzQZwCx1G2BLHEJLZi7CfLiFnjZMhGhYNkk49ir4JHtnBJTgLhNNaKALcA=="
+  "resolved" "https://registry.npmjs.org/element-plus/-/element-plus-2.0.0.tgz"
+  "version" "2.0.0"
   dependencies:
     "@ctrl/tinycolor" "^3.4.0"
     "@element-plus/icons-vue" "^0.2.6"
     "@popperjs/core" "^2.11.2"
-    "@vueuse/core" "^7.6.0"
+    "@vueuse/core" "^7.5.5"
     "async-validator" "^4.0.7"
     "dayjs" "^1.10.7"
     "lodash" "^4.17.21"
-    "lodash-es" "^4.17.21"
-    "lodash-unified" "^1.0.1"
     "memoize-one" "^6.0.0"
     "normalize-wheel-es" "^1.1.1"
 
@@ -2210,16 +2208,6 @@
   dependencies:
     "p-locate" "^4.1.0"
 
-"lodash-es@*", "lodash-es@^4.17.21":
-  "integrity" "sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw=="
-  "resolved" "https://registry.npmjs.org/lodash-es/-/lodash-es-4.17.21.tgz"
-  "version" "4.17.21"
-
-"lodash-unified@^1.0.1":
-  "integrity" "sha512-Py+twfpWn+2dFQWCuGcp21WiQRwZwnm1cyE3piSt/VtBVKVyxlR58WgOVRzXtmdmDRGJKH8F8GPaA29WK/yK8g=="
-  "resolved" "https://registry.npmjs.org/lodash-unified/-/lodash-unified-1.0.1.tgz"
-  "version" "1.0.1"
-
 "lodash.merge@^4.6.2":
   "integrity" "sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ=="
   "resolved" "https://registry.npmjs.org/lodash.merge/-/lodash.merge-4.6.2.tgz"
@@ -2230,7 +2218,7 @@
   "resolved" "https://registry.npmjs.org/lodash.truncate/-/lodash.truncate-4.4.2.tgz"
   "version" "4.4.2"
 
-"lodash@*", "lodash@^4.17.21":
+"lodash@^4.17.21":
   "integrity" "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
   "resolved" "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
   "version" "4.17.21"

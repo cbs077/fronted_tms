@@ -1,4 +1,5 @@
 export interface IDataTableHeader {
+  bool: boolean;
   key: string;
   value?: string;
   align?: "left" | "right" | "center";
