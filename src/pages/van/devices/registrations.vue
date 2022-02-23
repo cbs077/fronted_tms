@@ -88,10 +88,8 @@
       background
       class="my-6"
       layout="prev, pager, next"
-      :page-count="pageVal.total"
-      
+      :page-count="pageVal.total"   
     /> 
-
   </div>
 
   <device-register-modal
@@ -113,6 +111,7 @@
 </template>
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
+import * as XLSX from 'xlsx/xlsx.mjs';
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn, ElPagination } from "element-plus";
 import Pagination from '@/components/Pagination'
@@ -128,7 +127,7 @@ import DeviceRegisterModal from "~/components/templates/modals/device-register.m
 import ResultModal from "~/components/templates/modals/result.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
-import * as XLSX from 'xlsx/xlsx.mjs';
+
 //import {makeExcelFile5} from "~/components/molecules/excel-button.vue";
 
 
@@ -219,7 +218,6 @@ export default defineComponent({
 // 없애야 함.
     const onSelect = (event) => {
       searchKey = event
-      //console.log("onSelect", event)
     };
 
     const onSearch = (event) => {
@@ -230,7 +228,6 @@ export default defineComponent({
         setValue(data)
         defaultCheckbox()
       })
-      //return res
     };
 
     const paginate = (page) => {
@@ -261,7 +258,6 @@ export default defineComponent({
 
     const onCheckbox = (name, tst) => {
       tableHeader[name] = tst
-      //checkAll["van"] = true
       tableHeader.checkAll["van"] = true
     }
     function login() {
@@ -317,7 +313,6 @@ export default defineComponent({
         // 엑셀 파일을 내보낸다.
         XLSX.writeFile(wb, 'terminal.xlsx');
       })
- 
     }
 
     function setValue(data) {
