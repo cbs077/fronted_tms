@@ -17,6 +17,7 @@ createApp(App)
   .component(ExcelButton.name, ExcelButton)
   .component(OptionsSearchButton.name, OptionsSearchButton)
   .component(Breadcrumb.name, Breadcrumb)
+
   .use(router)
   .use(ElementPlus)
   .mount("#app");

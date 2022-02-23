@@ -4,7 +4,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "start:dev": "vite",
+    "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "prepare": "husky install",
     "lint": "yarn lint:js && yarn lint:style && yarn lint:prettier",
@@ -20,9 +20,11 @@
     "axios": "^0.26.0",
     "dayjs": "^1.10.7",
     "element-plus": "2.0.0",
+    "lodash": "^4.17.21",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
-    "vue-tsc": "^0.31.1"
+    "vue-tsc": "^0.31.1",
+    "vue3-xlsx": "^1.1.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.6",

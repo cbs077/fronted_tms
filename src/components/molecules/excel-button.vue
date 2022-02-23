@@ -39,7 +39,18 @@
             d="M9.807 19L12.193 19 14.129 22.754 16.175 19 18.404 19 15.333 24 18.474 29 16.123 29 14.013 25.07 11.912 29 9.526 29 12.719 23.982z"
           />
         </svg>
-        <p class="my-auto ml-4 p-0">엑셀저장</p>
+        <p class="my-auto ml-4 p-0"  @click="makeExcelFile5">엑셀저장</p>
+        <!-- <xlsx-workbook>
+          <xlsx-sheet
+            :collection="sheet.data"
+            v-for="sheet in sheets"
+            :key="sheet.name"
+            :sheet-name="sheet.name"
+          />
+          <xlsx-download>
+            <button>Download</button>
+          </xlsx-download>
+        </xlsx-workbook> -->
       </div>
     </template>
   </base-button>
@@ -47,12 +58,27 @@
 
 <script>
 import { defineComponent } from "vue";
+//import{ Xlsx } from 'xlsx'
 
 import BaseButton from "~/components/atoms/base-button.vue";
 
 export default defineComponent({
   name: "ExcelButton",
-  components: { BaseButton },
+  components: { 
+    BaseButton 
+  },
+  setup() {
+    const makeExcelFile5 = () => { 
+      const workBook = Xlsx.utils.book_new()
+      const workSheet = Xlsx.utils.json_to_sheet(this.data1)
+      Xlsx.utils.book_append_sheet(workBook, workSheet, 'example')
+      Xlsx.writeFile(workBook, 'example.xlsx')
+    }
+
+    return{
+      makeExcelFile5
+    }
+  }
 });
 </script>
 

@@ -45,13 +45,13 @@
       @click:search="onSearch"
     />
   </div>
-
+	
   <table-common-button
     @update:take="onTake"
   >
     <template #body>
       <div class="grow" />
-      <excel-button class="mr-1" />
+       <excel-button class="mr-1" />
       <base-button
         text="단말기 등록"
         class="ml-1"
@@ -91,18 +91,7 @@
       :page-count="pageVal.total"
       
     /> 
-    <!-- v-model:page-count="totalCount"
-         v-model:page-size="10"
-         :page-size="30"
-         :total="pageVal.total"
-         :pager-count="10"
-         @update:page-size="handleSizeChange" -->
-    <!--
-    <pagination
-      :total="totalCount"
-      :page.sync="10"
-      @pagination="getList" 
-    />-->
+
   </div>
 
   <device-register-modal
@@ -119,7 +108,7 @@
   <device-detail-modal
     v-model="deviceDetail.modal"
     :device="deviceDetail.data"
-    @click:positive="() => {}"
+    @click:positive="onSaveDetail"
   />
 </template>
 <script lang="ts">
@@ -137,6 +126,7 @@ import DeviceRegisterModal from "~/components/templates/modals/device-register.m
 import ResultModal from "~/components/templates/modals/result.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+
 
 export default defineComponent({
   name: "DeviceRegistrations",
@@ -218,8 +208,11 @@ export default defineComponent({
     };
 
     const onRowClicked = (row: IDevice) => {
+      console.log("onRowClicked", row)
       deviceDetail.data = row;
       deviceDetail.modal = true;
+
+
     };
 
 // 없애야 함.
@@ -267,11 +260,27 @@ export default defineComponent({
       checkAll["van"] = true
       tableHeader.checkAll["van"] = true
     }
+    function login() {
+      let data: any[] = [];
+
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=abc1')
+      .then(response => {
+        var list = response.data.list
+        console.log("response", response)
+
+        window.localStorage.setItem("token", response.data.messages.token)
+        window.localStorage.setItem("vanId", response.data.messages.van_id)
+        window.localStorage.setItem("userId", response.data.messages.user_id)
+        window.localStorage.setItem("userNm", response.data.messages.user_name)
+
+      });
+    };
+
 
     function getTerminal(param) {
       console.log("getTerminal",param)
-      var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NTQ3OTczLCJleHAiOjE2NDU1NTM5NzN9.F9HANrtW2ookIrac1KXLcUh8bVl1edjXkLpX6Sv0Ay8"
-      window.localStorage.setItem("token", tokena)
+      //var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NTU0MDgyLCJleHAiOjE2NDU1NjAwODJ9.s3BS6Xa_bUIvC3_9VhPuHw2JJPxkrJktuor4Ebv6a24"
+      //window.localStorage.setItem("token", tokena)
       var token = window.localStorage.getItem("token")
       if(token == null) token = "" 
 
@@ -291,7 +300,6 @@ export default defineComponent({
           var obj = renmeObjectKey(object);
           data.push(obj);
         }   
-        console.log("totalCount")
         seTtotalCount(response.data.total_count)
         update(data); 
         
@@ -300,6 +308,15 @@ export default defineComponent({
       console.log("response", response)
       return response
     };
+
+
+    // function onSaveDetail(val) {
+    //   console.log("onSaveDetail", val.)
+    // }
+
+    const onSaveDetail = ( val : any) => {
+      console.log("onSaveDetail", val.modelCode)
+    }
 
     function defaultCheckbox() {
       tableHeader.checkAll["van"] = true
@@ -313,7 +330,7 @@ export default defineComponent({
     }
 
     const selectOption = ref();
-
+    login()
     getTerminal("page=1&page_count=10")
     defaultCheckbox()
 
@@ -340,7 +357,8 @@ export default defineComponent({
       onSearch,
       paginate,
       onTake,
-      onCheckbox
+      onCheckbox,
+      onSaveDetail
     };
   },
 });

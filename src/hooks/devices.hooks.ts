@@ -28,15 +28,16 @@ export interface IDevice {
 export const useDevice = () => {
   const devices = reactive<IDevice[]>([]);
   const registrationHeaders: IDataTableHeader[] = [
-    { bool: true, key: "van", value: "VAN사명", align: "center" },
-    { bool: true, key: "modelCode", value: "단말기 모델 코드", align: "center" },
-    { bool: true, key: "deviceNumber", value: "단말기 번호", align: "center" },
-    { bool: true, key: "swGroupCode", value: "S/W Group 코드", align: "center" },
-    { bool: true, key: "swVersion", value: "S/W Version", align: "center" },
-    { bool: true, key: "status", value: "상태", align: "center" },
-    { bool: true, key: "applicationDate", value: "등록일", align: "center" },
-    { bool: true, key: "lastAccessDate", value: "최종 접속일", align: "center" },
+    { key: "van", value: "VAN사명", align: "center" },
+    { key: "modelCode", value: "단말기 모델 코드", align: "center" },
+    { key: "deviceNumber", value: "단말기 번호", align: "center" },
+    { key: "swGroupCode", value: "S/W Group 코드", align: "center" },
+    { key: "swVersion", value: "S/W Version", align: "center" },
+    { key: "status", value: "상태", align: "center" },
+    { key: "applicationDate", value: "등록일", align: "center" },
+    { key: "lastAccessDate", value: "최종 접속일", align: "center" },
   ];
+
   const logHeaders: IDataTableHeader[] = [
     { key: "van", value: "VAN사명", align: "center" },
     { key: "modelName", value: "단말기 모델명", align: "center" },

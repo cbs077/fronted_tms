@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-
+import  axios, { AxiosResponse } from "axios";
 import { ILnbMenuItem, INavMenuItem } from "~/interfaces/menu.interface";
 
 const rawGnb: INavMenuItem[] = [
@@ -47,6 +47,8 @@ const searchOptions = [
 const swVersions = [{ value: "1.0" }, { value: "1.1" }, { value: "1.2" }];
 const swGroupCodes = [{ value: "1111" }, { value: "2222" }, { value: "3333" }];
 const deviceModels = [{ value: "3001" }, { value: "3002" }, { value: "3003" }];
+
+
 
 const lnbs = (isVan: boolean) => {
   const prefix = isVan ? "/van" : "/admin";
