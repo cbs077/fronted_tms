@@ -51,7 +51,7 @@
   >
     <template #body>
       <div class="grow" />
-       <excel-button class="mr-1" />
+       <excel-button @click:excel="onSaveExcel" class="mr-1" />
       <base-button
         text="단말기 등록"
         class="ml-1"
@@ -117,15 +117,19 @@ import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn, ElPagination } from "element-plus";
 import Pagination from '@/components/Pagination'
 
+
 import { defineComponent, reactive, ref } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
+
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import DeviceDetailModal from "~/components/templates/modals/device-detail.modal.vue";
 import DeviceRegisterModal from "~/components/templates/modals/device-register.modal.vue";
 import ResultModal from "~/components/templates/modals/result.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+import * as XLSX from 'xlsx/xlsx.mjs';
+//import {makeExcelFile5} from "~/components/molecules/excel-button.vue";
 
 
 export default defineComponent({
@@ -153,8 +157,7 @@ export default defineComponent({
       data: {},
     });
 
-    let searchKey = {"key": "sw_group_id"};
-    let searchVal = "bb";
+    let excelValue = "";
     let pageVal = reactive({
       page: 1,
       pageCount: 10,
@@ -171,8 +174,6 @@ export default defineComponent({
       lastAccessDate: true,
       checkAll: []
     })
-
-
 
     const registrationResult = reactive({
       modal: false,
@@ -218,21 +219,18 @@ export default defineComponent({
 // 없애야 함.
     const onSelect = (event) => {
       searchKey = event
-      console.log("onSelect", event)
-    };
-    const onInput = (event) => {
-      console.log("onInput", event)
-    };
-    const selectCategory = (event) => {
-      console.log(event.target.value);
-      console.log("this.selected", this.selectedOption.value);
+      //console.log("onSelect", event)
     };
 
     const onSearch = (event) => {
-      console.log("onSearch", query.value);
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param);
+      excelValue = param //엑셀 다운로드에서 필요함.
+      getTerminal(param).then( data => {
+        setValue(data)
+        defaultCheckbox()
+      })
+      //return res
     };
 
     const paginate = (page) => {
@@ -240,7 +238,10 @@ export default defineComponent({
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param);
+      getTerminal(param).then( data => {
+        setValue(data)
+        defaultCheckbox()
+      })
     }; 
 
     const onTake = (pageCount) => {
@@ -248,7 +249,10 @@ export default defineComponent({
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param);
+      getTerminal(param).then( data => {
+        setValue(data)
+        defaultCheckbox()
+      })
     }; 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
@@ -257,7 +261,7 @@ export default defineComponent({
 
     const onCheckbox = (name, tst) => {
       tableHeader[name] = tst
-      checkAll["van"] = true
+      //checkAll["van"] = true
       tableHeader.checkAll["van"] = true
     }
     function login() {
@@ -266,7 +270,6 @@ export default defineComponent({
       let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=abc1')
       .then(response => {
         var list = response.data.list
-        console.log("response", response)
 
         window.localStorage.setItem("token", response.data.messages.token)
         window.localStorage.setItem("vanId", response.data.messages.van_id)
@@ -276,46 +279,56 @@ export default defineComponent({
       });
     };
 
-
-    function getTerminal(param) {
+    async function getTerminal(param) {
       console.log("getTerminal",param)
-      //var tokena= "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiJ0ZXN0IiwiaWF0IjoxNjQ1NTU0MDgyLCJleHAiOjE2NDU1NjAwODJ9.s3BS6Xa_bUIvC3_9VhPuHw2JJPxkrJktuor4Ebv6a24"
-      //window.localStorage.setItem("token", tokena)
       var token = window.localStorage.getItem("token")
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
-        {
-          headers: {
-              Authorization: token
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
           }
-        }
-      )
-      .then(response => {
-        var list = response.data.list
-
-        for (var object of list){
-          var obj = renmeObjectKey(object);
-          data.push(obj);
-        }   
-        seTtotalCount(response.data.total_count)
-        update(data); 
-        
-        return response.data.total_count;
-      });
-      console.log("response", response)
-      return response
+        )
+        .then(response => {
+          return response.data;
+        });
+      console.log("response", responset)
+      return responset
     };
 
 
-    // function onSaveDetail(val) {
-    //   console.log("onSaveDetail", val.)
-    // }
-
     const onSaveDetail = ( val : any) => {
       console.log("onSaveDetail", val.modelCode)
+    }
+
+    const onSaveExcel = () => {   
+      var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
+        var dataWS = XLSX.utils.json_to_sheet(data.list);
+        // 엑셀의 workbook을 만든다
+        // workbook은 엑셀파일에 지정된 이름이다.
+        var wb = XLSX.utils.book_new();
+        // workbook에 워크시트 추가
+        // 시트명은 'nameData'
+        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
+        // 엑셀 파일을 내보낸다.
+        XLSX.writeFile(wb, 'terminal.xlsx');
+      })
+ 
+    }
+
+    function setValue(data) {
+      var list = data.list
+      var dataArr = []
+      for (var object of list){
+        var obj = renmeObjectKey(object);
+        dataArr.push(obj);
+      }   
+      seTtotalCount(data.total_count)
+      update(dataArr); 
     }
 
     function defaultCheckbox() {
@@ -331,13 +344,16 @@ export default defineComponent({
 
     const selectOption = ref();
     login()
-    getTerminal("page=1&page_count=10")
-    defaultCheckbox()
+    getTerminal("page=1&page_count=10").then( data => {
+      setValue(data)
+      defaultCheckbox()
+    })
 
     return {
-      searchKey,
-      searchVal,
+      // searchKey,
+      // searchVal,
       pageVal,
+      excelValue,
       selectOption,
       onRowClicked,
       onRegistration,
@@ -351,14 +367,12 @@ export default defineComponent({
       deviceRegistration,
       registrationResult,
       Search,
-      onSelect,
-      onInput,
-      selectCategory,
+      //onSelect,
       onSearch,
       paginate,
       onTake,
       onCheckbox,
-      onSaveDetail
+      onSaveExcel
     };
   },
 });

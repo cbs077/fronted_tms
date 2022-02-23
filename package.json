@@ -21,10 +21,12 @@
     "dayjs": "^1.10.7",
     "element-plus": "2.0.0",
     "lodash": "^4.17.21",
+    "ts-xlsx-export": "^1.0.1",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
     "vue-tsc": "^0.31.1",
-    "vue3-xlsx": "^1.1.1"
+    "vue3-xlsx": "^1.1.1",
+    "xlsx": "^0.18.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-alpha.6",
