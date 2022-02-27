@@ -44,6 +44,16 @@ const searchOptions = [
   { id: 4, key: "cat_model_id", value: "단말기 모델" },
 ];
 
+const SGsearchOptions = [
+  { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+  { id: 2, key: "sw_group_nm", value: "S/W Group 명" },
+];
+
+const SWsearchOptions = [
+  { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+  { id: 2, key: "sw_version", value: "S/W Version" },
+];
+
 const swVersions = [{ value: "1.0" }, { value: "1.1" }, { value: "1.2" }];
 const swGroupCodes = [{ value: "1111" }, { value: "2222" }, { value: "3333" }];
 const deviceModels = [{ value: "3001" }, { value: "3002" }, { value: "3003" }];
@@ -217,6 +227,8 @@ export const useConst = () => {
     gnbs,
     lnbs,
     searchOptions,
+    SGsearchOptions,
+    SWsearchOptions,
     take,
   };
 };

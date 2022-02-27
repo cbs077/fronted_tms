@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";

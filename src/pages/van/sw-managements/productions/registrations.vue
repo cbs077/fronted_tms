@@ -13,10 +13,10 @@
           class="w-full"
         >
           <el-option
-            v-for="item in searchOptions"
+            v-for="item in SWsearchOptions"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
@@ -26,19 +26,22 @@
       <div class="w-5/12 pr-5">
         <el-input
           size="large"
+          v-model="query" 
           placeholder="Please Input"
           :suffix-icon="Search"
         />
       </div>
     </div>
 
-    <options-search-button />
+    <options-search-button 
+      @click:search="onSearch"
+    />
   </div>
 
   <table-common-button>
     <template #body>
       <div class="grow" />
-      <excel-button class="mr-1" />
+      <excel-button  @click:excel="onSaveExcel" class="mr-1" />
       <base-button
         text="S/W 등록"
         class="ml-1"
@@ -54,11 +57,11 @@
         label="S/W Group 코드"
         align="center"
       />
-      <el-table-column prop="swVersion" label="S/W Group 명" align="center" />
+      <el-table-column prop="swGroupNm" label="S/W Group 명" align="center" />
       <el-table-column prop="swVersion" label="S/W Version" align="center" />
-      <el-table-column prop="swVersion" label="Upload 파일명" align="center" />
+      <el-table-column prop="swFileNm" label="Upload 파일명" align="center" />
       <el-table-column
-        prop="swVersion"
+        prop="swFileSize"
         label="파일 Size (byte)"
         align="center"
       />
@@ -69,11 +72,12 @@
 
   <div class="flex justify-center">
     <el-pagination
+      @current-change="paginate"
       background
       class="my-6"
       layout="prev, pager, next"
-      :total="1000"
-    />
+      :page-count="pageVal.total"   
+    /> 
   </div>
 
   <sw-detail-modal v-model="swDetail.modal" />
@@ -83,6 +87,9 @@
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn } from "element-plus";
 import { defineComponent, reactive, ref } from "vue";
+import  axios, { AxiosResponse } from "axios";
+import * as _ from "lodash";
+import * as XLSX from 'xlsx/xlsx.mjs';
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
@@ -102,8 +109,8 @@ export default defineComponent({
     SwCreateModal,
   },
   setup() {
-    const { registrationHeaders: headers, devices } = useDevice();
-    const { searchOptions } = useConst();
+    const { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
+    const { SWsearchOptions } = useConst();
     const selectOption = ref();
 
     const swDetail = reactive({
@@ -118,6 +125,138 @@ export default defineComponent({
       swDetail.modal = true;
     };
 
+////////////////
+    // page
+    const paginate = (page) => {
+      console.log("paginate", page);
+      pageVal.page = page
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      getTerminal(param).then( data => {
+        setValue(data)
+      })
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      console.log("onTake", pageCount)
+      pageVal.pageCount = pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      getTerminal(param).then( data => {
+        setValue(data)
+      })
+    }; 
+    const query = ref("");
+    let pageVal = reactive({
+      page: 1,
+      pageCount: 10,
+      total: 10
+    })
+
+    let changeForm = reactive({
+      swGroupCodes: [{ value: "-" }],
+      deviceModels: [{ value: "-" }],
+      swVersions: [{ value: "-" }],
+    })
+
+    let excelValue = "";
+
+    const onSearch = (event) => {
+      console.log()
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      param = param + "&" + selectOption.value+ "=" +query.value
+      excelValue = param //엑셀 다운로드에서 필요함.
+      getTerminal(param).then( data => {
+        setValue(data)
+      })
+    };
+
+    const seTtotalCount = (pageCount) => {
+      pageVal.total = pageCount
+      console.log("seTtotalCount", pageVal.total)
+    }
+
+    function setValue(data) {
+      var list = data.list
+      var dataArr = []
+      for (var object of list){
+        var obj = renmeObjectKey(object);
+        dataArr.push(obj);
+      }   
+      seTtotalCount(data.total_count)
+      update(dataArr); 
+    }
+
+    function getTerminalMdl() {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = "van_id="+ vanId      
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        var list = response.data.list
+        
+        changeForm.deviceModels = _.map(list, function square(n) {
+          return {"value": n.CAT_MODEL_NM}
+        })
+
+        console.log("changeForm.deviceModels", changeForm.deviceModels)
+      });
+    };
+
+
+    async function getTerminal(param) {
+      console.log("getTerminal",param)
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = param + "&van_id="+ vanId
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/list?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
+          }
+        )
+        .then(response => {
+          return response.data;
+        });
+      console.log("response", responset)
+      return responset
+    };
+
+    const onSaveExcel = () => {   
+      var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
+        var dataWS = XLSX.utils.json_to_sheet(data.list);
+        // 엑셀의 workbook을 만든다
+        // workbook은 엑셀파일에 지정된 이름이다.
+        var wb = XLSX.utils.book_new();
+        // workbook에 워크시트 추가
+        // 시트명은 'nameData'
+        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
+        // 엑셀 파일을 내보낸다.
+        XLSX.writeFile(wb, 'swOperation.xlsx');
+      })
+    }
+
+
+    getTerminalMdl()
+    getTerminal("page=1&page_count=10").then( data => {
+      setValue(data)
+    })
+
     return {
       selectOption,
       onRowClicked,
@@ -125,8 +264,19 @@ export default defineComponent({
       swDetail,
       headers,
       devices,
-      searchOptions,
+      SWsearchOptions,
       Search,
+      //
+      query,
+      pageVal, 
+      changeForm,
+      onSearch,
+      excelValue,
+      onSaveExcel,
+      paginate,
+      onTake,
+      update,
+      renmeObjectKey
     };
   },
 });

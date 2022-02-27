@@ -1,49 +1,52 @@
 <template>
-  <base-nav-bar
-    :menus="gnbs"
-    :user-name="userName"
-    @click:menu="onGnbMenuClicked"
-  />
+  <div>
+    <base-nav-bar
+      v-if="islogin"
+      :menus="gnbs"
+      :user-name="userName"
+      @click:menu="onGnbMenuClicked"
+    />
 
-  <el-row class="tac mt-4">
-    <el-col :span="4">
-      <el-menu
-        class="h-full"
-        active-text-color="#EA002C"
-        :default-active="defaultActiveMenu"
-      >
-        <template v-for="lnb in lnbs">
-          <el-sub-menu v-if="lnb.childs" :key="lnb.text" :index="lnb.text">
-            <template #title>
-              <span>{{ lnb.text }}</span>
-            </template>
+    <el-row class="tac mt-4">
+      <el-col  v-if="islogin" :span="4">
+        <el-menu
+          class="h-full"
+          active-text-color="#EA002C"
+          :default-active="defaultActiveMenu"
+        >
+          <template v-for="lnb in lnbs">
+            <el-sub-menu v-if="lnb.childs" :key="lnb.text" :index="lnb.text">
+              <template #title>
+                <span>{{ lnb.text }}</span>
+              </template>
+              <el-menu-item
+                v-for="sub in lnb.childs"
+                :key="sub.text"
+                :index="`${lnb.text}-${sub.text}`"
+                @click="$router.push(sub.to)"
+              >
+                {{ sub.text }}
+              </el-menu-item>
+            </el-sub-menu>
+
             <el-menu-item
-              v-for="sub in lnb.childs"
-              :key="sub.text"
-              :index="`${lnb.text}-${sub.text}`"
-              @click="$router.push(sub.to)"
+              v-else
+              :key="lnb.text"
+              :index="lnb.text"
+              @click="$router.push(lnb.to || '/')"
             >
-              {{ sub.text }}
+              <span>{{ lnb.text }}</span>
             </el-menu-item>
-          </el-sub-menu>
-
-          <el-menu-item
-            v-else
-            :key="lnb.text"
-            :index="lnb.text"
-            @click="$router.push(lnb.to || '/')"
-          >
-            <span>{{ lnb.text }}</span>
-          </el-menu-item>
-        </template>
-      </el-menu>
-    </el-col>
-    <el-col :span="20">
-      <div class="w-full px-5">
-        <router-view />
-      </div>
-    </el-col>
-  </el-row>
+          </template>
+        </el-menu>
+      </el-col>
+      <el-col :span="20">
+        <div class="w-full px-5">
+          <router-view />
+        </div>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,6 +55,7 @@ import { computed, defineComponent, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import BaseNavBar from "~/components/organisms/base-nav.vue";
+//import Login from "~/pages/login.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { INavMenuItem } from "~/interfaces/menu.interface";
 
@@ -64,6 +68,7 @@ export default defineComponent({
     const userName = "SK TMS";
 
     const isVan = true;
+    const islogin = true;
 
     const displayLnbs = computed(() => {
       const { path } = router.currentRoute.value;
@@ -121,7 +126,9 @@ export default defineComponent({
       userName,
       onGnbMenuClicked,
       defaultActiveMenu,
+      islogin
     };
   },
 });
 </script>
+

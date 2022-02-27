@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
 

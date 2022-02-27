@@ -2,9 +2,10 @@
   <base-modal
     v-model="isOpen"
     class="w-2/3"
-    title="S/W Group 등록"
+    title="S/W 등록"
     positive-text="저장"
     negative-text="초기화"
+    @click:positive="onSave"
   >
     <template #modalBody>
       <div>
@@ -16,14 +17,16 @@
             <el-select
               clearable
               placeholder="선택"
+              v-model="changeForm.SW_GROUP_ID"
+              @change="onSelectGroupId"
               size="large"
               class="w-full"
             >
               <el-option
-                v-for="item in groupIds"
-                :key="item"
-                :label="item"
-                :value="item"
+                v-for="item in changeForm.deviceModels"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
               />
             </el-select>
           </div>
@@ -37,14 +40,16 @@
             <el-select
               clearable
               placeholder="선택"
+              v-model="changeForm.SW_GROUP_NM"
+              @change="onSelectGroupNm"
               size="large"
               class="w-full"
             >
               <el-option
-                v-for="item in groupNames"
-                :key="item"
-                :label="item"
-                :value="item"
+                v-for="item in changeForm.deviceModels"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
               />
             </el-select>
           </div>
@@ -54,7 +59,7 @@
             S/W Version
           </div>
           <div class="col-span-4 my-auto">
-            <el-input size="large" />
+            <el-input v-model="changeForm.SW_VERSION" size="large" />
           </div>
           <div class="col-span-2 my-auto text-center font-bold">
             <base-button
@@ -75,6 +80,7 @@
           </div>
           <div class="col-span-4 my-auto">
             <input
+               @change="selectFile"
               size="large"
               type="file"
             >
@@ -85,7 +91,7 @@
             등록일
           </div>
           <div class="col-span-6 my-auto">
-            {{ registrationUser }}
+            {{changeForm.REG_DT}}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -93,7 +99,7 @@
             등록자
           </div>
           <div class="col-span-6 my-auto">
-            {{ registrationUser }}
+            {{changeForm.REG_USER}}
           </div>
         </div>
       </div>
@@ -108,7 +114,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import  axios, { AxiosResponse } from "axios";
+import { computed, defineComponent, reactive } from "vue";
+import * as _ from "lodash";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
@@ -143,12 +151,143 @@ export default defineComponent({
 
     const { deviceModels, swVersions, swGroupCodes } = useConst();
 
-    const groupIds = ref([]);
-    const groupNames = ref<{ value: string }>();
+    //const groupIds = ref([]);
+   // const groupNames = ref<{ value: string }>();
+    ///
+    function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
+
+    let changeForm = reactive({
+      SW_GROUP_ID:"",
+      SW_GROUP_NM: "",
+      SW_VERSION: "",
+      APPL_DT: "",
+      DATA_SIZE: "",
+      FILE_PATH: "",
+      FILE_NM: "",      
+      UPLOAD_FILE_NM: "" ,  
+      REG_DT: formatDate(new Date()),
+      REG_USER: window.localStorage.getItem("userNm"),
+
+      deviceModels: [],
+      swfile: []
+      //selectOGroupId: "",
+      //selectOGroupNm: ""
+    })
+
+    function getTerminalMdl() {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = "van_id="+ vanId      
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        var list = response.data.list
+        
+        changeForm.deviceModels = _.map(list, function square(n) {
+          return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
+        })
+
+        console.log("changeForm.deviceModels", changeForm.deviceModels)
+      });
+    };
+
+    const onSave = (param: string) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
+        {
+          "VAN_ID" : vanId,
+          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
+          "SW_VERSION": changeForm.SW_VERSION,
+          "APPL_DT": changeForm.APPL_DT,
+          "DATA_SIZE": changeForm.DATA_SIZE,
+          "FILE_PATH": changeForm.FILE_PATH,
+          "FILE_NM": changeForm.FILE_NM,  
+          "UPLOAD_FILE_NM": changeForm.UPLOAD_FILE_NM,                
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var list = response.data.list
+        uploadFile()
+        emit("click:positive");
+        console.log("response", response)
+      });
+    };
+
+    async function uploadFile() {
+      const formData = new FormData();
+      formData.append("swfile", changeForm.swfile);
+
+      try {
+        const { data } = await axios.post(
+          "http://tms-test-server.p-e.kr:8081/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log(data);
+      } catch (err) {
+        console.log(err);
+      }
+    }  
+
+    function onSelectGroupId(event){
+      console.log("onSelectGroupId", event)
+      var groupRename = _.find(changeForm.deviceModels, function(data) {
+        return data.value == event }
+      );
+      console.log("groupRename", groupRename)
+      changeForm.SW_GROUP_ID = groupRename.value
+      changeForm.SW_GROUP_NM = groupRename.key     
+    }
+
+    function onSelectGroupNm(event){
+      console.log("onSelectGroupNm", event)
+      var groupRename = _.find(changeForm.deviceModels, function(data) {
+        return data.value == event }
+      );
+      console.log("onSelectGroupNm", groupRename)
+      changeForm.SW_GROUP_ID = groupRename.value
+      changeForm.SW_GROUP_NM = groupRename.key
+    }
+
+    // 파일 변경 시 이벤트 핸들러
+    function selectFile(event) {
+      //this.swfile = swfile;    
+      var swfile = event.target.files[0]
+      changeForm.swfile = swfile
+      console.log("selectFile", swfile)
+      changeForm.DATA_SIZE = swfile.size
+      changeForm.FILE_PATH = swfile.name
+      changeForm.FILE_NM = swfile.name
+      changeForm.UPLOAD_FILE_NM = swfile.name
+
+    }
+
+    getTerminalMdl()
 
     return {
-      groupIds,
-      groupNames,
+      //groupIds,
+      //groupNames,
       deviceModels,
       swVersions,
       swGroupCodes,
@@ -156,6 +295,12 @@ export default defineComponent({
       closeModal() {
         isOpen.value = false;
       },
+      //
+      changeForm,
+      onSave,
+      onSelectGroupId,
+      onSelectGroupNm,
+      selectFile        
     };
   },
 });

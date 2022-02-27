@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 
 import BaseModal from "~/components/organisms/base-modal.vue";
 import { IDataTableHeader } from "~/interfaces/data.interface";

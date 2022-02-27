@@ -43,7 +43,7 @@
 
 <script>
 import { ElDialog, ElMessageBox } from "element-plus";
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 

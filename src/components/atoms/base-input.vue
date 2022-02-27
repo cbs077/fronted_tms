@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { XIcon } from "@heroicons/vue/outline";
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 
 export default defineComponent({
   name: "BaseInput",

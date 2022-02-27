@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";

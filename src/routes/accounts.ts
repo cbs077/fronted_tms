@@ -17,6 +17,10 @@ const accountRoutes: RouteRecordRaw[] = [
     path: "/admin/accounts/users/registration",
     component: () => import("../pages/accounts/registration.vue"),
   },
+  {
+    path: "/login",
+    component: () => import("../pages/login.vue"),
+  },
 ];
 
 export default accountRoutes;

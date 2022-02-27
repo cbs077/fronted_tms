@@ -23,9 +23,13 @@
 
       <div class="my-auto w-1/12 text-center">검색어</div>
       <div class="w-80 w-5/12">
-        <el-input v-model="query" size="large" />
+        <el-input
+          v-model="query" 
+          size="large" 
+          placeholder="Please Input"
+          :suffix-icon="Search"
+        />
       </div>
-
     </div>
 
     <div class="my-6 flex flex-row">
@@ -144,7 +148,7 @@ export default defineComponent({
     DeviceDetailModal,
   },
   setup() {
-    const { registrationHeaders: headers, devices, update, renmeObjectKey} = useDevice();
+    const { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
     const { searchOptions } = useConst();
 
     const deviceRegistration = reactive({
@@ -263,7 +267,7 @@ export default defineComponent({
     function login() {
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=abc1')
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=1234')
       .then(response => {
         var list = response.data.list
 

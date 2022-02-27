@@ -85,13 +85,14 @@ export default defineComponent({
       },
     });
 
-    function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
-
+    
     const header: IDataTableHeader[] = [
       { key: "deviceNumber", value: "단말기 번호" },
       { key: "status", value: "상태" },
     ];
-    //
+    ///
+    function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
+
     let changeForm = reactive({
       CAT_MODEL_ID:"",
       CAT_MODEL_NM: "",
@@ -133,6 +134,7 @@ export default defineComponent({
       closeModal() {
         isOpen.value = false;
       },
+      //
       onSave,
       changeForm
     };
