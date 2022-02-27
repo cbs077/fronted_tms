@@ -41,7 +41,7 @@
           단말기 번호
         </div>
         <div class="col-span-6 flex">
-          <input class="h-10 w-9/12 rounded border border-sk-gray">
+          <input v-model="changeForm.CAT_SERIAL_NO" class="h-10 w-9/12 rounded border border-sk-gray">
 
           <base-button
             class="ml-2 w-2/12"
@@ -61,12 +61,12 @@
 
         <div class="col-span-6 flex">
           <div class="flex w-9/12">
-            <input class="mr-4 h-10 w-3/12 rounded border border-sk-gray">
-            <input class="h-10 w-4/12 rounded border border-sk-gray">
+            <input v-model="changeForm.CAT_SERIAL_NO_COMMON" class="mr-4 h-10 w-3/12 rounded border border-sk-gray">
+            <input v-model="changeForm.CAT_SERIAL_NO_FROM" class="h-10 w-4/12 rounded border border-sk-gray">
             <div class="my-auto mx-2 w-1/12 text-center">
               ~
             </div>
-            <input class="h-10 w-4/12 rounded border border-sk-gray">
+            <input v-model="changeForm.CAT_SERIAL_NO_TO" class="h-10 w-4/12 rounded border border-sk-gray">
           </div>
           <base-button
             class="ml-2 w-2/12"
@@ -88,30 +88,52 @@
         <div class="col-span-2 my-auto text-center font-bold">
           단말기 모델
         </div>
-        <div class="col-span-6">
-          <select-box
-            :items="deviceModels"
-            class="w-3/4"
-          />
+        <div class="col-span-4 my-auto">
+          <el-select
+            clearable
+            placeholder="선택"
+            v-model="changeForm.CAT_MODEL_ID"
+            @change="onSelectGroupId"
+            size="large"
+            class="w-full"
+          >
+            <el-option
+              v-for="item in changeForm.deviceModels"
+              :key="item.value"
+              :label="item.key"
+              :value="item.value"
+            />
+          </el-select>
         </div>
       </div>
       <div class="my-3 grid h-12 grid-cols-8">
         <div class="col-span-2 my-auto text-center font-bold">
           S/W Group 명
         </div>
-        <div class="col-span-6">
-          <select-box
-            :items="swVersions"
-            class="w-3/4"
-          />
-        </div>
+          <div class="col-span-4 my-auto">
+            <el-select
+              clearable
+              placeholder="선택"
+              v-model="changeForm.SW_GROUP_ID"
+              @change="onSelectGroupNm"
+              size="large"
+              class="w-full"
+            >
+              <el-option
+                v-for="item in changeForm.swGroupCodes"
+                :key="item.value"
+                :label="item.key"
+                :value="item.value"
+              />
+            </el-select>
+          </div>  
       </div>
       <div class="my-3 grid h-12 grid-cols-8">
         <div class="col-span-2 my-auto text-center font-bold">
           등록일
         </div>
         <div class="col-span-6 my-auto">
-          2020-02-02
+          {{changeForm.REG_DT}}
         </div>
       </div>
       <div class="my-3 grid h-12 grid-cols-8">
@@ -119,7 +141,7 @@
           등록자
         </div>
         <div class="col-span-6 my-auto">
-          SK TMS
+           {{changeForm.REG_USER}}
         </div>
       </div>
     </template>
@@ -130,7 +152,7 @@
           class="mr-4 bg-sk-gray text-white"
           text="저장"
           type="button"
-          @click="$emit('click:positive')"
+          @click="onPreSave"
         />
         <base-button
           class="mr-4"
@@ -144,7 +166,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import  axios, { AxiosResponse } from "axios";
+import { computed, defineComponent, reactive, ref } from "vue";
+import * as _ from "lodash";
 
 import { DEVICE_REGISTER_TYPE } from "~/@types/union";
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -165,7 +189,7 @@ export default defineComponent({
       default: true,
     },
   },
-  emits: ["update:modelValue", "click:positive", "click:negative"],
+  emits: ["update:modelValue", "click:positive",  "click:positiveNormal", "click:negative"],
 
   setup(properties, { emit }) {
     const isOpen = computed({
@@ -178,6 +202,140 @@ export default defineComponent({
     const uploadMethodSelection = ref<DEVICE_REGISTER_TYPE>("일반등록");
 
     const { deviceModels, swVersions } = useConst();
+    ///
+    function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
+
+    let changeForm = reactive({
+      CAT_SERIAL_NO: "",
+      CAT_SERIAL_NO_COMMON: "",
+      CAT_SERIAL_NO_FROM: "",
+      CAT_SERIAL_NO_TO: "",
+      CAT_SERIAL_NO_MULTI_RESULT: [],
+      SW_GROUP_ID:"",
+      SW_GROUP_NM: "",
+      CAT_MODEL_ID: "",
+      REG_DT: formatDate(new Date()),
+      REG_USER: window.localStorage.getItem("userNm"),
+
+      deviceModels: [],
+      swfile: []
+    })
+
+    function getswGroupCodes() {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+      var param = "van_id="+ vanId
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        var list = response.data.list
+        
+        changeForm.swGroupCodes = _.map(list, function square(n) {
+          return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
+        })
+        console.log("getswGroupCodes", list)
+        
+        return response.data.total_count;
+      });
+      console.log("response", response)
+      return response
+    };
+
+    function getTerminalMdl() {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+      var param = "van_id="+ vanId
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        var list = response.data.list
+        
+        changeForm.deviceModels = _.map(list, function square(n) {
+          return {"key" :  n.CAT_MODEL_NM, "value": n.CAT_MODEL_ID}
+        })
+
+        console.log("changeForm.deviceModels", changeForm.deviceModels)
+      });
+    };
+    const onPreSave = () => {
+      console.log("uploadMethodSelection", uploadMethodSelection)
+      changeForm.CAT_SERIAL_NO_MULTI_RESULT = []
+      console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_FROM)
+      console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_TO)
+      if( uploadMethodSelection.value == '일괄등록'){
+        for(var i=changeForm.CAT_SERIAL_NO_FROM; i <= changeForm.CAT_SERIAL_NO_TO ; i++){
+          console.log("onPreSave", i)
+          changeForm.CAT_SERIAL_NO = changeForm.CAT_SERIAL_NO_COMMON + i
+          console.log("changeForm.CAT_SERIAL_NO", changeForm.CAT_SERIAL_NO)
+          onSave(changeForm.CAT_SERIAL_NO)
+        }
+        emit("click:positive", { "type" : "multi", "data" : changeForm.CAT_SERIAL_NO_MULTI_RESULT }); 
+        console.log("일괄등록")
+      }else{
+        console.log("일반등록")
+        onSave(changeForm.CAT_SERIAL_NO)
+      }
+    }
+
+    const onSave = (deviceNumber) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post ('http://tms-test-server.p-e.kr:8081/terminal?' ,
+        {
+          "VAN_ID" : vanId,
+          "CAT_SERIAL_NO": deviceNumber,
+          "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
+          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
+          "SW_VERSION": "",
+          "STATUS": "",         
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        if( uploadMethodSelection.value == '일괄등록'){
+          if( response.data.status == 200){
+            changeForm.CAT_SERIAL_NO_MULTI_RESULT.push({ 
+              deviceNumber: deviceNumber,
+              status: "성공"
+            })
+          }else {
+             changeForm.CAT_SERIAL_NO_MULTI_RESULT.push({ 
+              deviceNumber: deviceNumber,
+              status: "실패"
+            })           
+          }
+        }
+        else {
+          emit("click:positive", { "type" : "normal", "data" : [] });
+        }
+        
+      });
+    };
+
+    getswGroupCodes()
+    getTerminalMdl()
 
     return {
       uploadMethodSelection,
@@ -187,6 +345,10 @@ export default defineComponent({
       closeModal() {
         isOpen.value = false;
       },
+      //
+      changeForm,
+      onPreSave,
+      onSave,      
     };
   },
 });

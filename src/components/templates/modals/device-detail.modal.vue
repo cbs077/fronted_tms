@@ -21,27 +21,68 @@
             단말기 모델
           </div>
           <div class="col-span-6 my-auto">
-            <div v-if="admin">단말기 모델</div>
-            <select-box v-else v-model="form.modelCode" :items="changeForm.deviceModels" class="w-3/4" />
+          <div class="col-span-4 my-auto">
+            <el-select
+              clearable
+              placeholder="선택"
+              v-model="changeForm.CAT_MODEL_ID"
+              @change="onSelectGroupId"
+              size="large"
+              class="w-full"
+            >
+              <el-option
+                v-for="item in changeForm.deviceModels"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
+              />
+            </el-select>
+          </div>
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             S/W Group 코드
           </div>
-          <div class="col-span-6 my-auto">
-            <div v-if="admin">S/W Group 코드</div>
-            <select-box v-else :items="changeForm.swGroupCodes" class="w-3/4" />
+          <div class="col-span-4 my-auto">
+            <el-select
+              clearable
+              placeholder="선택"
+              v-model="changeForm.SW_GROUP_ID"
+              @change="onSelectGroupId"
+              size="large"
+              class="w-full"
+            >
+              <el-option
+                v-for="item in changeForm.swGroupCodes"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
+              />
+            </el-select>
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             S/W Group 명
           </div>
-          <div class="col-span-6 my-auto">
-            <div v-if="admin">S/W Group 명</div>
-            <select-box v-else :items="changeForm.swGroupCodes" class="w-3/4" />
-          </div>       
+          <div class="col-span-4 my-auto">
+            <el-select
+              clearable
+              placeholder="선택"
+              v-model="changeForm.SW_GROUP_NM"
+              @change="onSelectGroupNm"
+              size="large"
+              class="w-full"
+            >
+              <el-option
+                v-for="item in changeForm.swGroupCodes"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
+              />
+            </el-select>
+          </div>     
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -75,7 +116,7 @@
           class="mr-4 border-sk-gray bg-sk-gray text-white"
           text="수정 및 저장"
           type="button"
-          @click="$emit('click:positive', form)"
+          @click="onSave"
         />
       </div>
     </template>
@@ -127,6 +168,15 @@ export default defineComponent({
       },
     });
 
+    let changeForm = reactive({
+      SW_GROUP_ID: "",
+      SW_GROUP_NM: "",
+      CAT_MODEL_ID: "",
+      swGroupCodes: [{ value: "-" }],
+      deviceModels: [{ value: "-" }],
+      swVersions: [{ value: "-" }],
+    })
+
     function getswGroupCodes() {
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
@@ -134,7 +184,7 @@ export default defineComponent({
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup?' + param,
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
         {
           headers: {
               Authorization: token
@@ -145,7 +195,7 @@ export default defineComponent({
         var list = response.data.list
         
         changeForm.swGroupCodes = _.map(list, function square(n) {
-          return {"value": n.SW_GROUP_ID}
+          return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
         console.log("getswGroupCodes", list)
         
@@ -180,29 +230,64 @@ export default defineComponent({
       });
     };
 
-    let changeForm = reactive({
-      swGroupCodes: [{ value: "-" }],
-      deviceModels: [{ value: "-" }],
-      swVersions: [{ value: "-" }],
-    })
+    const onSave = (param: string) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
 
-    let form = reactive({
-      modelCode: "",
-    })
-    const {/* deviceModels, swVersions, swGroupCodes*/ } = useConst();
+      axios.put ('http://tms-test-server.p-e.kr:8081/terminal/?' ,
+        {
+          "VAN_ID": vanId,
+          "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
+          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
+          "CAT_SERIAL_NO": properties.device.deviceNumber
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var list = response.data.list
+        //uploadFile()
+        //$emit('click:positive', form
+        emit("click:positive");
+        console.log("response", response)
+      });
+    };
+
+    function onSelectGroupId(event){
+      console.log("onSelectGroupId", event)
+      var groupRename = _.find(changeForm.swGroupCodes, function(data) {
+        return data.value == event }
+      );
+      console.log("groupRename1", groupRename)
+      changeForm.SW_GROUP_ID = groupRename.value
+      changeForm.SW_GROUP_NM = groupRename.key     
+    }
+
+    function onSelectGroupNm(event){
+      console.log("onSelectGroupNm", event)
+      var groupRename = _.find(changeForm.swGroupCodes, function(data) {
+        return data.value == event }
+      );
+      console.log("onSelectGroupNm", groupRename)
+      changeForm.SW_GROUP_ID = groupRename.value
+      changeForm.SW_GROUP_NM = groupRename.key
+    }
+
+
 
     getswGroupCodes()
     getTerminalMdl()
     return {
-      // deviceModels,
-      // swVersions,
-      // swGroupCodes,
-      form,
       changeForm,
       isOpen,
       closeModal() {
         isOpen.value = false;
       },
+      onSelectGroupId,
+      onSelectGroupNm,
+      onSave
     };
   },
 });

@@ -65,7 +65,7 @@
   </table-common-button>
   <div class="rounded border border-sk-gray">
     <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
-      <el-table-column v-if="tableHeader.van==true" prop="van" label="VAN사명" align="center" />
+      <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column v-if="tableHeader.modelCode==true" prop="modelCode" label="단말기모델코드" align="center" />
       <el-table-column v-if="tableHeader.deviceNumber==true"  prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column
@@ -172,6 +172,7 @@ export default defineComponent({
       modelCode: true,
       deviceNumber: true,
       swGroupCode: true,
+      swVersion: true,
       status: true,
       applicationDate: true,
       lastAccessDate: true,
@@ -204,11 +205,17 @@ export default defineComponent({
       ],
     });
 
-    const onRegistration = () => {
-      deviceRegistration.modal = false;
-      setTimeout(() => {
-        registrationResult.modal = true;
-      }, 1000);
+    const onRegistration = (value) => {
+      console.log("onRegistration", value)
+      if( value.type == "multi"){
+        registrationResult.items = value.data
+        deviceRegistration.modal = false;
+        setTimeout(() => {
+          registrationResult.modal = true;
+        }, 1000);
+      }else{
+        deviceRegistration.modal = false;
+      }
     };
 
     const onRowClicked = (row: IDevice) => {
@@ -230,7 +237,7 @@ export default defineComponent({
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
-        defaultCheckbox()
+        //defaultCheckbox()
       })
     };
 
@@ -241,7 +248,7 @@ export default defineComponent({
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
-        defaultCheckbox()
+        //defaultCheckbox()
       })
     }; 
 
@@ -252,7 +259,7 @@ export default defineComponent({
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
-        defaultCheckbox()
+        //defaultCheckbox()
       })
     }; 
     const seTtotalCount = (pageCount) => {
@@ -262,22 +269,8 @@ export default defineComponent({
 
     const onCheckbox = (name, tst) => {
       tableHeader[name] = tst
-      tableHeader.checkAll["van"] = true
+    //  tableHeader.checkAll["van"] = true
     }
-    function login() {
-      let data: any[] = [];
-
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=1234')
-      .then(response => {
-        var list = response.data.list
-
-        window.localStorage.setItem("token", response.data.messages.token)
-        window.localStorage.setItem("vanId", response.data.messages.van_id)
-        window.localStorage.setItem("userId", response.data.messages.user_id)
-        window.localStorage.setItem("userNm", response.data.messages.user_name)
-
-      });
-    };
 
     async function getTerminal(param) {
       console.log("getTerminal",param)
@@ -331,7 +324,7 @@ export default defineComponent({
     }
 
     function defaultCheckbox() {
-      tableHeader.checkAll["van"] = true
+     //tableHeader.checkAll["van"] = true
       tableHeader.checkAll["modelCode"] = true
       tableHeader.checkAll["deviceNumber"] = true
       tableHeader.checkAll["swGroupCode"] = true
@@ -342,7 +335,7 @@ export default defineComponent({
     }
 
     const selectOption = ref();
-    login()
+
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)
       defaultCheckbox()

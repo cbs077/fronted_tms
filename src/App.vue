@@ -67,8 +67,15 @@ export default defineComponent({
     const { lnbs, gnbs } = useConst();
     const userName = "SK TMS";
 
-    const isVan = true;
-    const islogin = true;
+    let isVan = true;
+    let userRight = window.localStorage.getItem("user_right")
+    let islogin = window.localStorage.getItem("islogin")
+    console.log("route.path", window.localStorage.getItem("user_right"))
+    if( userRight == "S") isVan = true;
+
+    //let islogin = true 
+    if(route.path == "/login" ) islogin = false
+    else islogin = true
 
     const displayLnbs = computed(() => {
       const { path } = router.currentRoute.value;
@@ -120,13 +127,19 @@ export default defineComponent({
     const onGnbMenuClicked = ({ to }: INavMenuItem) => router.push(to);
     let displayGnbs = reactive<INavMenuItem[]>([...gnbs(isVan)]);
 
+    function updateVal(val){
+      islogin = val
+    }
+
     return {
       gnbs: displayGnbs,
       lnbs: displayLnbs,
       userName,
       onGnbMenuClicked,
       defaultActiveMenu,
-      islogin
+      islogin,
+      userRight,
+      updateVal
     };
   },
 });

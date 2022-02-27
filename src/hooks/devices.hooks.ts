@@ -55,7 +55,7 @@ export const useDevice = () => {
   ];
 
   const registrationHeaders_a: IDataTableHeader[] = [
-    { key: "van", value: "VAN사명", align: "center" },
+    //{ key: "van", value: "VAN사명", align: "center" },
     { key: "modelCode", value: "단말기 모델 코드", align: "center" },
     { key: "deviceNumber", value: "단말기 번호", align: "center" },
     { key: "swGroupCode", value: "S/W Group 코드", align: "center" },

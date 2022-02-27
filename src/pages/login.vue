@@ -8,14 +8,17 @@
     <div class="right_base"></div>
     <div class="input-signin">Sign In</div>
     <div class="text-id">ID</div>
-    <input class="input-login" placeholder="Enter your ID" v-model="uid">
+    <input class="input-login" placeholder="Enter your ID" v-model="changeForm.userId">
     <div class="text-password">Password</div>
-    <input class="input-password" placeholder="Enter your password" v-model="password">
-    <button class="button-login" type="submit">Login</button>  
+    <input class="input-password" type="password" placeholder="Enter your password" v-model="changeForm.password">
+    <button class="button-login" @click="login" type="submit">Login</button>  
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, reactive } from "vue";
+  import  axios, { AxiosResponse } from "axios";
+  import { defineComponent, reactive, ref } from "vue";
+  import { useRoute, useRouter } from "vue-router";
+
 
   export default defineComponent({
     name: "Loing",
@@ -23,9 +26,33 @@
 
     },
     setup() {
+      const router = useRouter();
 
+      let changeForm = reactive({
+        userId: "",
+        password: ""
+      })
 
-      return { };
+      function login() {
+        let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=' + changeForm.userId + '&password=' + changeForm.password)
+        .then(response => {
+          var list = response.data.list
+          if( response.data.status == 200){
+            window.localStorage.setItem("token", response.data.messages.token)
+            window.localStorage.setItem("vanId", response.data.messages.van_id)
+            window.localStorage.setItem("userId", response.data.messages.user_id)
+            window.localStorage.setItem("userNm", response.data.messages.user_name)
+            window.localStorage.setItem("user_right", response.data.messages.user_right)
+            window.localStorage.setItem("islogin", true)
+
+            console.log("login")
+            this.$router.push('/van/devices/registrations')
+
+          }
+        });
+      };
+
+      return {login, changeForm};
     },
   });
 </script>

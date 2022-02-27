@@ -21,7 +21,7 @@
             />
           </div>
         </div>
-        <div class="grid grid-cols-8">
+        <div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
           <div class="col-span-2" />
           <div class="col-span-6 text-sk-red">
             이미 등록된 단말기 번호입니다.
@@ -53,7 +53,7 @@
             등록일
           </div>
           <div class="col-span-6 my-auto">
-            {{changeForm.REG_USER}}
+            {{changeForm.REG_DT}}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -123,7 +123,8 @@ export default defineComponent({
       SW_GROUP_NM: "",
       DESCRIPTION: "",
       REG_DT: formatDate(new Date()),
-      REG_USER: window.localStorage.getItem("userNm")
+      REG_USER: window.localStorage.getItem("userNm"),
+      isExistId: ""
     })
     
     const onSave = (param: string) => {

@@ -47,8 +47,12 @@
     <div class="ml-auto flex">
       <div class="relative flex items-center justify-end">
         <p class="mr-4">{{ userName }} 님</p>
-        <user-circle-icon class="mx-1 h-10" />
-        <logout-icon class="mx-1 h-10" />
+        <button @click="onUserProfile" class="aa">  
+          <user-circle-icon class="mx-1 h-10" />
+        </button>
+        <button @click="onLogout" class="aa">
+          <logout-icon class="mx-1 h-10" />
+        </button>
         <!-- mobile drawer -->
         <div class="block">
           <div class="relative inline" />
@@ -67,6 +71,7 @@ import { useRouter } from "vue-router";
 import BaseButton from "~/components/atoms/base-button.vue";
 import { INavMenuItem } from "~/interfaces/menu.interface";
 import { isNavMenu } from "~/utils/type-guard";
+//import { islogin } from "~/App.vue";
 
 export default defineComponent({
   name: "BaseNavBar",
@@ -80,21 +85,37 @@ export default defineComponent({
         return Array.isArray(menus) && menus.every((menu) => isNavMenu(menu));
       },
     },
-    userName: {
-      type: String,
-      required: true,
-      default: "SK TMS",
-    },
+    
+    // userName: {
+    //   type: String,
+    //   required: true,
+    //   default: "SK TMS",
+    // },
   },
   emits: ["click:menu"],
   setup() {
     const router = useRouter();
-    const currentPath = computed(() => {
+    let userName = window.localStorage.getItem("userNm")
+
+    const currentPath = computed(() => {      
       const { path } = router.currentRoute.value;
       return path;
     });
 
-    return { currentPath };
+    function onUserProfile(){
+      this.$router.push('/van/accounts/users/my')
+      console.log("onUserProfile")
+    }
+
+    function onLogout(){
+      window.localStorage.removeItem("token")
+      window.localStorage.setItem("islogin", false)
+      //islogin = false
+      this.$router.push('/login')
+      console.log("onLogout")
+    }    
+
+    return { currentPath, onUserProfile, onLogout, userName };
   },
 });
 </script>

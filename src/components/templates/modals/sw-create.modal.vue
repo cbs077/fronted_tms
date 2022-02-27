@@ -68,7 +68,7 @@
             />
           </div>
         </div>
-        <div class="grid grid-cols-8">
+        <div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
           <div class="col-span-2" />
           <div class="col-span-6 text-sk-red">
             이미 등록된 단말기 번호입니다.
@@ -151,8 +151,6 @@ export default defineComponent({
 
     const { deviceModels, swVersions, swGroupCodes } = useConst();
 
-    //const groupIds = ref([]);
-   // const groupNames = ref<{ value: string }>();
     ///
     function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
 
@@ -169,7 +167,8 @@ export default defineComponent({
       REG_USER: window.localStorage.getItem("userNm"),
 
       deviceModels: [],
-      swfile: []
+      swfile: [],
+      isExistId: ""
       //selectOGroupId: "",
       //selectOGroupNm: ""
     })

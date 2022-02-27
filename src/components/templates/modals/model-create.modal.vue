@@ -17,10 +17,10 @@
             <el-input v-model="changeForm.CAT_MODEL_ID" csize="large" />
           </div>
           <div class="col-span-2 my-auto text-center font-bold">
-            <base-button text="중복확인" class="mr-1" />
+            <base-button @click="onIdCheck" text="중복확인" class="mr-1" />
           </div>
         </div>
-        <div class="grid grid-cols-8">
+        <div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
           <div class="col-span-2" />
           <div class="col-span-6 text-sk-red">
             이미 등록된 모델 코드 입니다.
@@ -75,7 +75,7 @@ export default defineComponent({
       default: true,
     },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "click:positiveA"],
 
   setup(properties, { emit }) {
     const isOpen = computed({
@@ -98,10 +98,16 @@ export default defineComponent({
       CAT_MODEL_NM: "",
       DESCRIPTION: "",
       REG_DT: formatDate(new Date()),
-      REG_USER: window.localStorage.getItem("userNm")
+      REG_USER: window.localStorage.getItem("userNm"),
+      isExistId: ""
     })
     
     const onSave = (param: string) => {
+      if( changeForm.isExistId == "true" || changeForm.isExistId == "" ){
+        alert("값을 확인해주세요.") 
+        return
+      } 
+       
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
@@ -122,7 +128,26 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
+        emit("click:positiveA")
         console.log("response", response)
+      });
+    };
+
+    const onIdCheck = (param: string) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl/idcheck/' + vanId + "/" + changeForm.CAT_MODEL_ID ,
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var count = response.data.count
+        if( count > 0 ) changeForm.isExistId = "true"
+        else changeForm.isExistId = "false"
+        console.log("onIdCheck", response)
       });
     };
 
@@ -136,7 +161,8 @@ export default defineComponent({
       },
       //
       onSave,
-      changeForm
+      changeForm,
+      onIdCheck
     };
   },
 });

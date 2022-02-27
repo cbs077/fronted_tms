@@ -76,7 +76,7 @@
   />
 
   <model-detail-modal v-model="modelDetail.modal" />
-  <model-create-modal v-model="modelCreate.modal" />
+  <model-create-modal @click:positiveA="onSave" v-model="modelCreate.modal" />
 </template>
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
@@ -268,6 +268,11 @@ export default defineComponent({
       })
     }
 
+    function onSave(event) {
+      modelCreate.modal = false
+      modelCreate.data = {}
+      console.log("onSave", event)
+    }
 
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
@@ -286,13 +291,15 @@ export default defineComponent({
       devices,
       //deviceModels,
       displayOptions,
-      pageVal, //
+      //
+      pageVal, 
       changeForm,
       onSearch,
       excelValue,
       onSaveExcel,
       paginate,
-      onTake
+      onTake,
+      onSave
     };
   },
 });

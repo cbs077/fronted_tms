@@ -132,16 +132,6 @@ export default defineComponent({
       userDetail.modal = true;
     };
 
-    // const example: IAdminUser = [{
-    //   id: faker.lorem.word(),
-    //   manager: faker.lorem.word(),
-    //   squad: faker.lorem.word(),
-    //   user: faker.lorem.word(),
-    //   date: dateYYYYMMDD(new Date()),
-    // }];
-
-    //const items: IAdminUser[] = [...duplicateMockData<IAdminUser>(example)];
-////////////////
     // page
     const vanList = reactive({
       data: []
@@ -151,7 +141,7 @@ export default defineComponent({
       console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
+      param = param + "&" + selectOption.value+ "=" + filter.query.value
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -161,7 +151,7 @@ export default defineComponent({
       console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
+      param = param + "&" + selectOption.value+ "=" + filter.query.value
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -208,8 +198,6 @@ export default defineComponent({
       seTtotalCount(data.total_count)
       console.log("dataArr", dataArr)
       vanList.data = dataArr
-      //items = example;
-      //update(dataArr); 
     }
 
     function getTerminalMdl() {
@@ -275,21 +263,7 @@ export default defineComponent({
         XLSX.writeFile(wb, 'terminalmdl.xlsx');
       })
     }
-    function login() {
-      let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=abc1')
-      .then(response => {
-        var list = response.data.list
-
-        window.localStorage.setItem("token", response.data.messages.token)
-        window.localStorage.setItem("vanId", response.data.messages.van_id)
-        window.localStorage.setItem("userId", response.data.messages.user_id)
-        window.localStorage.setItem("userNm", response.data.messages.user_name)
-
-      });
-    };
-    login()
     // getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)

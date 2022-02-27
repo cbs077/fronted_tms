@@ -301,7 +301,6 @@ export default defineComponent({
       console.log("onSave")
     }
 
-
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)

@@ -249,21 +249,7 @@ export default defineComponent({
         XLSX.writeFile(wb, 'terminalmdl.xlsx');
       })
     }
-    function login() {
-      let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=cbs&password=1234')
-      .then(response => {
-        var list = response.data.list
-
-        window.localStorage.setItem("token", response.data.messages.token)
-        window.localStorage.setItem("vanId", response.data.messages.van_id)
-        window.localStorage.setItem("userId", response.data.messages.user_id)
-        window.localStorage.setItem("userNm", response.data.messages.user_name)
-
-      });
-    };
-    login()
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)

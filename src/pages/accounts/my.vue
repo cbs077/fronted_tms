@@ -78,7 +78,7 @@ export default defineComponent({
     BaseButton,
   },
   setup() {
-    const { registrationHeaders: headers, devices } = useDevice();
+    const { registrationHeaders: headers, devices, renmeObjectKey } = useDevice();
     const { searchOptions } = useConst();
 
     const deviceRegistration = reactive({
@@ -132,7 +132,8 @@ export default defineComponent({
       REG_DT: formatDate(new Date()),
       REG_USER: window.localStorage.getItem("userNm"),
       deviceModels: [{ value: "" }],
-      RIGHT: [{ value: "S"}, {value: "-"}]
+      RIGHT: [{ value: "S"}, {value: "-"}],
+      data: []
     })
 
     const onSave = (param: string) => {
@@ -161,36 +162,31 @@ export default defineComponent({
         console.log("response", response)
       });
     };
-
-    function getTerminalMdl() {
+    async function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
       var userId = window.localStorage.getItem("userId")
-      //var param = "user_id="+ userId      
+ 
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/user/' + userId,
-        {
-          headers: {
-              Authorization: token
-          }
-        }
-      )
-      .then(response => {
-        // var list = response.data.list
-        
-        // changeForm.deviceModels = _.map(list, function square(n) {
-        //   return {"key": n.VAN_ID, "value": n.VAN_NM}
-        // })
-
-        //changeForm.deviceModels = [{"value": "Asas"}]
-
-        console.log("response", response)
-      });
+      let response = await axios.get('http://tms-test-server.p-e.kr:8081/getUserInfo/' + userId,
+              {
+                headers: {
+                    Authorization: token
+                }
+              }
+            )
+            .then(response => {
+              console.log("response.data:" ,response.data)
+              changeForm.USER_ID = userId
+              changeForm.VAN_NM = response.data[0].user_rights_nm
+              return response.data;   
+            });
+            return response;    
     };
-
     getTerminalMdl()
+
     return {
       selectOption,
       deviceDetail,
