@@ -141,7 +141,7 @@ export default defineComponent({
 ////////////////
     // page
     const paginate = (page) => {
-      console.log("paginate", page);
+      //console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -151,7 +151,7 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      console.log("onTake", pageCount)
+      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -175,8 +175,8 @@ export default defineComponent({
     let excelValue = "";
 
     const onSearch = (event) => {
-      console.log("selectOption", selectOption)
-      console.log("query.value", query.value)
+      //console.log("selectOption", selectOption)
+      //console.log("query.value", query.value)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       
       if(query.value != "") param = param + "&cat_model_nm=" + query.value
@@ -190,7 +190,7 @@ export default defineComponent({
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      console.log("seTtotalCount", pageVal.total)
+      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -226,13 +226,13 @@ export default defineComponent({
           return {"value": n.CAT_MODEL_NM}
         })
 
-        console.log("changeForm.deviceModels", changeForm.deviceModels)
+        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
 
     async function getTerminal(param) {
-      console.log("getTerminal",param)
+      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
@@ -250,7 +250,7 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      console.log("response", responset)
+      //console.log("response", responset)
       return responset
     };
 
@@ -271,7 +271,7 @@ export default defineComponent({
     function onSave(event) {
       modelCreate.modal = false
       modelCreate.data = {}
-      console.log("onSave", event)
+      //console.log("onSave", event)
     }
 
     getTerminalMdl()

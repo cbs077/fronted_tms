@@ -72,7 +72,7 @@ export default defineComponent({
   emits: ["click:excel"],
   setup(properties,{emit}) {
     // const makeExcelFile5 = (data) => { 
-    //   console.log("makeExcelFile5", properties.excelValue)
+    //   //console.log("makeExcelFile5", properties.excelValue)
     //   var dataWS = XLSX.utils.json_to_sheet([{"abc": "abc"}]);
     //   // 엑셀의 workbook을 만든다
     //   // workbook은 엑셀파일에 지정된 이름이다.

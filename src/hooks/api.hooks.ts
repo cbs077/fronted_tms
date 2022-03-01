@@ -85,7 +85,7 @@ export const useDevice = () => {
       swDownload: 20,
     };
 
-    //console.log("temporary", temporary)
+    ////console.log("temporary", temporary)
     //delete object.CAT_SERIAL_NO;
     return temporary
   };

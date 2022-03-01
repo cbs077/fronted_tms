@@ -72,7 +72,8 @@ import BaseButton from "~/components/atoms/base-button.vue";
 import { INavMenuItem } from "~/interfaces/menu.interface";
 import { isNavMenu } from "~/utils/type-guard";
 //import { islogin } from "~/App.vue";
-
+  import { useStore } from "vuex";
+  
 export default defineComponent({
   name: "BaseNavBar",
   components: { UserCircleIcon, LogoutIcon, BaseButton },
@@ -92,8 +93,9 @@ export default defineComponent({
     //   default: "SK TMS",
     // },
   },
-  emits: ["click:menu"],
-  setup() {
+  emits: ["click:menu", "click:logout"],
+  setup(properties, { emit }) {
+    const store = useStore();
     const router = useRouter();
     let userName = window.localStorage.getItem("userNm")
 
@@ -102,17 +104,24 @@ export default defineComponent({
       return path;
     });
 
+    function onClickMenu(menu){
+      //this.$router.push('/van/accounts/users/my')
+      ////console.log("onUserProfile")
+      //emit('click:menu', menu)
+    }
+
     function onUserProfile(){
       this.$router.push('/van/accounts/users/my')
-      console.log("onUserProfile")
     }
 
     function onLogout(){
       window.localStorage.removeItem("token")
       window.localStorage.setItem("islogin", false)
-      //islogin = false
+      
+      //store.commit("setisLoginPage", true);
       this.$router.push('/login')
-      console.log("onLogout")
+      store.state.isLoginPage = true
+
     }    
 
     return { currentPath, onUserProfile, onLogout, userName };

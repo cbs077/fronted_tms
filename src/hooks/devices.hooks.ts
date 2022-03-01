@@ -121,7 +121,7 @@ export const useDevice = () => {
       squad: object.USER_RIGHTS_NM,
     };
 
-    //console.log("temporary", temporary)
+    ////console.log("temporary", temporary)
     //delete object.CAT_SERIAL_NO;
     return temporary
   };

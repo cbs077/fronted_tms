@@ -129,7 +129,7 @@ export default defineComponent({
       .then(response => {
         var list = response.data.list
         emit("click:positiveA")
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
 
@@ -147,7 +147,7 @@ export default defineComponent({
         var count = response.data.count
         if( count > 0 ) changeForm.isExistId = "true"
         else changeForm.isExistId = "false"
-        console.log("onIdCheck", response)
+        //console.log("onIdCheck", response)
       });
     };
 

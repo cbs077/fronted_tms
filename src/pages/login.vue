@@ -18,6 +18,7 @@
   import  axios, { AxiosResponse } from "axios";
   import { defineComponent, reactive, ref } from "vue";
   import { useRoute, useRouter } from "vue-router";
+  import { useStore } from "vuex";
 
 
   export default defineComponent({
@@ -25,7 +26,9 @@
     components: {
 
     },
-    setup() {
+    emits: ["click:login"],
+    setup(properties, { emit }) {
+      const store = useStore();
       const router = useRouter();
 
       let changeForm = reactive({
@@ -41,16 +44,32 @@
             window.localStorage.setItem("token", response.data.messages.token)
             window.localStorage.setItem("vanId", response.data.messages.van_id)
             window.localStorage.setItem("userId", response.data.messages.user_id)
-            window.localStorage.setItem("userNm", response.data.messages.user_name)
-            window.localStorage.setItem("user_right", response.data.messages.user_right)
+            window.localStorage.setItem("userNm", response.data.messages.user_name)       
             window.localStorage.setItem("islogin", true)
 
             console.log("login")
+            
             this.$router.push('/van/devices/registrations')
+            store.commit("setisLoginPage", false);
+            store.state.isLoginPage = false
 
+            if( response.data.messages.user_right == "S" ){
+              window.localStorage.setItem("is_van", false)
+              store.state.userRight  = false
+              store.commit("userRight", false);
+            }  
+            else { // van
+              window.localStorage.setItem("is_van", true)
+              store.state.userRight  = true  
+              store.commit("userRight", true);
+            } 
           }
         });
       };
+
+      store.commit("setisLoginPage", true);
+      store.state.isLoginPage = true
+
 
       return {login, changeForm};
     },

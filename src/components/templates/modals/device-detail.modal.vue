@@ -197,11 +197,11 @@ export default defineComponent({
         changeForm.swGroupCodes = _.map(list, function square(n) {
           return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
-        console.log("getswGroupCodes", list)
+        //console.log("getswGroupCodes", list)
         
         return response.data.total_count;
       });
-      console.log("response", response)
+      //console.log("response", response)
       return response
     };
 
@@ -226,7 +226,7 @@ export default defineComponent({
           return {"value": n.CAT_MODEL_NM}
         })
 
-        console.log("changeForm.deviceModels", changeForm.deviceModels)
+        ////console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
@@ -251,26 +251,26 @@ export default defineComponent({
         //uploadFile()
         //$emit('click:positive', form
         emit("click:positive");
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
 
     function onSelectGroupId(event){
-      console.log("onSelectGroupId", event)
+      //console.log("onSelectGroupId", event)
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
-      console.log("groupRename1", groupRename)
+      //console.log("groupRename1", groupRename)
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key     
     }
 
     function onSelectGroupNm(event){
-      console.log("onSelectGroupNm", event)
+      //console.log("onSelectGroupNm", event)
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
-      console.log("onSelectGroupNm", groupRename)
+      //console.log("onSelectGroupNm", groupRename)
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key
     }

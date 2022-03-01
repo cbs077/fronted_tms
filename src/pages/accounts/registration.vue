@@ -204,7 +204,7 @@ export default defineComponent({
 
         //changeForm.deviceModels = [{"value": "Asas"}]
 
-        console.log("changeForm.deviceModels", changeForm.deviceModels)
+        ////console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
@@ -232,7 +232,7 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
     getTerminalMdl()

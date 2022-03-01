@@ -11,6 +11,7 @@ import OptionsSearchButton from "~/components/molecules/options-search-button.vu
 
 import App from "./App.vue";
 import router from "./routes";
+import store from "./store.vue";
 
 createApp(App)
   .component(BaseButton.name, BaseButton)
@@ -19,4 +20,5 @@ createApp(App)
   .component(Breadcrumb.name, Breadcrumb)
   .use(router)
   .use(ElementPlus)
+  .use(store)
   .mount("#app");

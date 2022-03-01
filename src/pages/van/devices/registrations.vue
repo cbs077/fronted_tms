@@ -206,7 +206,7 @@ export default defineComponent({
     });
 
     const onRegistration = (value) => {
-      console.log("onRegistration", value)
+      //console.log("onRegistration", value)
       if( value.type == "multi"){
         registrationResult.items = value.data
         deviceRegistration.modal = false;
@@ -219,7 +219,7 @@ export default defineComponent({
     };
 
     const onRowClicked = (row: IDevice) => {
-      console.log("onRowClicked", row)
+      //console.log("onRowClicked", row)
       deviceDetail.data = row;
       deviceDetail.modal = true;
 
@@ -242,7 +242,7 @@ export default defineComponent({
     };
 
     const paginate = (page) => {
-      console.log("paginate", page);
+      //console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -253,7 +253,7 @@ export default defineComponent({
     }; 
 
     const onTake = (pageCount) => {
-      console.log("onTake", pageCount)
+      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -264,7 +264,7 @@ export default defineComponent({
     }; 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      console.log("seTtotalCount", pageVal.total)
+      //console.log("seTtotalCount", pageVal.total)
     }
 
     const onCheckbox = (name, tst) => {
@@ -273,7 +273,7 @@ export default defineComponent({
     }
 
     async function getTerminal(param) {
-      console.log("getTerminal",param)
+      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       if(token == null) token = "" 
 
@@ -289,13 +289,13 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      console.log("response", responset)
+      //console.log("response", responset)
       return responset
     };
 
 
     const onSaveDetail = ( val : any) => {
-      console.log("onSaveDetail", val.modelCode)
+      //console.log("onSaveDetail", val.modelCode)
     }
 
     const onSaveExcel = () => {   

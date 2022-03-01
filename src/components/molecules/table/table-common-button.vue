@@ -33,7 +33,7 @@ export default defineComponent({
     watch(
       () => take.select,
       (newValue) => {
-        console.log("newValue", newValue)
+        //console.log("newValue", newValue)
         emit("update:take", newValue)
       }
     );

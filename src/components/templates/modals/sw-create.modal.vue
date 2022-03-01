@@ -195,7 +195,7 @@ export default defineComponent({
           return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
 
-        console.log("changeForm.deviceModels", changeForm.deviceModels)
+        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
@@ -225,7 +225,7 @@ export default defineComponent({
         var list = response.data.list
         uploadFile()
         emit("click:positive");
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
 
@@ -250,21 +250,21 @@ export default defineComponent({
     }  
 
     function onSelectGroupId(event){
-      console.log("onSelectGroupId", event)
+      //console.log("onSelectGroupId", event)
       var groupRename = _.find(changeForm.deviceModels, function(data) {
         return data.value == event }
       );
-      console.log("groupRename", groupRename)
+      //console.log("groupRename", groupRename)
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key     
     }
 
     function onSelectGroupNm(event){
-      console.log("onSelectGroupNm", event)
+      //console.log("onSelectGroupNm", event)
       var groupRename = _.find(changeForm.deviceModels, function(data) {
         return data.value == event }
       );
-      console.log("onSelectGroupNm", groupRename)
+      //console.log("onSelectGroupNm", groupRename)
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key
     }
@@ -274,7 +274,7 @@ export default defineComponent({
       //this.swfile = swfile;    
       var swfile = event.target.files[0]
       changeForm.swfile = swfile
-      console.log("selectFile", swfile)
+      //console.log("selectFile", swfile)
       changeForm.DATA_SIZE = swfile.size
       changeForm.FILE_PATH = swfile.name
       changeForm.FILE_NM = swfile.name

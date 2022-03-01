@@ -148,7 +148,7 @@ export default defineComponent({
       .then(response => {
         var list = response.data.list
         emit("click:positive");
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
 

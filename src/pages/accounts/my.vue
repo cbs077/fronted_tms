@@ -159,7 +159,7 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
-        console.log("response", response)
+        //console.log("response", response)
       });
     };
     async function getTerminalMdl() {
@@ -178,7 +178,7 @@ export default defineComponent({
               }
             )
             .then(response => {
-              console.log("response.data:" ,response.data)
+              //console.log("response.data:" ,response.data)
               changeForm.USER_ID = userId
               changeForm.VAN_NM = response.data[0].user_rights_nm
               return response.data;   

@@ -1,14 +1,14 @@
 <template>
   <div>
     <base-nav-bar
-      v-if="islogin"
+      v-if="!isLoginPage"
       :menus="gnbs"
       :user-name="userName"
       @click:menu="onGnbMenuClicked"
     />
 
     <el-row class="tac mt-4">
-      <el-col  v-if="islogin" :span="4">
+      <el-col  v-if="!isLoginPage" :span="4">
         <el-menu
           class="h-full"
           active-text-color="#EA002C"
@@ -33,7 +33,7 @@
               v-else
               :key="lnb.text"
               :index="lnb.text"
-              @click="$router.push(lnb.to || '/')"
+              @click="onClickLnb(lnb)"
             >
               <span>{{ lnb.text }}</span>
             </el-menu-item>
@@ -47,37 +47,45 @@
       </el-col>
     </el-row>
   </div>
+  <!-- <login-page v-if="data.isLoginPage" @click:login="onLogin"></login-page> -->
 </template>
 
 <script lang="ts">
 import { ElMenu, ElMenuItem, ElSubMenu } from "element-plus";
-import { computed, defineComponent, reactive } from "vue";
+import { computed, defineComponent, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import BaseNavBar from "~/components/organisms/base-nav.vue";
+import LoginPage from "~/pages/login.vue";
 //import Login from "~/pages/login.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { INavMenuItem } from "~/interfaces/menu.interface";
+import { useStore } from "vuex";
 
 export default defineComponent({
-  components: { BaseNavBar, ElMenu, ElMenuItem, ElSubMenu },
+  components: { BaseNavBar, ElMenu, ElMenuItem, ElSubMenu, LoginPage },
   setup() {
     const router = useRouter();
     const route = useRoute();
     const { lnbs, gnbs } = useConst();
     const userName = "SK TMS";
+    const store = useStore();
+    let isLoginPage = computed(() => store.state.isLoginPage); // 상태값 가져오기
+    let data = reactive({
+       isVan: store.state.userRight //window.localStorage.getItem("is_van"),
+    })
+    store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
+    //console.log("data.isVan", data.isVan)
+    //store.state.userRight = window.localStorage.getItem("is_van")
+    //data.isVan = store.state.userRight 
 
-    let isVan = true;
-    let userRight = window.localStorage.getItem("user_right")
-    let islogin = window.localStorage.getItem("islogin")
-    console.log("route.path", window.localStorage.getItem("user_right"))
-    if( userRight == "S") isVan = true;
+    const displayLnbs = computed(() => {    
+     // data.isVan = true //window.localStorage.getItem("is_van")
+      // data.isVan = true
+      // displayGnbs = [...gnbs(data.isVan)]
+      console.log("data.isVan1", data.isVan)
+      console.log("displayLnbs", store.getters.userRight)
 
-    //let islogin = true 
-    if(route.path == "/login" ) islogin = false
-    else islogin = true
-
-    const displayLnbs = computed(() => {
       const { path } = router.currentRoute.value;
 
       if (path.includes("/sw-managements-managements")) {
@@ -85,28 +93,34 @@ export default defineComponent({
       }
 
       if (path.includes("/devices")) {
-        return lnbs(isVan).devices();
+        return lnbs(data.isVan).devices();
       }
 
       if (path.includes("/accounts")) {
-        return lnbs(isVan).accounts();
+        return lnbs(data.isVan).accounts();
       }
 
       if (path.includes("/monitors")) {
-        return lnbs(isVan).monitors();
+        return lnbs(data.isVan).monitors();
       }
 
       if (path.includes("/sw-managements")) {
-        return lnbs(isVan).swManagements();
+        return lnbs(data.isVan).swManagements();
       }
 
-      if (path.includes("/vans") && !isVan) {
-        return lnbs(isVan).vans();
+      if (path.includes("/vans") && !data.isVan) {
+        return lnbs(data.isVan).vans();
       }
 
       return [];
     });
+
+    const onClickLnb = computed((lnb) =>{
+      $router.push(lnb.to || '/')
+    });
+
     const defaultActiveMenu = computed(() => {
+      checkLoginPage()
       for (const lnb of displayLnbs.value) {
         if ("to" in lnb && lnb.to === route.path) {
           return lnb.text;
@@ -124,12 +138,36 @@ export default defineComponent({
       return displayLnbs.value[0]?.text || "";
     });
 
-    const onGnbMenuClicked = ({ to }: INavMenuItem) => router.push(to);
-    let displayGnbs = reactive<INavMenuItem[]>([...gnbs(isVan)]);
+    function checkLoginPage(){
+      //data.isVan = true
+      //displayGnbs = [...gnbs(data.isVan)]
+      store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
+      //displayGnbs = [...gnbs(data.isVan)]
+      console.log("checkLoginPage")
+      //data.isVan = eval(window.localStorage.getItem("is_van")) === true 
+      // console.log("checkLoginPage", window.location.hash)
+      // if(window.location.hash == "#/login"  ) {
+      //   store.commit("setisLoginPage", true);
+      //   store.state.isLoginPage = true
+      // }
+      // else{
+      //   store.commit("setisLoginPage", false); 
+      //   store.state.isLoginPage = false
+      // }
+      //console.log("store.state.userRight", store.getters.userRight)
+      //console.log("checkLoginPage", store.getters.isLoginPage)
+      //data.isVan = store.getters.userRight
 
-    function updateVal(val){
-      islogin = val
+      //return store.state.userRight   
     }
+
+    const onGnbMenuClicked = ({ to }: INavMenuItem)  =>{
+      console.log("route.path", to)
+      router.push(to)
+    };
+
+    let displayGnbs = reactive<INavMenuItem[]>([...gnbs(data.isVan)]);
+    checkLoginPage()
 
     return {
       gnbs: displayGnbs,
@@ -137,9 +175,12 @@ export default defineComponent({
       userName,
       onGnbMenuClicked,
       defaultActiveMenu,
-      islogin,
-      userRight,
-      updateVal
+      data,
+      onClickLnb,
+      isLoginPage,
+      //data.isVan
+      //onLogin
+      //updateVal
     };
   },
 });

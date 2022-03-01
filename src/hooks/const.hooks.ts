@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import { ILnbMenuItem, INavMenuItem } from "~/interfaces/menu.interface";
+import { useStore } from "vuex";
 
 const rawGnb: INavMenuItem[] = [
   {
@@ -18,20 +19,32 @@ const rawGnb: INavMenuItem[] = [
   {
     text: "S/W 관리",
     to: `/sw-managements/groups/registrations`,
-  },
+  }
 ];
 
-const gnbs = (isVan = true): INavMenuItem[] => {
-  const prefix = isVan ? "/van" : "/admin";
-  const temporary = [...rawGnb];
+const gnbs = (isVan): INavMenuItem[] => {
+  const store = useStore();
+  isVan = window.localStorage.getItem("is_van")
+  isVan = store.getters.userRight
+  let prefix = isVan ? "/van" : "/admin";
+  
+  let temporary = [...rawGnb];
+   
+  console.log("gnbs1", store.state.userRight )
+  console.log("gnbs2", store.getters.userRight )
+  console.log("gnbs3", window.localStorage.getItem("is_van") )
+  console.log("gnbs4", isVan)
 
   if (!isVan) {
+    console.log("van~~")
     temporary.push({
       text: "VAN사 관리",
       to: `/vans`,
     });
   }
 
+  console.log("temporary", temporary)
+  
   return temporary.map((gnb) => {
     return { ...gnb, to: `${prefix}${gnb.to}` };
   });

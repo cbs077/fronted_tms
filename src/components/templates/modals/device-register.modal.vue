@@ -241,11 +241,11 @@ export default defineComponent({
         changeForm.swGroupCodes = _.map(list, function square(n) {
           return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
-        console.log("getswGroupCodes", list)
+        //console.log("getswGroupCodes", list)
         
         return response.data.total_count;
       });
-      console.log("response", response)
+      //console.log("response", response)
       return response
     };
 
@@ -270,25 +270,25 @@ export default defineComponent({
           return {"key" :  n.CAT_MODEL_NM, "value": n.CAT_MODEL_ID}
         })
 
-        console.log("changeForm.deviceModels", changeForm.deviceModels)
+        ////console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
     const onPreSave = () => {
-      console.log("uploadMethodSelection", uploadMethodSelection)
+      //console.log("uploadMethodSelection", uploadMethodSelection)
       changeForm.CAT_SERIAL_NO_MULTI_RESULT = []
-      console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_FROM)
-      console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_TO)
+      //console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_FROM)
+      //console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_TO)
       if( uploadMethodSelection.value == '일괄등록'){
         for(var i=changeForm.CAT_SERIAL_NO_FROM; i <= changeForm.CAT_SERIAL_NO_TO ; i++){
-          console.log("onPreSave", i)
+          //console.log("onPreSave", i)
           changeForm.CAT_SERIAL_NO = changeForm.CAT_SERIAL_NO_COMMON + i
-          console.log("changeForm.CAT_SERIAL_NO", changeForm.CAT_SERIAL_NO)
+          //console.log("changeForm.CAT_SERIAL_NO", changeForm.CAT_SERIAL_NO)
           onSave(changeForm.CAT_SERIAL_NO)
         }
         emit("click:positive", { "type" : "multi", "data" : changeForm.CAT_SERIAL_NO_MULTI_RESULT }); 
-        console.log("일괄등록")
+        //console.log("일괄등록")
       }else{
-        console.log("일반등록")
+        //console.log("일반등록")
         onSave(changeForm.CAT_SERIAL_NO)
       }
     }
