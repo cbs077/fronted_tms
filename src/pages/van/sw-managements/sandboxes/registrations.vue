@@ -1,5 +1,5 @@
 <template>
-  <bread-crumb text="S/W 조회" />
+  <bread-crumb text="S/W 조회 및 등록" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>

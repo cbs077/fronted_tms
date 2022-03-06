@@ -1,5 +1,5 @@
 <template>
-  <bread-crumb text="S/W 조회" />
+  <bread-crumb text="S/W 조회 및 등록" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>
@@ -50,7 +50,7 @@
     </template>
   </table-common-button>
   <div class="rounded border border-sk-gray">
-    <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
+    <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column
         prop="swGroupCode"
@@ -65,8 +65,8 @@
         label="파일 Size (byte)"
         align="center"
       />
-      <el-table-column prop="applicationDate" label="등록일" align="center" />
-      <el-table-column prop="lastAccessDate" label="등록자" align="center" />
+      <el-table-column prop="regDt" label="등록일" align="center" />
+      <el-table-column prop="regUser" label="등록자" align="center" />
     </el-table>
   </div>
 
@@ -81,7 +81,7 @@
   </div>
 
   <sw-detail-modal v-model="swDetail.modal" />
-  <sw-create-modal v-model="swCreate.modal" />
+  <sw-create-modal @click:positive="onSave" v-model="swCreate.modal" />
 </template>
 <script lang="ts">
 import { Search } from "@element-plus/icons-vue";
@@ -157,6 +157,7 @@ export default defineComponent({
       swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
       swVersions: [{ value: "-" }],
+      data: []
     })
 
     let excelValue = "";
@@ -184,7 +185,8 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      update(dataArr); 
+      changeForm.data = dataArr
+      //update(dataArr); 
     }
 
     function getTerminalMdl() {
@@ -250,6 +252,10 @@ export default defineComponent({
         XLSX.writeFile(wb, 'swOperation.xlsx');
       })
     }
+    function onSave() {
+      swCreate.modal = false
+      swCreate.data = {}
+    }
 
 
     getTerminalMdl()
@@ -273,6 +279,7 @@ export default defineComponent({
       onSearch,
       excelValue,
       onSaveExcel,
+      onSave,
       paginate,
       onTake,
       update,

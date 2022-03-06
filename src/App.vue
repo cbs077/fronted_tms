@@ -2,7 +2,7 @@
   <div>
     <base-nav-bar
       v-if="!isLoginPage"
-      :menus="gnbs"
+      :menus="displayGnbs"
       :user-name="userName"
       @click:menu="onGnbMenuClicked"
     />
@@ -67,22 +67,19 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const { lnbs, gnbs } = useConst();
+    let { lnbs, gnbs} = useConst();
     const userName = "SK TMS";
     const store = useStore();
     let isLoginPage = computed(() => store.state.isLoginPage); // 상태값 가져오기
     let data = reactive({
+       gnbs: [],
        isVan: store.state.userRight //window.localStorage.getItem("is_van"),
     })
     store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
-    //console.log("data.isVan", data.isVan)
-    //store.state.userRight = window.localStorage.getItem("is_van")
-    //data.isVan = store.state.userRight 
 
     const displayLnbs = computed(() => {    
-     // data.isVan = true //window.localStorage.getItem("is_van")
-      // data.isVan = true
-      // displayGnbs = [...gnbs(data.isVan)]
+      data.isVan =  eval(window.localStorage.getItem("is_van")) === true
+      
       console.log("data.isVan1", data.isVan)
       console.log("displayLnbs", store.getters.userRight)
 
@@ -111,7 +108,6 @@ export default defineComponent({
       if (path.includes("/vans") && !data.isVan) {
         return lnbs(data.isVan).vans();
       }
-
       return [];
     });
 
@@ -139,26 +135,9 @@ export default defineComponent({
     });
 
     function checkLoginPage(){
-      //data.isVan = true
-      //displayGnbs = [...gnbs(data.isVan)]
       store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
-      //displayGnbs = [...gnbs(data.isVan)]
-      console.log("checkLoginPage")
-      //data.isVan = eval(window.localStorage.getItem("is_van")) === true 
-      // console.log("checkLoginPage", window.location.hash)
-      // if(window.location.hash == "#/login"  ) {
-      //   store.commit("setisLoginPage", true);
-      //   store.state.isLoginPage = true
-      // }
-      // else{
-      //   store.commit("setisLoginPage", false); 
-      //   store.state.isLoginPage = false
-      // }
-      //console.log("store.state.userRight", store.getters.userRight)
-      //console.log("checkLoginPage", store.getters.isLoginPage)
-      //data.isVan = store.getters.userRight
+      store.state.menuss= [...gnbs(data.isVan)]
 
-      //return store.state.userRight   
     }
 
     const onGnbMenuClicked = ({ to }: INavMenuItem)  =>{
@@ -170,7 +149,7 @@ export default defineComponent({
     checkLoginPage()
 
     return {
-      gnbs: displayGnbs,
+      displayGnbs,
       lnbs: displayLnbs,
       userName,
       onGnbMenuClicked,

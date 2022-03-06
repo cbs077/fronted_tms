@@ -5,7 +5,7 @@
     title="S/W 등록"
     positive-text="저장"
     negative-text="초기화"
-    @click:positive="onSave"
+    @click:positive="uploadFile"
   >
     <template #modalBody>
       <div>
@@ -199,19 +199,20 @@ export default defineComponent({
       });
     };
 
-    const onSave = (param: string) => {
+    async function onSave (param) {
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
+      console.log("param", param)
+      await axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
         {
           "VAN_ID" : vanId,
           "SW_GROUP_ID": changeForm.SW_GROUP_ID,
-          "SW_VERSION": changeForm.SW_VERSION,
+          "SW_VERSION": changeForm.SW_VERSION.padStart(10, '0') ,
           "APPL_DT": changeForm.APPL_DT,
           "DATA_SIZE": changeForm.DATA_SIZE,
-          "FILE_PATH": changeForm.FILE_PATH,
+          "FILE_PATH": param,
           "FILE_NM": changeForm.FILE_NM,  
           "UPLOAD_FILE_NM": changeForm.UPLOAD_FILE_NM,                
           'REG_DT': new Date(),
@@ -223,7 +224,7 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
-        uploadFile()
+        //uploadFile()
         emit("click:positive");
         //console.log("response", response)
       });
@@ -242,7 +243,13 @@ export default defineComponent({
               "Content-Type": "multipart/form-data",
             },
           }
-        );
+        ).then(response => {
+          //var list = response.data.list
+          console.log("response.data", response.data.messages.filepath)
+          onSave(response.data.messages.filepath)
+          //emit("click:positive");
+
+        });
         console.log(data);
       } catch (err) {
         console.log(err);
@@ -299,7 +306,8 @@ export default defineComponent({
       onSave,
       onSelectGroupId,
       onSelectGroupNm,
-      selectFile        
+      selectFile,
+      uploadFile        
     };
   },
 });

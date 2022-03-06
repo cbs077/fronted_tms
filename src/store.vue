@@ -4,7 +4,8 @@ import { createStore } from "vuex";
 export default createStore({
   state: {
     isLoginPage: false,
-    userRight: false
+    userRight: false,
+    menuss: []
   },
   getters: {
     isLoginPage(state) {

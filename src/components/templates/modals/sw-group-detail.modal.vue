@@ -12,7 +12,7 @@
             S/W Group 코드
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swGroupCode }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -20,7 +20,7 @@
             S/W Group 명
           </div>
           <div class="col-span-6 my-auto">
-            <el-input />
+            <el-input v-model="changeForm.SW_GROUP_NM" />
           </div>
         </div>
         <div class="my-3 grid grid-cols-8">
@@ -29,6 +29,7 @@
           </div>
           <div class="col-span-6 my-auto">
             <el-input
+              v-model="changeForm.description"
               rows="5"
               type="textarea"
             />
@@ -40,7 +41,7 @@
             등록일
           </div>
           <div class="col-span-6 my-auto">
-            {{ registrationDate }}
+            {{ device.regDt }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -48,7 +49,7 @@
             등록자
           </div>
           <div class="col-span-6 my-auto">
-            {{ registrationUser }}
+            {{ device.regUser }}
           </div>
         </div>
       </div>
@@ -57,7 +58,7 @@
           class="mr-4 border-sk-gray bg-sk-gray text-white"
           text="수정 및 저장"
           type="button"
-          @click="$emit('click:positive')"
+          @click="onSave"
         />
       </div>
     </template>
@@ -66,6 +67,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive } from "vue";
+import  axios, { AxiosResponse } from "axios";
+import * as _ from "lodash";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
@@ -79,15 +82,10 @@ export default defineComponent({
     SelectBox,
   },
   props: {
-    name: { type: String },
-    code: { type: String },
-    description: { type: String },
-    registrationDate: { type: String },
-    registrationUser: { type: String },
-    modelValue: {
-      type: Boolean,
-      required: false,
-      default: true,
+    device: {
+      type: Object,
+      required: true,
+      default: () => {},
     },
   },
   emits: ["update:modelValue", "click:positive", "click:negative"],
@@ -96,10 +94,42 @@ export default defineComponent({
     const isOpen = computed({
       get: () => properties.modelValue,
       set: (value: boolean) => {
+        Object.assign(changeForm, initialState);
         emit("update:modelValue", value);
       },
     });
     const { deviceModels, swVersions, swGroupCodes } = useConst();
+
+    let initialState = reactive({
+      SW_GROUP_NM: "",
+      description: ""
+    })
+
+    const changeForm = reactive({ ...initialState });
+
+    const onSave = (param: string) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.put ('http://tms-test-server.p-e.kr:8081/swgroup/?' ,
+        {
+          "VAN_ID": vanId,
+          "SW_GROUP_ID": properties.device.swGroupCode,
+          "SW_GROUP_NM": changeForm.SW_GROUP_NM,
+          "DESCRIPTION": changeForm.description
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var list = response.data.list
+        emit("click:positive");
+      });
+    };
+
+
     return {
       deviceModels,
       swVersions,
@@ -108,6 +138,9 @@ export default defineComponent({
       closeModal() {
         isOpen.value = false;
       },
+      //
+      changeForm,
+      onSave
     };
   },
 });

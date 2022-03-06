@@ -4,22 +4,8 @@ import { ILnbMenuItem, INavMenuItem } from "~/interfaces/menu.interface";
 import { useStore } from "vuex";
 
 const rawGnb: INavMenuItem[] = [
-  {
-    text: "단말기관리",
-    to: `/devices/registrations`,
-  },
-  {
-    text: "사용자관리",
-    to: `/accounts/users/my`,
-  },
-  {
-    text: "모니터링",
-    to: `/monitors/transactions`,
-  },
-  {
-    text: "S/W 관리",
-    to: `/sw-managements/groups/registrations`,
-  }
+
+
 ];
 
 const gnbs = (isVan): INavMenuItem[] => {
@@ -35,12 +21,40 @@ const gnbs = (isVan): INavMenuItem[] => {
   console.log("gnbs3", window.localStorage.getItem("is_van") )
   console.log("gnbs4", isVan)
 
-  if (!isVan) {
+  if (!isVan) { // admin
     console.log("van~~")
-    temporary.push({
-      text: "VAN사 관리",
-      to: `/vans`,
-    });
+    temporary.push(
+      {
+        text: "사용자관리",
+        to: `/accounts/users/my`,
+      },
+      {
+        text: "VAN사 관리",
+        to: `/vans`,
+      },
+);
+  }
+
+  if (isVan) { // admin
+    console.log("van~~")
+    temporary.push(
+      {
+        text: "단말기관리",
+        to: `/devices/registrations`,
+      },
+      {
+        text: "사용자관리",
+        to: `/accounts/users/my`,
+      },
+      {
+        text: "모니터링",
+        to: `/monitors/transactions`,
+      },
+      {
+        text: "S/W 관리",
+        to: `/sw-managements/groups/registrations`,
+      }
+    );
   }
 
   console.log("temporary", temporary)
@@ -57,10 +71,10 @@ const searchOptions = [
   { id: 4, key: "cat_model_id", value: "단말기 모델" },
 ];
 
-const SGsearchOptions = [
-  { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
-  { id: 2, key: "sw_group_nm", value: "S/W Group 명" },
-];
+// const SGsearchOptions = [
+//   { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+//   { id: 2, key: "sw_group_nm", value: "S/W Group 명" },
+// ];
 
 const SWsearchOptions = [
   { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
@@ -165,7 +179,7 @@ const lnbs = (isVan: boolean) => {
           text: "S/W Group 관리",
           childs: [
             {
-              text: isVan ? "S/W Group 조회 및 등록" : "S/W 조회",
+              text: isVan ? "S/W Group 조회 및 등록" : "S/W 조회 및 등록",
               to: `${prefix}/sw-managements/groups/registrations`,
             },
           ],
@@ -174,7 +188,7 @@ const lnbs = (isVan: boolean) => {
           text: "운영 S/W 관리",
           childs: [
             {
-              text: isVan ? "S/W 조회 및 등록" : "S/W 조회",
+              text: isVan ? "S/W 조회 및 등록" : "S/W 조회 및 등록",
               to: `${prefix}/sw-managements/productions/registrations`,
             },
             {
@@ -191,7 +205,7 @@ const lnbs = (isVan: boolean) => {
           text: "테스트 S/W 관리",
           childs: [
             {
-              text: isVan ? "S/W 조회 및 등록" : "S/W 조회",
+              text: isVan ? "S/W 조회 및 등록" : "S/W 조회 및 등록",
               to: `${prefix}/sw-managements/sandboxes/registrations`,
             },
             {
@@ -240,7 +254,7 @@ export const useConst = () => {
     gnbs,
     lnbs,
     searchOptions,
-    SGsearchOptions,
+    //SGsearchOptions,
     SWsearchOptions,
     take,
   };

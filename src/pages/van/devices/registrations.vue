@@ -45,6 +45,7 @@
           />
       </div>
     </div>
+    
     <options-search-button
       @click:search="onSearch"
     />
@@ -273,8 +274,9 @@ export default defineComponent({
     }
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
+      var vanId = window.localStorage.getItem("vanId")
       var token = window.localStorage.getItem("token")
+      var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
 
       let data: any[] = [];
@@ -295,6 +297,7 @@ export default defineComponent({
 
 
     const onSaveDetail = ( val : any) => {
+      deviceDetail.modal = false
       //console.log("onSaveDetail", val.modelCode)
     }
 
@@ -344,8 +347,6 @@ export default defineComponent({
     return {
       // searchKey,
       // searchVal,
-      pageVal,
-      excelValue,
       selectOption,
       onRowClicked,
       onRegistration,
@@ -364,7 +365,9 @@ export default defineComponent({
       paginate,
       onTake,
       onCheckbox,
-      onSaveExcel
+      onSaveExcel,
+      pageVal,
+      excelValue,
     };
   },
 });

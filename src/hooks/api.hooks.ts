@@ -65,8 +65,8 @@ export const useDevice = () => {
 
   let renmeObjectKey = (object: any) => {
     const temporary: IDevice = {   
-      deviceNumberFrom: "Z118120500",
-      deviceNumberTo: "Z118120600",
+      deviceNumberFrom: object.SERIAL_NO_FROM,
+      deviceNumberTo: object.SERIAL_NO_TO,
       modelName: object.CAT_MODEL_NM,
       swVersion: object.SW_VERSION,
       description: object.DESCRIPTION,

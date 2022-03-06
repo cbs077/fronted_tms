@@ -2,10 +2,7 @@
   <base-modal
     v-model="isOpen"
     class="w-2/3"
-    title="단말기 모델 상세조회"
-    positive-text="저장"
-    negative-text="초기화"
-    @click:positive="onSave"
+    title="단말기 모델 등록"
   >
     <template #modalBody>
       <div>
@@ -14,18 +11,21 @@
             모델 코드
           </div>
           <div class="col-span-4 my-auto">
-            <el-input v-model="changeForm.CAT_MODEL_ID" csize="large" />
+            <el-input v-model="changeForm.CAT_MODEL_ID" maxlength='4' csize="large" />
           </div>
           <div class="col-span-2 my-auto text-center font-bold">
             <base-button @click="onIdCheck" text="중복확인" class="mr-1" />
           </div>
         </div>
-        <div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
+        <!--<div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
           <div class="col-span-2" />
           <div class="col-span-6 text-sk-red">
             이미 등록된 모델 코드 입니다.
           </div>
-        </div>
+          <p class="col-span-6 col-start-4 text-sk-teal">
+            등록 가능한 번호입니다.
+          </p>          
+        </div>-->
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             모델명
@@ -48,6 +48,14 @@
           <div class="col-span-2 my-auto text-center font-bold">등록자</div>
           <div class="col-span-6 my-auto">{{changeForm.REG_USER}}</div>
         </div>
+      </div>
+      <div class="mt-12 text-center">
+        <base-button
+          class="mr-4 border-sk-gray bg-sk-gray text-white"
+          text="수정 및 저장"
+          type="button"
+          @click="onSave"
+        />
       </div>
     </template>
   </base-modal>
@@ -103,8 +111,9 @@ export default defineComponent({
     })
     
     const onSave = (param: string) => {
+      console.log("changeForm.isExistId", changeForm.isExistId)
       if( changeForm.isExistId == "true" || changeForm.isExistId == "" ){
-        alert("값을 확인해주세요.") 
+        alert("모델 코드 중복값을 확인해주세요.") 
         return
       } 
        
@@ -138,6 +147,9 @@ export default defineComponent({
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
+      if(changeForm.CAT_MODEL_ID == "" ) {alert("모델코드 is null"); return}
+      if(changeForm.CAT_MODEL_ID.length > 4 ) {alert("4자리 이상입니다."); return}
+
       axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl/idcheck/' + vanId + "/" + changeForm.CAT_MODEL_ID ,
         {
           headers: { Authorization: token} // header의 속성
@@ -145,9 +157,14 @@ export default defineComponent({
       )
       .then(response => {
         var count = response.data.count
-        if( count > 0 ) changeForm.isExistId = "true"
-        else changeForm.isExistId = "false"
-        //console.log("onIdCheck", response)
+        if( count > 0 ) {
+          alert("이미 등록된 모델 코드 입니다.")
+          changeForm.isExistId = "true"
+        }
+        else {
+          alert("등록가능한 모델 코드 입니다.")
+          changeForm.isExistId = "false"
+        }
       });
     };
 

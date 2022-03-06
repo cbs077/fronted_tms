@@ -17,7 +17,7 @@
             v-for="item in changeForm.deviceModels"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
@@ -30,6 +30,7 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -48,7 +49,7 @@
   </table-common-button>
 
   <div class="rounded border border-sk-gray">
-    <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
+    <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column prop="modelCode" label="모델코드" align="center" />
       <el-table-column prop="modelName" label="모델명" align="center" />
@@ -75,7 +76,11 @@
     :text="deviceUnRegistration.text"
   />
 
-  <model-detail-modal v-model="modelDetail.modal" />
+  <model-detail-modal 
+    v-model="modelDetail.modal"
+    :device="modelDetail.data"
+    @click:positive="onSaveDetail"
+   />
   <model-create-modal @click:positiveA="onSave" v-model="modelCreate.modal" />
 </template>
 <script lang="ts">
@@ -103,7 +108,7 @@ export default defineComponent({
     BaseButton,
   },
   setup() {
-    let { registrationHeaders: headers, devices, update, renmeObjectKey} = useDevice();
+    let { registrationHeaders: headers, devices, renmeObjectKey} = useDevice();
     //const { deviceModels } = useConst();
     const query = ref("");
     const displayOptions = reactive({
@@ -130,7 +135,8 @@ export default defineComponent({
       modal: false,
     });
 
-    const onRowClicked = () => {
+    const onRowClicked = (row) => {
+      modelDetail.data = row;
       modelDetail.modal = true;
     };
 
@@ -138,28 +144,7 @@ export default defineComponent({
       slectData: [],
     });   
 
-////////////////
-    // page
-    const paginate = (page) => {
-      //console.log("paginate", page);
-      pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-    // 10개, 20개, 30개
-    const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-
+    ////////////////
     let pageVal = reactive({
       page: 1,
       pageCount: 10,
@@ -168,29 +153,62 @@ export default defineComponent({
 
     let changeForm = reactive({
       swGroupCodes: [{ value: "-" }],
-      deviceModels: [{ value: "-" }],
+      deviceModels: [],
       swVersions: [{ value: "-" }],
+      data: []
     })
 
     let excelValue = "";
 
+    const paginate = (page) => {
+      //console.log("paginate", page);
+      pageVal.page = page
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      //검색어
+      if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
+      else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
+      
+      getTerminal(param).then( data => {
+        setValue(data)
+      })
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      console.log("onTake", pageCount)
+      pageVal.pageCount = pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+
+      if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
+      else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
+      
+      getTerminal(param).then( data => {
+        setValue(data)
+      })
+    }; 
+
     const onSearch = (event) => {
-      //console.log("selectOption", selectOption)
-      //console.log("query.value", query.value)
+      console.log("onSearch11", selectOption)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       
-      if(query.value != "") param = param + "&cat_model_nm=" + query.value
-      else param = param + "&cat_model_nm=" + selectOption.value
+      if(query.value != "") { param = param + "&cat_model_id=" + query.value }
+      else { param = param + "&cat_model_id=" + selectOption.value }
       
+      console.log("param" , param)
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
       })
     };
 
+
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
+    };
+
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -201,7 +219,7 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      update(dataArr); 
+      changeForm.data = dataArr
     }
 
     function getTerminalMdl() {
@@ -223,10 +241,9 @@ export default defineComponent({
         var list = response.data.list
         
         changeForm.deviceModels = _.map(list, function square(n) {
-          return {"value": n.CAT_MODEL_NM}
+          return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
         })
-
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
+        changeForm.deviceModels.unshift({"key": "", "value": "전체"})
       });
     };
 
@@ -271,7 +288,20 @@ export default defineComponent({
     function onSave(event) {
       modelCreate.modal = false
       modelCreate.data = {}
+      getTerminalMdl()
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })   
       //console.log("onSave", event)
+    }
+
+    const onSaveDetail = ( val : any) => {
+      console.log("onSaveDetail")
+      modelDetail.modal =false
+      getTerminalMdl()
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })      
     }
 
     getTerminalMdl()
@@ -284,22 +314,23 @@ export default defineComponent({
       onRowClicked,
       selectOption,
       modelDetail,
-      update,
+      //update,
       deviceUnRegistration,
       query,
       headers,
       devices,
-      //deviceModels,
       displayOptions,
       //
       pageVal, 
       changeForm,
       onSearch,
+      onReset,
       excelValue,
       onSaveExcel,
       paginate,
       onTake,
-      onSave
+      onSave,
+      onSaveDetail
     };
   },
 });

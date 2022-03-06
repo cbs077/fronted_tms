@@ -34,10 +34,10 @@ router.beforeEach((to, from, next) => {
   if (authRequired && !loggedIn) {
     next('/login');
   } 
-  else if( !authRequired && loggedIn ) { //로그인 페이지이면
-    console.log("aa2")
-    next('/van/devices/registrations');
-  }
+  // else if( !authRequired && loggedIn ) { //로그인 페이지이면
+  //   console.log("aa2")
+  //   next('/van/devices/registrations');
+  // }
   else {
     next();
   }

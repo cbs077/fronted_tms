@@ -35,10 +35,13 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
-  <table-common-button>
+  <table-common-button
+    @update:take="onTake"
+  >
     <template #body>
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
@@ -79,7 +82,11 @@
     :items="registrationResult.items"
   />
 
-  <sw-group-detail-modal v-model="swGroupDetail.modal" />
+  <sw-group-detail-modal
+   v-model="swGroupDetail.modal" 
+   :device="swGroupDetail.data"
+   @click:positive="onSaveDetail"
+  />
   <sw-group-create-modal @click:positive="onSave" v-model="swGroupCreate.modal" />
 </template>
 <script lang="ts">
@@ -111,7 +118,12 @@ export default defineComponent({
   },
   setup() {
     const { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
-    const { SGsearchOptions} = useConst();
+    //const { SGsearchOptions} = useConst();
+    
+    const SGsearchOptions = [
+      { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+      { id: 2, key: "sw_group_nm", value: "S/W Group 명" },
+    ];
 
     const deviceRegistration = reactive({
       modal: false,
@@ -161,6 +173,7 @@ export default defineComponent({
     };
 
     const onRowClicked = (row: IDevice) => {
+      console.log("row", row)
       swGroupDetail.data = row;
       swGroupDetail.modal = true;
     };
@@ -207,11 +220,17 @@ export default defineComponent({
     const onSearch = (event) => {
       console.log()
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
+      param = param + "&" + selectOption.value+ "=" + query.value
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
       })
+    };
+
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -231,35 +250,33 @@ export default defineComponent({
       //update(dataArr); 
     }
 
-    function getTerminalMdl() {
-      var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
-      var param = "van_id="+ vanId      
-      if(token == null) token = "" 
+    // function getTerminalMdl() {
+    //   var token = window.localStorage.getItem("token")
+    //   var vanId = window.localStorage.getItem("vanId")
+    //   var param = "van_id="+ vanId      
+    //   if(token == null) token = "" 
 
-      let data: any[] = [];
+    //   let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
-        {
-          headers: {
-              Authorization: token
-          }
-        }
-      )
-      .then(response => {
-        var list = response.data.list
+    //   let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+    //     {
+    //       headers: {
+    //           Authorization: token
+    //       }
+    //     }
+    //   )
+    //   .then(response => {
+    //     var list = response.data.list
         
-        changeForm.deviceModels = _.map(list, function square(n) {
-          return {"value": n.CAT_MODEL_NM}
-        })
-
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
-      });
-    };
+    //     changeForm.deviceModels = _.map(list, function square(n) {
+    //       return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
+    //     })
+    //     //changeForm.deviceModels.unshift({"key": "", "value": "전체"})
+    //   });
+    // };
 
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
@@ -281,9 +298,12 @@ export default defineComponent({
       return responset
     };
 
+
+
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
+        console.log("renmeObjectKey", renmeObjectKey(data.list))
+        var dataWS = XLSX.utils.json_to_sheet(data.list, { origin: 'A2', skipHeader: true });
         // 엑셀의 workbook을 만든다
         // workbook은 엑셀파일에 지정된 이름이다.
         var wb = XLSX.utils.book_new();
@@ -298,10 +318,20 @@ export default defineComponent({
     function onSave() {
       swGroupCreate.modal = false
       swGroupCreate.data = {}
-      //console.log("onSave")
+  
+      //getTerminalMdl()
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })   
     }
 
-    getTerminalMdl()
+    const onSaveDetail = ( val : any) => {
+      swGroupDetail.modal =false
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })   
+    }
+    //getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)
     })
@@ -322,13 +352,15 @@ export default defineComponent({
       pageVal, 
       changeForm,
       onSearch,
+      onReset,
       excelValue,
       onSaveExcel,
       paginate,
       onTake,
       update,
       renmeObjectKey,
-      onSave
+      onSave,
+      onSaveDetail
       
     };
   },

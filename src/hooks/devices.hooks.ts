@@ -36,6 +36,7 @@ export interface IDevice {
   userId: string;
   userNm: string;
   squad: string;
+  request: string;
 }
 
 export const useDevice = () => {
@@ -89,8 +90,8 @@ export const useDevice = () => {
 
   let renmeObjectKey = (object: any) => {
     const temporary: IDevice = {   
-      deviceNumberFrom: "Z118120500",
-      deviceNumberTo: "Z118120600",
+      deviceNumberFrom: object.SERIAL_NO_FROM,
+      deviceNumberTo: object.SERIAL_NO_TO,
       modelName: object.CAT_MODEL_NM,
       swVersion: object.SW_VERSION,
       swFileNm: object.UPLOAD_FILE_NM,
@@ -119,10 +120,9 @@ export const useDevice = () => {
       userId: object.USER_ID,
       userNm: object.USER_NM,
       squad: object.USER_RIGHTS_NM,
+      request: object.GUBUN
     };
 
-    ////console.log("temporary", temporary)
-    //delete object.CAT_SERIAL_NO;
     return temporary
   };
 

@@ -47,7 +47,7 @@
             window.localStorage.setItem("userNm", response.data.messages.user_name)       
             window.localStorage.setItem("islogin", true)
 
-            console.log("login")
+            console.log("login--------!!!!!!")
             
             this.$router.push('/van/devices/registrations')
             store.commit("setisLoginPage", false);

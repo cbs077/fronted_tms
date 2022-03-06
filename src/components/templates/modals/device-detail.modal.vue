@@ -248,10 +248,7 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
-        //uploadFile()
-        //$emit('click:positive', form
         emit("click:positive");
-        //console.log("response", response)
       });
     };
 
