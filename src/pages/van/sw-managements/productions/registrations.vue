@@ -35,6 +35,7 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -80,7 +81,11 @@
     /> 
   </div>
 
-  <sw-detail-modal v-model="swDetail.modal" />
+  <sw-detail-modal 
+    v-model="swDetail.modal" 
+    :device="swDetail.data"
+    @click:positive="onSaveDetail"
+  />
   <sw-create-modal @click:positive="onSave" v-model="swCreate.modal" />
 </template>
 <script lang="ts">
@@ -122,6 +127,7 @@ export default defineComponent({
     });
 
     const onRowClicked = (row: IDevice) => {
+      swDetail.data = row;
       swDetail.modal = true;
     };
 
@@ -172,9 +178,15 @@ export default defineComponent({
       })
     };
 
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
+      
+    };
+
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -186,7 +198,7 @@ export default defineComponent({
       }   
       seTtotalCount(data.total_count)
       changeForm.data = dataArr
-      //update(dataArr); 
+
     }
 
     function getTerminalMdl() {
@@ -210,8 +222,6 @@ export default defineComponent({
         changeForm.deviceModels = _.map(list, function square(n) {
           return {"value": n.CAT_MODEL_NM}
         })
-
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
@@ -235,9 +245,18 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
+
       return responset
     };
+
+    const onSaveDetail = ( val : any) => {
+      console.log("onSaveDetail")
+      swDetail.modal =false
+      getTerminalMdl()
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })     
+    }
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
@@ -255,8 +274,11 @@ export default defineComponent({
     function onSave() {
       swCreate.modal = false
       swCreate.data = {}
+      getTerminalMdl()
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+      })
     }
-
 
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
@@ -283,7 +305,9 @@ export default defineComponent({
       paginate,
       onTake,
       update,
-      renmeObjectKey
+      renmeObjectKey,
+      onReset,
+      onSaveDetail
     };
   },
 });

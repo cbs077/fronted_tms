@@ -94,15 +94,15 @@ export default defineComponent({
     const isOpen = computed({
       get: () => properties.modelValue,
       set: (value: boolean) => {
-        Object.assign(changeForm, initialState);
+        //Object.assign(changeForm, initialState);
         emit("update:modelValue", value);
       },
     });
     const { deviceModels, swVersions, swGroupCodes } = useConst();
 
     let initialState = reactive({
-      SW_GROUP_NM: "",
-      description: ""
+      SW_GROUP_NM: properties.device.swGroupNm ,
+      description: properties.device.description
     })
 
     const changeForm = reactive({ ...initialState });

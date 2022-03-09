@@ -6,17 +6,18 @@
 
       <div class="mr-12 flex">
         <div class="block">
-          <el-date-picker v-model="selectDataRange.start" size="large" />
+          <el-date-picker v-model="condition.start" size="large" />
         </div>
         <p class="mx-2 translate-y-1 transition">~</p>
         <div class="block">
-          <el-date-picker v-model="selectDataRange.end" size="large" />
+          <el-date-picker v-model="condition.end" size="large" />
         </div>
       </div>
     </div>
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -31,7 +32,7 @@
   <div class="rounded border border-sk-gray">
     <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
       <el-table-column prop="van" label="VAN사명" align="center" />
-      <el-table-column prop="modelName" label="단말기 모델" align="center" />
+      <el-table-column prop="modelCode" label="단말기 모델" align="center" />
 
       <el-table-column prop="deviceCount" label="단말기 수량" align="center" />
       <el-table-column
@@ -66,6 +67,7 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import DeviceUsageDetailModal from "~/components/templates/modals/device-usage-detail.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 
 export default defineComponent({
   name: "DeviceRegistrationLogs",
@@ -78,7 +80,7 @@ export default defineComponent({
     const { logHeaders: headers, devices, update, renmeObjectKey } = useDevice();
     const { deviceModels } = useConst();
 
-    const selectDataRange = reactive({
+    const condition = reactive({
       start: new Date(),
       end: new Date(),
     });
@@ -90,26 +92,7 @@ export default defineComponent({
     const onRowClicked = (row: IDevice) => {
       deviceUsageDetail.modal = true;
     };
-////////////////
-    // page
-    const paginate = (page) => {
-      //console.log("paginate", page);
-      pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-    // 10개, 20개, 30개
-    const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
+    //////////////// 
     const query = ref("");
     let pageVal = reactive({
       page: 1,
@@ -118,22 +101,43 @@ export default defineComponent({
     })
 
     let changeForm = reactive({
-      swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
-      swVersions: [{ value: "-" }], 
       data: []
     })
 
     let excelValue = "";
 
-    const onSearch = (event) => {
-      console.log()
+    function common_query(){
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      excelValue = param //엑셀 다운로드에서 필요함.
+      param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
+      if(query.value != "") param = param + "&cat_model_id=" + query.value
+
+
       getTerminal(param).then( data => {
         setValue(data)
       })
+      return param
+    }
+    
+    const paginate = (page) => {
+      pageVal.page = page
+      common_query()
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      pageVal.pageCount = pageCount
+      common_query()
+    }; 
+
+    const onSearch = (event) => {
+      common_query()
+    };
+
+    const onReset = (event) => {
+      console.log("reset")
+      condition.start = new Date()
+      condition.end = new Date()
+      query.value = ""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -161,7 +165,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -172,10 +176,9 @@ export default defineComponent({
         var list = response.data.list
         
         changeForm.deviceModels = _.map(list, function square(n) {
-          return {"value": n.CAT_MODEL_NM}
+          return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
         })
-
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
+        changeForm.deviceModels.unshift({"key": "", "value": "전체"})
       });
     };
 
@@ -189,7 +192,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/stat/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -199,7 +202,6 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
@@ -213,39 +215,39 @@ export default defineComponent({
         // 시트명은 'nameData'
         XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
         // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'swGroup.xlsx');
+        XLSX.writeFile(wb, 'terminalmdl.xlsx');
       })
     }
 
-    function onSave() {
-      swGroupCreate.modal = false
-      swGroupCreate.data = {}
-      //console.log("onSave")
+    function onSave(event) {
+      modelCreate.modal = false
+      modelCreate.data = {}
+      //console.log("onSave", event)
     }
 
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)
     })
+
     return {
       deviceUsageDetail,
       onRowClicked,
       headers,
-      selectDataRange,
+      condition,
       devices,
       deviceModels,
-     //
+      //
       query,
       pageVal, 
       changeForm,
       onSearch,
+      onReset,
       excelValue,
       onSaveExcel,
       paginate,
       onTake,
-      update,
-      renmeObjectKey,
-      onSave      
+      onSave     
     };
   },
 });

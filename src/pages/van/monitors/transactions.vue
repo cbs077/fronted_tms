@@ -20,17 +20,17 @@
         <div class="my-auto w-1/12">검색조건</div>
         <div class="flex w-4/12">
           <el-select
-            v-model="selectOption"
+            v-model="searchOptions"
             clearable
             placeholder="선택"
             size="large"
             class="w-full"
           >
             <el-option
-              v-for="item in searchOptions"
+              v-for="item in SGsearchOptions"
               :key="item.value"
               :label="item.value"
-              :value="item.value"
+              :value="item.key"
             />
           </el-select>
         </div>
@@ -43,7 +43,7 @@
         <div class="my-auto w-1/12">응답상태</div>
         <div class="mr-12 flex">
           <div class="mr-12 flex">
-            <el-radio-group>
+            <el-radio-group v-model="changeForm.response">
               <el-radio label="일반" />
               <el-radio label="오류" />
             </el-radio-group>
@@ -53,20 +53,23 @@
       <div class="my-3 flex">
         <div class="my-auto w-1/12">단말기 번호</div>
         <div class="flex w-4/12">
-          <el-input size="large" placeholder="Please Input" />
+          <el-input v-model="changeForm.deviceNumber" size="large" placeholder="Please Input" />
         </div>
       </div>
       <div class="my-3 flex">
         <div class="my-auto w-1/12">서버</div>
         <div class="mr-12 flex">
-          <el-radio-group>
+          <el-radio-group  v-model="changeForm.server">
             <el-radio label="운영서버" />
             <el-radio label="테스트서버" />
           </el-radio-group>
         </div>
       </div>
     </div>
-    <options-search-button />
+    <options-search-button 
+      @click:search="onSearch"
+      @click:reset="onReset"    
+    />
   </div>
 
   <table-common-button
@@ -90,6 +93,7 @@
       />
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column prop="modelCode" label="S/W Group명" align="center" />
+      <el-table-column prop="swOldVersion" label="S/W Version" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column prop="request" label="요청내용" align="center" />
       <el-table-column prop="regDt" label="요청일시" align="center" />
@@ -127,6 +131,7 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import ConfirmModal from "~/components/templates/modals/confirm.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { useDevice } from "~/hooks/devices.hooks";
+import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -138,12 +143,12 @@ export default defineComponent({
   setup() {
     let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
     //const { searchOptions } = useConst();
-    const searchOptions = [
+    const SGsearchOptions = [
       { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
       { id: 2, key: "sw_version", value: "S/W Version" },
     ];
+    const searchOptions = ref();
 
-    //const query = ref("");
     const displayOptions = reactive({
       all: false,
       modelCode: false,
@@ -153,40 +158,17 @@ export default defineComponent({
       registrationDate: true,
       lastAccessDate: true,
     });
-    const selectOption = ref();
-
     const deviceUnRegistration = reactive({
       modal: false,
       text: "선택한 항목을 삭제 하시겠습니까?",
     });
 
     const condition = reactive({
-      available: searchOptions,
-      select: undefined,
       start: new Date(),
       end: new Date(),
     });
 
 ////////////////
-    // page
-    const paginate = (page) => {
-      //console.log("paginate", page);
-      pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-    // 10개, 20개, 30개
-    const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
     const query = ref("");
     let pageVal = reactive({
       page: 1,
@@ -197,20 +179,52 @@ export default defineComponent({
     let changeForm = reactive({
       swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
+      deviceNumber: "",
       swVersions: [{ value: "-" }], 
+      response: "normal",
+      server: "prod",
       data: []
     })
 
     let excelValue = "";
 
-    const onSearch = (event) => {
-      console.log()
+     function common_query(){
+       console.log("searchOptions", searchOptions)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      excelValue = param //엑셀 다운로드에서 필요함.
+      param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
+      if(query.value != "") param = param + "&" + searchOptions.value+ "=" + query.value
+      if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
+      
+      param = param + "&cat_serial_no=" + changeForm.response
+      param = param + "&cat_serial_no=" + changeForm.server
+      //param = param + "&cat_model_id=" + query.value
+      excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
       })
+      return param
+    }
+    
+    const paginate = (page) => {
+      pageVal.page = page
+      common_query()
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      pageVal.pageCount = pageCount
+      common_query()
+    }; 
+
+    const onSearch = (event) => {
+      common_query()
+    };
+
+    const onReset = (event) => {
+      console.log("reset")
+      searchOptions.value = ""
+      condition.start = new Date()
+      condition.end = new Date()
+      query.value = ""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -304,8 +318,10 @@ export default defineComponent({
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)
     })
+    changeForm.server = ref("운영서버")
+    changeForm.response = ref("일반")
     return {
-      selectOption,
+      //selectOption,
       update,
       deviceUnRegistration,
       headers,
@@ -319,12 +335,15 @@ export default defineComponent({
       changeForm,
       onSearch,
       excelValue,
+      SGsearchOptions,
       onSaveExcel,
       paginate,
       onTake,
       update,
       renmeObjectKey,
-      onSave
+      onSave,
+      common_query,
+      onReset
     };
   },
 });

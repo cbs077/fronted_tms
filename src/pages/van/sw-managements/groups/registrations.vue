@@ -247,34 +247,7 @@ export default defineComponent({
       }   
       seTtotalCount(data.total_count)
       changeForm.data = dataArr
-      //update(dataArr); 
     }
-
-    // function getTerminalMdl() {
-    //   var token = window.localStorage.getItem("token")
-    //   var vanId = window.localStorage.getItem("vanId")
-    //   var param = "van_id="+ vanId      
-    //   if(token == null) token = "" 
-
-    //   let data: any[] = [];
-
-    //   let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
-    //     {
-    //       headers: {
-    //           Authorization: token
-    //       }
-    //     }
-    //   )
-    //   .then(response => {
-    //     var list = response.data.list
-        
-    //     changeForm.deviceModels = _.map(list, function square(n) {
-    //       return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
-    //     })
-    //     //changeForm.deviceModels.unshift({"key": "", "value": "전체"})
-    //   });
-    // };
-
 
     async function getTerminal(param) {
       var token = window.localStorage.getItem("token")
@@ -294,11 +267,8 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
-
-
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
@@ -319,7 +289,6 @@ export default defineComponent({
       swGroupCreate.modal = false
       swGroupCreate.data = {}
   
-      //getTerminalMdl()
       getTerminal("page=1&page_count=10").then( data => {
         setValue(data)
       })   
@@ -331,7 +300,7 @@ export default defineComponent({
         setValue(data)
       })   
     }
-    //getTerminalMdl()
+
     getTerminal("page=1&page_count=10").then( data => {
       setValue(data)
     })

@@ -16,7 +16,7 @@
             v-for="item in searchOptions"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
@@ -25,6 +25,7 @@
 
       <div class="w-5/12 pr-5">
         <el-input
+          v-model="query"
           size="large"
           placeholder="Please Input"
           :suffix-icon="Search"
@@ -34,6 +35,7 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -95,7 +97,11 @@ export default defineComponent({
   },
   setup() {
     const { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
-    const { searchOptions } = useConst();
+    //const { searchOptions } = useConst();
+    const searchOptions = [
+      { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+      { id: 2, key: "sw_version", value: "S/W Version" }
+    ];
     const selectOption = ref();
 
     const swDetail = reactive({
@@ -191,10 +197,9 @@ export default defineComponent({
         var list = response.data.list
         
         changeForm.deviceModels = _.map(list, function square(n) {
-          return {"value": n.CAT_MODEL_NM}
+          return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
         })
 
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
@@ -208,7 +213,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/list?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/upgrade/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -240,6 +245,11 @@ export default defineComponent({
       swCreate.data = {}
     }
 
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
+    };
 
     getTerminalMdl()
     getTerminal("page=1&page_count=10").then( data => {
@@ -265,7 +275,8 @@ export default defineComponent({
       paginate,
       onTake,
       update,
-      renmeObjectKey      
+      renmeObjectKey   ,
+      onReset   
     };
   },
 });

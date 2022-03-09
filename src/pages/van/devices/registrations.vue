@@ -48,6 +48,7 @@
     
     <options-search-button
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 	
@@ -168,7 +169,7 @@ export default defineComponent({
       total: 10
     })
 
-    let tableHeader = reactive({
+    let initialState = reactive({
       van: true,
       modelCode: true,
       deviceNumber: true,
@@ -179,6 +180,7 @@ export default defineComponent({
       lastAccessDate: true,
       checkAll: []
     })
+    const tableHeader = reactive({ ...initialState });
 
     const registrationResult = reactive({
       modal: false,
@@ -220,7 +222,7 @@ export default defineComponent({
     };
 
     const onRowClicked = (row: IDevice) => {
-      //console.log("onRowClicked", row)
+      console.log("onRowClicked", row)
       deviceDetail.data = row;
       deviceDetail.modal = true;
 
@@ -263,6 +265,16 @@ export default defineComponent({
         //defaultCheckbox()
       })
     }; 
+
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
+
+      defaultCheckbox()
+      Object.assign(tableHeader, initialState);
+    };
+
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
       //console.log("seTtotalCount", pageVal.total)
@@ -295,12 +307,6 @@ export default defineComponent({
       return responset
     };
 
-
-    const onSaveDetail = ( val : any) => {
-      deviceDetail.modal = false
-      //console.log("onSaveDetail", val.modelCode)
-    }
-
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
         var dataWS = XLSX.utils.json_to_sheet(data.list);
@@ -312,6 +318,15 @@ export default defineComponent({
         XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
         // 엑셀 파일을 내보낸다.
         XLSX.writeFile(wb, 'terminal.xlsx');
+      })
+    }
+
+    const onSaveDetail = ( val : any) => {
+      deviceDetail.modal = false
+
+      getTerminal("page=1&page_count=10").then( data => {
+        setValue(data)
+        defaultCheckbox()
       })
     }
 
@@ -368,6 +383,8 @@ export default defineComponent({
       onSaveExcel,
       pageVal,
       excelValue,
+      onReset,
+      onSaveDetail  
     };
   },
 });

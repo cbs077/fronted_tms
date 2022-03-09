@@ -18,17 +18,17 @@
       <div class="w-1-12 my-auto mr-6">모델명</div>
       <div class="my-auto w-5/12 pr-5">
         <el-select
-          v-model="condition.select"
+          v-model="query"
           clearable
           placeholder="선택"
           size="large"
           class="w-full"
         >
           <el-option
-            v-for="item in condition.available"
+            v-for="item in changeForm.deviceModels"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
@@ -36,6 +36,7 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -87,9 +88,9 @@ import { defineComponent, reactive, ref } from "vue";
 import BreadCrumb from "~/components/atoms/breadcrumb.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import { useConst } from "~/hooks/const.hooks";
-import { IDeviceLog } from "~/interfaces/data.interface";
-import { duplicateMockData } from "~/utils/filter";
+//mport { IDeviceLog } from "~/interfaces/data.interface";
 import { useDevice } from "~/hooks/devices.hooks";
+import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 
 export default defineComponent({
   name: "DeviceRegistrationLogs",
@@ -98,48 +99,15 @@ export default defineComponent({
     TableCommonButton,
   },
   setup() {
-    const { searchOptions } = useConst();
     let { renmeObjectKey} = useDevice();
 
     const condition = reactive({
-      available: searchOptions,
-      select: undefined,
       start: new Date(),
       end: new Date(),
     });
 
-    const example: IDeviceLog = {
-      createdAt: faker.lorem.word(),
-      deviceNumberFrom: faker.lorem.word(),
-      deviceNumberTo: faker.lorem.word(),
-      model: faker.lorem.word(),
-      user: faker.lorem.word(),
-      van: faker.lorem.word(),
-    };
-
-    const items: IDeviceLog[] = [...duplicateMockData<IDeviceLog>(example)];
-
-    ////////////////
-    const paginate = (page) => {
-      //console.log("paginate", page);
-      pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-    // 10개, 20개, 30개
-    const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      //param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-
+    //////////////// 
+    const query = ref("");
     let pageVal = reactive({
       page: 1,
       pageCount: 10,
@@ -147,26 +115,43 @@ export default defineComponent({
     })
 
     let changeForm = reactive({
-      swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
-      swVersions: [{ value: "-" }],
       data: []
     })
 
     let excelValue = "";
 
-    const onSearch = (event) => {
-      //console.log("selectOption", selectOption)
-      //console.log("query.value", query.value)
+    function common_query(){
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      
-      if(query.value != "") param = param + "&cat_model_nm=" + query.value
-      else param = param + "&cat_model_nm=" + selectOption.value
-      
-      excelValue = param //엑셀 다운로드에서 필요함.
+      param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
+      if(query.value != "") param = param + "&cat_model_id=" + query.value
+
+
       getTerminal(param).then( data => {
         setValue(data)
       })
+      return param
+    }
+    
+    const paginate = (page) => {
+      pageVal.page = page
+      common_query()
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      pageVal.pageCount = pageCount
+      common_query()
+    }; 
+
+    const onSearch = (event) => {
+      common_query()
+    };
+
+    const onReset = (event) => {
+      console.log("reset")
+      condition.start = new Date()
+      condition.end = new Date()
+      query.value = ""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -205,9 +190,9 @@ export default defineComponent({
         var list = response.data.list
         
         changeForm.deviceModels = _.map(list, function square(n) {
-          return {"value": n.CAT_MODEL_NM}
+          return {"key": n.CAT_MODEL_ID, "value": n.CAT_MODEL_NM}
         })
-
+        changeForm.deviceModels.unshift({"key": "", "value": "전체"})
       });
     };
 
@@ -231,7 +216,6 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
@@ -260,12 +244,14 @@ export default defineComponent({
       setValue(data)
     })
     return { 
-      items,
+     // items,
       condition,
       //
+      query,
       pageVal, 
       changeForm,
       onSearch,
+      onReset,
       excelValue,
       onSaveExcel,
       paginate,

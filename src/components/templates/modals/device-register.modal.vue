@@ -44,6 +44,7 @@
           <input v-model="changeForm.CAT_SERIAL_NO" class="h-10 w-9/12 rounded border border-sk-gray">
 
           <base-button
+            @click="onPreIdCheck"
             class="ml-2 w-2/12"
             text="중복확인"
           />
@@ -69,12 +70,13 @@
             <input v-model="changeForm.CAT_SERIAL_NO_TO" class="h-10 w-4/12 rounded border border-sk-gray">
           </div>
           <base-button
+            @click="onMultiPreIdCheck"
             class="ml-2 w-2/12"
             text="중복확인"
           />
         </div>
       </div>
-
+      <!--
       <div class="mb-3 grid grid-cols-12">
         <p class="col-span-6 col-start-4 text-sk-red">
           이미 등록된 단말기 번호입니다.
@@ -83,7 +85,7 @@
           등록 가능한 번호입니다.
         </p>
       </div>
-
+      -->
       <div class="my-3 grid h-12 grid-cols-8">
         <div class="col-span-2 my-auto text-center font-bold">
           단말기 모델
@@ -158,7 +160,8 @@
           class="mr-4"
           text="초기화"
           type="button"
-          @click="$emit('click:negative')"
+          @click="onReset"
+
         />
       </div>
     </template>
@@ -195,6 +198,7 @@ export default defineComponent({
     const isOpen = computed({
       get: () => properties.modelValue,
       set: (value: boolean) => {
+        onReset()
         emit("update:modelValue", value);
       },
     });
@@ -205,7 +209,7 @@ export default defineComponent({
     ///
     function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
 
-    let changeForm = reactive({
+    let initialState = reactive({
       CAT_SERIAL_NO: "",
       CAT_SERIAL_NO_COMMON: "",
       CAT_SERIAL_NO_FROM: "",
@@ -218,8 +222,9 @@ export default defineComponent({
       REG_USER: window.localStorage.getItem("userNm"),
 
       deviceModels: [],
-      swfile: []
+      //swfile: []
     })
+    const changeForm = reactive({ ...initialState });
 
     function getswGroupCodes() {
       var token = window.localStorage.getItem("token")
@@ -249,6 +254,13 @@ export default defineComponent({
       return response
     };
 
+    const onReset = (event) => {
+      console.log("reset")
+      Object.assign(changeForm, initialState);
+      getswGroupCodes()
+      getTerminalMdl()
+    };
+    
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
@@ -274,23 +286,58 @@ export default defineComponent({
       });
     };
     const onPreSave = () => {
-      //console.log("uploadMethodSelection", uploadMethodSelection)
-      changeForm.CAT_SERIAL_NO_MULTI_RESULT = []
-      //console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_FROM)
-      //console.log("changeForm.CAT_SERIAL_NO_TO", changeForm.CAT_SERIAL_NO_TO)
       if( uploadMethodSelection.value == '일괄등록'){
         for(var i=changeForm.CAT_SERIAL_NO_FROM; i <= changeForm.CAT_SERIAL_NO_TO ; i++){
-          //console.log("onPreSave", i)
           changeForm.CAT_SERIAL_NO = changeForm.CAT_SERIAL_NO_COMMON + i
-          //console.log("changeForm.CAT_SERIAL_NO", changeForm.CAT_SERIAL_NO)
+
           onSave(changeForm.CAT_SERIAL_NO)
         }
+        saveRegHist()
         emit("click:positive", { "type" : "multi", "data" : changeForm.CAT_SERIAL_NO_MULTI_RESULT }); 
-        //console.log("일괄등록")
       }else{
-        //console.log("일반등록")
         onSave(changeForm.CAT_SERIAL_NO)
       }
+    }
+
+    function saveRegHist(){
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post ('http://tms-test-server.p-e.kr:8081/reghist?' ,
+        {
+          "VAN_ID" : vanId,
+          "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
+          "SERIAL_NO_FROM": changeForm.CAT_SERIAL_NO_COMMON + changeForm.CAT_SERIAL_NO_FROM,
+          "SERIAL_NO_TO": changeForm.CAT_SERIAL_NO_COMMON + changeForm.CAT_SERIAL_NO_TO,
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        if( uploadMethodSelection.value == '일괄등록'){
+          if( response.data.status == 200){
+            changeForm.CAT_SERIAL_NO_MULTI_RESULT.push({ 
+              deviceNumber: deviceNumber,
+              status: "성공"
+            })
+          }else {
+             changeForm.CAT_SERIAL_NO_MULTI_RESULT.push({ 
+              deviceNumber: deviceNumber,
+              status: "실패"
+            })           
+          }
+
+        }
+        else {
+          emit("click:positive", { "type" : "normal", "data" : [] });
+        }
+        
+      });
+
     }
 
     const onSave = (deviceNumber) => {
@@ -326,12 +373,63 @@ export default defineComponent({
               status: "실패"
             })           
           }
+
         }
         else {
           emit("click:positive", { "type" : "normal", "data" : [] });
         }
         
       });
+    };
+
+    const onPreIdCheck = (param: string) => {
+      if(changeForm.CAT_SERIAL_NO == "" ) {alert("단말기 코드 is null"); return}
+      var res = onIdCheck(changeForm.CAT_SERIAL_NO).then( res =>{
+        if( res != "false") {alert("이미 등록된 모델 코드 입니다."); return}
+        else {alert("등록가능한 모델 코드 입니다."); return}
+      })
+    }
+
+    const onMultiPreIdCheck = (param: string) => {
+      if(changeForm.CAT_SERIAL_NO_COMMON == "" ) {alert("공통 코드 is null"); return}
+      if(changeForm.CAT_SERIAL_NO_FROM == "" ) {alert("단말기 시작 코드 is null"); return}
+      if(changeForm.CAT_SERIAL_NO_TO == "" ) {alert("단말기 마지막 코드 is null"); return}
+      if(Number(changeForm.CAT_SERIAL_NO_FROM) > Number(changeForm.CAT_SERIAL_NO_TO)) {alert("시작코드가 더 작아야 합니다."); return}
+
+      onIdCheck(changeForm.CAT_SERIAL_NO_COMMON + changeForm.CAT_SERIAL_NO_FROM)
+      .then( res =>{
+         if( res != "false") {alert("이미 등록된 단말기 시작 코드 입니다."); return}
+        onIdCheck(changeForm.CAT_SERIAL_NO_COMMON + changeForm.CAT_SERIAL_NO_TO)
+        .then( res =>{
+          if( res != "false") {alert("이미 등록된 단말기 마지막 코드 입니다."); return}
+          alert("등록가능한 모델 코드 입니다.");
+        }) 
+      })
+      
+    }
+
+
+    async function onIdCheck(param) {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/idcheck/' + vanId + "/" + param,
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var count = response.data.count
+        if( count > 0 ) {           //존재하는
+          return "true"
+        }
+        else {
+          return "false"
+        }
+      });
+
+      return responset
     };
 
     getswGroupCodes()
@@ -348,7 +446,11 @@ export default defineComponent({
       //
       changeForm,
       onPreSave,
-      onSave,      
+      onSave,     
+      onPreIdCheck ,
+      onMultiPreIdCheck,
+      onIdCheck,
+      onReset
     };
   },
 });

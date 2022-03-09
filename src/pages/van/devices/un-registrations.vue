@@ -16,7 +16,7 @@
             v-for="item in searchOptions"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
@@ -43,10 +43,13 @@
 
     <options-search-button
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
-  <table-common-button>
+  <table-common-button
+    @update:take="onTake"
+  >
     <template #body>
       <base-button class="ml-1" @click="deviceUnRegistration.modal = true">
         <template #button-body>
@@ -60,7 +63,7 @@
   </table-common-button>
 
   <div class="rounded border border-sk-gray">
-    <el-table :data="devices" fit class="rounded" @select="onCheckboxT" @row-click="onRowClicked">
+    <el-table :data="devices" fit class="rounded" @selection-change="onSelectChange">
       <el-table-column v-model="data.checkbox" type="selection" primary-text class="text-black" />
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column v-if="tableHeader.modelCode==true" prop="modelCode" label="단말기모델코드" align="center" />
@@ -144,17 +147,18 @@ export default defineComponent({
       text: "선택한 항목을 삭제 하시겠습니까?",
     });
 // 없애야 함.
-   let tableHeader = reactive({
+   let initialState = reactive({
       van: true,
-      modelCode: true,
-      deviceNumber: true,
+      modelCode: false,
+      deviceNumber: false,
       swGroupCode: true,
-      swVersion: true,
+      swVersion: false,
       status: true,
       applicationDate: true,
       lastAccessDate: true,
       checkAll: []
     })
+    const tableHeader = reactive({ ...initialState });
 
     let excelValue = "";
     let pageVal = reactive({
@@ -171,7 +175,16 @@ export default defineComponent({
       searchKey = event
     };
 
+    const onReset = (event) => {
+      console.log("reset")
+      selectOption.value = ""
+      query.value = ""
+      defaultCheckbox()
+      Object.assign(tableHeader, initialState);
+    };
+
     const onSearch = (event) => {
+      console.log("onSearch", selectOption)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       excelValue = param //엑셀 다운로드에서 필요함.
@@ -290,11 +303,11 @@ export default defineComponent({
     }
 
     function defaultCheckbox() {
-     //tableHeader.checkAll["van"] = true
-      tableHeader.checkAll["modelCode"] = true
-      tableHeader.checkAll["deviceNumber"] = true
+      //tableHeader.checkAll["van"] = true
+      tableHeader.checkAll["modelCode"] = false
+      tableHeader.checkAll["deviceNumber"] = false
       tableHeader.checkAll["swGroupCode"] = true
-      tableHeader.checkAll["swVersion"] = true
+      tableHeader.checkAll["swVersion"] = false
       tableHeader.checkAll["status"] = true
       tableHeader.checkAll["applicationDate"] = true
       tableHeader.checkAll["lastAccessDate"] = true
@@ -309,14 +322,22 @@ export default defineComponent({
       console.log("onDeleteItems")
     }
 
-    function onRowClicked() {  
-      console.log("onRowClicked", data.checkbox)
-    }
+    // function onRowClicked() {  
+    //   console.log("onRowClicked", data.checkbox)
+    // }
 
-    function onCheckboxT(event) {
-      console.log("onRowClicked", event)
+    // function onCheckboxT(event) {
+    //   console.log("onRowClicked", event)
+    //   data.checkbox = _.map(event, "deviceNumber")
+    //   console.log(" data.checkbox ",  data.checkbox )
+    // }
+
+    function onSelectChange(event) {
+      console.log("onSelectChange", event)
       data.checkbox = _.map(event, "deviceNumber")
-      console.log(" data.checkbox ",  data.checkbox )
+      console.log("onSelectChange", data.checkbox)
+      //data.checkbox = _.map(event, "deviceNumber")
+      //console.log(" data.checkbox ",  data.checkbox )
     }
 
     getTerminal("page=1&page_count=10").then( data => {
@@ -342,10 +363,12 @@ export default defineComponent({
       pageVal,
       excelValue,
       onDeleteItems,
-      onRowClicked,
+      //onRowClicked,
       delTerminal,
       data,
-      onCheckboxT
+      //onCheckboxT,
+      onReset,
+      onSelectChange
     };
   },
 });

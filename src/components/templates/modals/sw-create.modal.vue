@@ -48,7 +48,7 @@
               <el-option
                 v-for="item in changeForm.deviceModels"
                 :key="item.value"
-                :label="item.value"
+                :label="item.key"
                 :value="item.value"
               />
             </el-select>
@@ -63,17 +63,18 @@
           </div>
           <div class="col-span-2 my-auto text-center font-bold">
             <base-button
+              @click="onIdCheck"
               text="중복확인"
               class="mr-1"
             />
           </div>
         </div>
-        <div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
+        <!--<div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
           <div class="col-span-2" />
           <div class="col-span-6 text-sk-red">
             이미 등록된 단말기 번호입니다.
           </div>
-        </div>
+        </div>-->
         <div class="my-3 grid grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             S/W 파일 업로드
@@ -199,63 +200,6 @@ export default defineComponent({
       });
     };
 
-    async function onSave (param) {
-      var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
-      var userNM = window.localStorage.getItem("userNm")
-
-      console.log("param", param)
-      await axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
-        {
-          "VAN_ID" : vanId,
-          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
-          "SW_VERSION": changeForm.SW_VERSION.padStart(10, '0') ,
-          "APPL_DT": changeForm.APPL_DT,
-          "DATA_SIZE": changeForm.DATA_SIZE,
-          "FILE_PATH": param,
-          "FILE_NM": changeForm.FILE_NM,  
-          "UPLOAD_FILE_NM": changeForm.UPLOAD_FILE_NM,                
-          'REG_DT': new Date(),
-          'REG_USER': userNM,
-        }, 
-        {
-          headers: { Authorization: token} // header의 속성
-        },
-      )
-      .then(response => {
-        var list = response.data.list
-        //uploadFile()
-        emit("click:positive");
-        //console.log("response", response)
-      });
-    };
-
-    async function uploadFile() {
-      const formData = new FormData();
-      formData.append("swfile", changeForm.swfile);
-
-      try {
-        const { data } = await axios.post(
-          "http://tms-test-server.p-e.kr:8081/upload",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        ).then(response => {
-          //var list = response.data.list
-          console.log("response.data", response.data.messages.filepath)
-          onSave(response.data.messages.filepath)
-          //emit("click:positive");
-
-        });
-        console.log(data);
-      } catch (err) {
-        console.log(err);
-      }
-    }  
-
     function onSelectGroupId(event){
       //console.log("onSelectGroupId", event)
       var groupRename = _.find(changeForm.deviceModels, function(data) {
@@ -289,6 +233,89 @@ export default defineComponent({
 
     }
 
+    async function uploadFile() {
+      if( changeForm.FILE_PATH == '') {alert("파일을 선택해주세요.");return}
+      if( changeForm.isExistId == "true" || changeForm.isExistId == "" ){
+        alert("버전 중복값을 확인해주세요.") 
+        return
+      } 
+      const formData = new FormData();
+      formData.append("swfile", changeForm.swfile);
+
+      try {
+        const { data } = await axios.post(
+          "http://tms-test-server.p-e.kr:8081/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        ).then(response => {
+          console.log("response.data", response.data.messages.filepath)
+          onSave(response.data.messages.filepath)
+        });
+        console.log(data);
+      } catch (err) {
+        console.log(err);
+      }
+    }  
+
+    async function onSave (param) {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+       
+      await axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
+        {
+          "VAN_ID" : vanId,
+          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
+          "SW_VERSION": changeForm.SW_VERSION.padStart(10, '0') ,
+          "APPL_DT": changeForm.APPL_DT,
+          "DATA_SIZE": changeForm.DATA_SIZE,
+          "FILE_PATH": param,
+          "FILE_NM": changeForm.FILE_NM,  
+          "UPLOAD_FILE_NM": changeForm.UPLOAD_FILE_NM,                
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var list = response.data.list
+        emit("click:positive");
+      });
+    };
+
+    const onIdCheck = (param: string) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      if(changeForm.SW_GROUP_ID == "" ) {alert("그룹 아이디 is null"); return}
+      if(changeForm.SW_VERSION == "" ) {alert("버전 is null"); return}
+
+      axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID + "/" + changeForm.SW_VERSION.padStart(10, '0') ,
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var count = response.data.count
+        if( count > 0 ) {
+          alert("이미 등록된 버전 입니다.")
+          changeForm.isExistId = "true"
+        }
+        else {
+          alert("등록가능한 버전 입니다.")
+          changeForm.isExistId = "false"
+        }
+      });
+    };
+
     getTerminalMdl()
 
     return {
@@ -307,7 +334,8 @@ export default defineComponent({
       onSelectGroupId,
       onSelectGroupNm,
       selectFile,
-      uploadFile        
+      uploadFile,
+      onIdCheck        
     };
   },
 });

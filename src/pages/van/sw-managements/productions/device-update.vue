@@ -53,12 +53,12 @@
   <table-common-button />
 
   <div class="rounded border border-sk-gray">
-    <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
+    <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column prop="swGroupNm" label="S/W Group명" align="center" />
       <el-table-column prop="swVersion" label="S/W Version" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
-      <el-table-column prop="swGroupCode" label="요청내용" align="center" />
+      <el-table-column prop="request" label="요청내용" align="center" />
       <el-table-column prop="regDt" label="요청일시" align="center" />
       <el-table-column prop="status" label="응답코드" align="center" />
     </el-table>
@@ -74,7 +74,10 @@
     /> 
   </div>
 
-  <device-update-detail-modal v-model="deviceUpdateDetail.modal" />
+  <device-update-detail-modal 
+    v-model="deviceUpdateDetail.modal"
+    :device="deviceUpdateDetail.data"
+  />
 </template>
 <script lang="ts">
 import { Search } from "@element-plus/icons-vue";
@@ -97,7 +100,10 @@ export default defineComponent({
   },
   setup() {
     let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
-    const { searchOptions } = useConst();
+    const searchOptions = [
+      { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
+      { id: 2, key: "sw_version", value: "S/W Version" },
+    ];
     const query = ref("");
     const displayOptions = reactive({
       all: false,
@@ -112,11 +118,10 @@ export default defineComponent({
 
     const deviceUpdateDetail = reactive({
       modal: false,
+      data: {}
     });
 
-    const onRowClicked = (row) => {
-      deviceUpdateDetail.modal = true;
-    };
+
 ////////////////
     // page
     const paginate = (page) => {
@@ -175,7 +180,8 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      update(dataArr); 
+      changeForm.data =dataArr
+      //update(dataArr); 
     }
 
     function getTerminalMdl() {
@@ -204,17 +210,16 @@ export default defineComponent({
       });
     };
 
-
     async function getTerminal(param) {
       //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
-      var param = param + "&van_id="+ vanId
+      var param = param + "&van_id="+ vanId + "&gubun_code=FA"
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/list?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
           {
             headers: {
                 Authorization: token
@@ -225,6 +230,62 @@ export default defineComponent({
           return response.data;
         });
       //console.log("response", responset)
+      return responset
+    };
+
+    const onRowClicked = (row) => {
+      var swGroupCode = row.swGroupCode
+      var swVersion = row.swVersion
+      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
+      getDetail(param).then( data => {     
+        // var list = data.list[0]
+        // var dataArr = []
+        // for (var object of list){
+        //   var obj = renmeObjectKey(object);
+        //   dataArr.push(obj);
+        // }   
+        var list = data.list
+        var dataArr = []
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          dataArr.push(obj);
+        }   
+        //seTtotalCount(data.total_count)
+        // changeForm.data =dataArr
+        console.log("row", dataArr)
+        deviceUpdateDetail.data = dataArr //renmeObjectKey(data.list[0]);
+        //console.log("onRowClicked", data)
+        //console.log("onRowClicked1", deviceUpdateDetail.data)
+        deviceUpdateDetail.modal = true
+
+      })
+      //console.log("onRowClicked_row", row)
+      //deviceUpdateDetail.data = row
+      //deviceUpdateDetail.modal = true
+    };
+
+    async function getDetail(param) {
+       var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      //var swGroupCode = changeForm.swGroupCode
+      //var swVersion = changeForm.swVersion
+      var param = param + "&van_id="+ vanId + "&gubun_code=FA"
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
+          }
+        )
+        .then(response => {
+          //console.log("response", response)
+          return response.data;
+        });
+      
       return responset
     };
 
@@ -272,7 +333,7 @@ export default defineComponent({
       paginate,
       onTake,
       update,
-      renmeObjectKey          
+      renmeObjectKey,        
     };
   },
 });

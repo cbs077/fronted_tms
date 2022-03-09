@@ -13,7 +13,7 @@
             S/W Group 코드
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swGroupCode }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -21,7 +21,7 @@
             S/W Group 명
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swGroupNm }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -29,7 +29,7 @@
             S/W Version
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swVersion }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -37,13 +37,13 @@
             Upload 파일명
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swFileNm }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">파일 Size</div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.swFileSize }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -51,19 +51,19 @@
             S/W버전 업데이트 이력
           </div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.status }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">등록일</div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.regDt }}
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">등록자</div>
           <div class="col-span-6 my-auto">
-            {{ code }}
+            {{ device.regUser }}
           </div>
         </div>
       </div>
@@ -82,11 +82,11 @@ export default defineComponent({
     BaseModal,
   },
   props: {
-    name: { type: String },
-    code: { type: String },
-    description: { type: String },
-    registrationDate: { type: String },
-    registrationUser: { type: String },
+    // name: { type: String },
+    // code: { type: String },
+    // description: { type: String },
+    // registrationDate: { type: String },
+    // registrationUser: { type: String },
     modelValue: {
       type: Boolean,
       required: false,
@@ -99,6 +99,11 @@ export default defineComponent({
     admin: {
       type: Boolean,
       default: false,
+    },
+    device: {
+      type: Object,
+      required: true,
+      default: () => {},
     },
   },
   emits: ["update:modelValue", "click:positive", "click:negative"],

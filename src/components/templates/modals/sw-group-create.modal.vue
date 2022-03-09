@@ -176,7 +176,7 @@ export default defineComponent({
       var userNM = window.localStorage.getItem("userNm")
 
       console.log("changeForm.SW_GROUP_ID.length", changeForm.SW_GROUP_ID.length)
-      if(changeForm.SW_GROUP_ID == "" ){ alert("모델코드 is null"); return}
+      if(changeForm.SW_GROUP_ID == "" ){ alert("그룹코드 is null"); return}
       if(changeForm.SW_GROUP_ID.length > 4 ) {alert("4자리 이상입니다."); return}
 
       axios.get('http://tms-test-server.p-e.kr:8081/swgroup/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID ,

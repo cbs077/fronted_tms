@@ -8,7 +8,7 @@
     <div class="right_base"></div>
     <div class="input-signin">Sign In</div>
     <div class="text-id">ID</div>
-    <input class="input-login" placeholder="Enter your ID" v-model="changeForm.userId">
+    <input class="input-login" type="text" placeholder="Enter your ID" v-model="changeForm.userId">
     <div class="text-password">Password</div>
     <input class="input-password" type="password" placeholder="Enter your password" v-model="changeForm.password">
     <button class="button-login" @click="login" type="submit">Login</button>  

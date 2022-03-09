@@ -12,6 +12,7 @@ export interface IDevice {
   swGroupCode: string;
   swGroupNm: string;
   swVersion: string;
+  swOldVersion: string;
   swFileNm: string;
   swFileSize: number;
   status: string;
@@ -37,6 +38,8 @@ export interface IDevice {
   userNm: string;
   squad: string;
   request: string;
+  firstUseDt: string;
+  lastUseDt: string;
 }
 
 export const useDevice = () => {
@@ -94,6 +97,7 @@ export const useDevice = () => {
       deviceNumberTo: object.SERIAL_NO_TO,
       modelName: object.CAT_MODEL_NM,
       swVersion: object.SW_VERSION,
+      swOldVersion: object.OLD_SW_VERSION,
       swFileNm: object.UPLOAD_FILE_NM,
       swFileSize: object.DATA_SIZE,
       description: object.DESCRIPTION,
@@ -107,11 +111,11 @@ export const useDevice = () => {
       vanCode: object.VAN_ID,
       van: object.VAN_NM,
       applicationUser: "SK TMS",
-      deviceCount: 10,
+      deviceCount: object.tw_count,
       init: 3,
       running: 8,
       idle: 10,
-      swDownload: 20,
+      swDownload: object.sw_count,
       address: object.ADDR1,
       contact: object.PHONE,
       manager: object.MANAGER_NM,
@@ -120,7 +124,9 @@ export const useDevice = () => {
       userId: object.USER_ID,
       userNm: object.USER_NM,
       squad: object.USER_RIGHTS_NM,
-      request: object.GUBUN
+      request: object.GUBUN,
+      firstUseDt: object.FIRST_USE_DT,
+      lastUseDt: object.LAST_USE_DT
     };
 
     return temporary
