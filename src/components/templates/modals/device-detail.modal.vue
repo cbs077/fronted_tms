@@ -25,7 +25,7 @@
             <el-select
               clearable
               placeholder="선택"
-              v-model="changeForm.CAT_MODEL_ID"
+              v-model="device.modelCode"
               @change="onSelectGroupId"
               size="large"
               class="w-full"
@@ -48,7 +48,7 @@
             <el-select
               clearable
               placeholder="선택"
-              v-model="changeForm.SW_GROUP_ID"
+              v-model="device.swGroupCode"
               @change="onSelectGroupId"
               size="large"
               class="w-full"
@@ -70,7 +70,7 @@
             <el-select
               clearable
               placeholder="선택"
-              v-model="changeForm.SW_GROUP_NM"
+              v-model="device.swGroupNm"
               @change="onSelectGroupNm"
               size="large"
               class="w-full"
@@ -169,12 +169,8 @@ export default defineComponent({
     });
 
     let changeForm = reactive({
-      SW_GROUP_ID: properties.device.swGroupCode,
-      SW_GROUP_NM: properties.device.swGroupNm,
-      CAT_MODEL_ID: properties.device.modelName,//properties.device.modelCode,
       swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
-      swVersions: [{ value: "-" }],
     })
 
     function getswGroupCodes() {
@@ -234,8 +230,8 @@ export default defineComponent({
       axios.put ('http://tms-test-server.p-e.kr:8081/terminal/?' ,
         {
           "VAN_ID": vanId,
-          "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
-          "SW_GROUP_ID": changeForm.SW_GROUP_ID,
+          "CAT_MODEL_ID": properties.device.modelCode,
+          "SW_GROUP_ID": properties.device.swGroupCode,
           "CAT_SERIAL_NO": properties.device.deviceNumber
         }, 
         {
@@ -249,23 +245,19 @@ export default defineComponent({
     };
 
     function onSelectGroupId(event){
-      //console.log("onSelectGroupId", event)
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
-      //console.log("groupRename1", groupRename)
-      changeForm.SW_GROUP_ID = groupRename.value
-      changeForm.SW_GROUP_NM = groupRename.key     
+      properties.device.swGroupCode = groupRename.value
+      properties.device.swGroupNm = groupRename.key     
     }
 
     function onSelectGroupNm(event){
-      //console.log("onSelectGroupNm", event)
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
-      //console.log("onSelectGroupNm", groupRename)
-      changeForm.SW_GROUP_ID = groupRename.value
-      changeForm.SW_GROUP_NM = groupRename.key
+      properties.device.swGroupCode = groupRename.value
+      properties.device.swGroupNm = groupRename.key
     }
 
 

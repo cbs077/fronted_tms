@@ -29,13 +29,13 @@
             </tr>
             <tr>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                4000
+                 {{ headerDate.swGroupCode }}
               </td>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                유선
+                 {{ headerDate.swGroupNm }}
               </td>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                12312312312
+                 {{ headerDate.swVersion }}
               </td>
             </tr>
           </tbody>
@@ -51,7 +51,7 @@
                 Update 파일명
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{ fileInfo.swFileNm }}
               </td>
             </tr>
             <tr>
@@ -61,7 +61,7 @@
                 파일 Size
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{ fileInfo.swFileSize }}
               </td>
             </tr>
             <tr>
@@ -71,7 +71,7 @@
                 등록일
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                 {{ fileInfo.regDt }}
               </td>
             </tr>
             <tr>
@@ -81,7 +81,7 @@
                 등록자
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{ fileInfo.regUser }}
               </td>
             </tr>
             <tr>
@@ -108,28 +108,28 @@
         </table>
       </div>
       <div v-show="!admin" class="mt-3 rounded border border-sk-gray">
-        <el-table :data="items" fit class="rounded">
+        <el-table :data="device" fit class="rounded">
           <el-table-column
             prop="deviceNumber"
             label="S/W Group 코드"
             align="center"
           />
           <el-table-column
-            prop="requestDate"
+            prop="deviceNumber"
             label="단말기 번호"
             align="center"
           />
           <el-table-column
-            prop="responseCode"
+            prop="swGroupNm"
             label="S/W Group 명"
             align="center"
           />
           <el-table-column
-            prop="responseCode"
+            prop="status"
             label="에러코드"
             align="center"
           />
-          <el-table-column prop="responseCode" label="상태" align="center" />
+          <el-table-column prop="status" label="상태" align="center" />
           <el-table-column
             prop="responseCode"
             label="업그레이드"
@@ -163,21 +163,26 @@ export default defineComponent({
       required: false,
       default: true,
     },
-    items: {
-      type: Array,
-      required: false,
+    device: {
+      type: Object,
+      required: true,
       default: () => [],
     },
+    fileInfo: {
+      type: Object,
+      required: true,
+      default: () => {},
+    },
+    headerDate: {
+      type: Object,
+      required: true,
+      default: () => {},
+    },    
     admin: {
       type: Boolean,
-      required: false,
       default: false,
-    },
-    sandboxes: {
-      type: Boolean,
       required: false,
-      default: false,
-    },
+    }
   },
   emits: ["update:modelValue"],
 
@@ -193,6 +198,14 @@ export default defineComponent({
       { key: "deviceNumber", value: "단말기 번호" },
       { key: "status", value: "상태" },
     ];
+//
+    let initialState = reactive({
+      swGroupCode: properties.device.swGroupCode,
+      description: properties.device.description,
+      data: []
+    })
+
+    const changeForm = reactive({ ...initialState });
 
     return {
       header,
@@ -200,6 +213,7 @@ export default defineComponent({
       closeModal() {
         isOpen.value = false;
       },
+      changeForm,
     };
   },
 });

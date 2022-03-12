@@ -6,11 +6,11 @@
         <div class="my-auto w-1/12">Update 일</div>
         <div class="flex w-4/12">
           <div class="block">
-            <el-date-picker size="large" />
+            <el-date-picker v-model="condition.start" size="large" />
           </div>
           <p class="mx-auto grow translate-y-1 text-center transition">~</p>
           <div class="block">
-            <el-date-picker size="large" />
+            <el-date-picker v-model="condition.end"  size="large" />
           </div>
         </div>
       </div>
@@ -29,19 +29,19 @@
               v-for="item in searchOptions"
               :key="item.value"
               :label="item.value"
-              :value="item.value"
+              :value="item.key"
             />
           </el-select>
         </div>
         <div class="my-auto w-1/12 text-center">검색어</div>
         <div class="flex w-4/12">
-          <el-input size="large" placeholder="Please Input" />
+          <el-input v-model="query" size="large" placeholder="Please Input" />
         </div>
       </div>
       <div class="my-3 flex">
         <div class="my-auto w-1/12">단말기 번호</div>
         <div class="flex w-4/12">
-          <el-input size="large" placeholder="Please Input" />
+          <el-input  v-model="changeForm.deviceNumber" size="large" placeholder="Please Input" />
         </div>
       </div>
     </div>
@@ -50,7 +50,13 @@
     />
   </div>
 
-  <table-common-button />
+  <table-common-button>
+    <template #body>
+      <div class="grow" />
+      <excel-button  @click:excel="onSaveExcel" class="mr-1" />
+    </template>
+  </table-common-button>
+
 
   <div class="rounded border border-sk-gray">
     <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
@@ -77,6 +83,8 @@
   <device-update-detail-modal 
     v-model="deviceUpdateDetail.modal"
     :device="deviceUpdateDetail.data"
+    :headerDate="deviceUpdateDetail.headerDate"
+    :fileInfo="deviceUpdateDetail.fileInfo"
   />
 </template>
 <script lang="ts">
@@ -91,6 +99,7 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import DeviceUpdateDetailModal from "~/components/templates/modals/device-update-detail.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { useDevice } from "~/hooks/devices.hooks";
+import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -118,31 +127,17 @@ export default defineComponent({
 
     const deviceUpdateDetail = reactive({
       modal: false,
-      data: {}
+      data: {},
+      fileInfo: {},
+      headerDate: {}
     });
 
-
+    const condition = reactive({
+      start: new Date(),
+      end: new Date(),
+    });
 ////////////////
     // page
-    const paginate = (page) => {
-      //console.log("paginate", page);
-      pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
-    // 10개, 20개, 30개
-    const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-      })
-    }; 
     let pageVal = reactive({
       page: 1,
       pageCount: 10,
@@ -153,23 +148,40 @@ export default defineComponent({
       swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
       swVersions: [{ value: "-" }],
+      deviceNumber: "",
     })
 
     let excelValue = "";
-
-    const onSearch = (event) => {
-      console.log()
+    function common_query(){
+      console.log("searchOptions", changeForm.deviceNumber)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      excelValue = param //엑셀 다운로드에서 필요함.
+      param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
+      if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
+      if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
+      
+      excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
       })
+      return param
+    }
+    
+    const paginate = (page) => {
+      pageVal.page = page
+      common_query()
+    }; 
+    // 10개, 20개, 30개
+    const onTake = (pageCount) => {
+      pageVal.pageCount = pageCount
+      common_query()
+    }; 
+
+    const onSearch = (event) => {
+      common_query()
     };
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -183,6 +195,81 @@ export default defineComponent({
       changeForm.data =dataArr
       //update(dataArr); 
     }
+
+    const onRowClicked = (row) => {
+      deviceUpdateDetail.headerDate = row
+      var swGroupCode = row.swGroupCode
+      var swVersion = row.swVersion
+      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
+
+      getDetail(param).then( data => {     
+        var list = data.list
+        var dataArr = []
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          dataArr.push(obj);
+        }  
+        deviceUpdateDetail.data = dataArr 
+        deviceUpdateDetail.modal = true
+      })
+
+      getSwVersion(param).then( data => {     
+        var list = data.list
+        var dataArr = []
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          dataArr.push(obj);
+        }   
+        //계속 상세보기 누르면 이상함
+        console.log("dataArr1", dataArr)
+        deviceUpdateDetail.fileInfo = dataArr[0]
+        deviceUpdateDetail.modal = true
+      })
+    };
+
+    async function getSwVersion(param) {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = param + "&van_id="+ vanId    
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/upgrade/list?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        return response.data;
+      });
+
+      return responset
+    };
+
+    async function getDetail(param) {
+       var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = param + "&van_id="+ vanId + "&gubun_code=FA"
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
+          }
+        )
+        .then(response => {
+          return response.data;
+        });
+      
+      return responset
+    };
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
@@ -211,7 +298,6 @@ export default defineComponent({
     };
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId + "&gubun_code=FA"
@@ -230,62 +316,6 @@ export default defineComponent({
           return response.data;
         });
       //console.log("response", responset)
-      return responset
-    };
-
-    const onRowClicked = (row) => {
-      var swGroupCode = row.swGroupCode
-      var swVersion = row.swVersion
-      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
-      getDetail(param).then( data => {     
-        // var list = data.list[0]
-        // var dataArr = []
-        // for (var object of list){
-        //   var obj = renmeObjectKey(object);
-        //   dataArr.push(obj);
-        // }   
-        var list = data.list
-        var dataArr = []
-        for (var object of list){
-          var obj = renmeObjectKey(object);
-          dataArr.push(obj);
-        }   
-        //seTtotalCount(data.total_count)
-        // changeForm.data =dataArr
-        console.log("row", dataArr)
-        deviceUpdateDetail.data = dataArr //renmeObjectKey(data.list[0]);
-        //console.log("onRowClicked", data)
-        //console.log("onRowClicked1", deviceUpdateDetail.data)
-        deviceUpdateDetail.modal = true
-
-      })
-      //console.log("onRowClicked_row", row)
-      //deviceUpdateDetail.data = row
-      //deviceUpdateDetail.modal = true
-    };
-
-    async function getDetail(param) {
-       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
-      //var swGroupCode = changeForm.swGroupCode
-      //var swVersion = changeForm.swVersion
-      var param = param + "&van_id="+ vanId + "&gubun_code=FA"
-      if(token == null) token = "" 
-
-      let data: any[] = [];
-
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
-          {
-            headers: {
-                Authorization: token
-            }
-          }
-        )
-        .then(response => {
-          //console.log("response", response)
-          return response.data;
-        });
-      
       return responset
     };
 
@@ -333,7 +363,8 @@ export default defineComponent({
       paginate,
       onTake,
       update,
-      renmeObjectKey,        
+      renmeObjectKey,    
+      condition    
     };
   },
 });

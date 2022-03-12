@@ -117,10 +117,14 @@
 </template>
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
-import * as XLSX from 'xlsx/xlsx.mjs';
+//import { saveAs } from 'file-saver';
+//import * as XLXS from "xlsx-style" 
+import writeXlsxFile from 'write-excel-file'
+
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn, ElPagination } from "element-plus";
 import Pagination from '@/components/Pagination'
+
 
 
 import { defineComponent, reactive, ref } from "vue";
@@ -307,17 +311,45 @@ export default defineComponent({
       return responset
     };
 
+    function s2ab(s) { 
+        var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+        var view = new Uint8Array(buf);  //create uint8array as viewer
+        for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+        return buf;    
+    }
+
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'terminal.xlsx');
+        var headerData = 
+          ["VAN_ID", "CAT_MODEL_ID", "CAT_SERIAL_NO", "SW_GROUP_ID", "SW_VERSION", "STATUS", "REG_DT", "LAST_USE_DT"]
+        var headerName =
+          ["VNA사명", "단말기모델코드", "단말기번호", "S/W 그룹 코드", "S/W 버전", "상태", "등록일", "최종접속일"]
+        
+        var dataa = []
+        var arr = []
+
+        headerName.forEach((val)=>{
+          arr.push({
+            value:val,
+            fontWeight: 'bold',
+            backgroundColor: '#bfbfbf',
+            width: 120
+          })
+        })
+        dataa.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          headerData.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataa.push(list)
+        })
+
+
+        writeXlsxFile(dataa, {
+          fileName: '단말기조회.xlsx'
+        })
       })
     }
 

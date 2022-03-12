@@ -29,13 +29,13 @@
             </tr>
             <tr>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                 {{ device[0].swGroupCode }}
+                 {{ headerDate.swGroupCode }}
               </td>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                 {{ device[0].swGroupNm }}
+                 {{ headerDate.swGroupNm }}
               </td>
               <td class="h-10 w-3/12 border border-sk-gray text-center">
-                 {{ device[0].swVersion }}
+                 {{ headerDate.swVersion }}
               </td>
             </tr>
           </tbody>
@@ -49,7 +49,7 @@
                 Update 파일명
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{ fileInfo.swFileNm }}
               </td>
             </tr>
             <tr>
@@ -59,7 +59,7 @@
                 파일 Size
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                 {{ fileInfo.swFileSize }}
               </td>
             </tr>
             <tr>
@@ -69,7 +69,7 @@
                 등록일
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                 {{ fileInfo.regDt }}
               </td>
             </tr>
             <tr>
@@ -79,7 +79,7 @@
                 등록자
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                 {{ fileInfo.regUser }}
               </td>
             </tr>
             <tr>
@@ -127,7 +127,7 @@
             label="에러코드"
             align="center"
           />
-          <el-table-column prop="responseCode" label="상태" align="center" />
+          <el-table-column prop="status" label="상태" align="center" />
           <el-table-column
             prop="responseCode"
             label="업그레이드"
@@ -169,6 +169,16 @@ export default defineComponent({
       required: true,
       default: () => {},
     },
+    fileInfo: {
+      type: Object,
+      required: true,
+      default: () => {},
+    },
+    headerDate: {
+      type: Object,
+      required: true,
+      default: () => {},
+    },
     admin: {
       type: Boolean,
       default: false,
@@ -180,12 +190,7 @@ export default defineComponent({
 
   setup(properties, { emit }) {
     onMounted(() => {
-      // console.log("onmount")
-      // var swGroupCode = properties.device.swGroupCode
-      // var swVersion = properties.device.swVersion
-      // getTerminal("page=1&page_count=10").then( data => {
-      //   setValue(data)
-      // })
+
     });
 
     const isOpen = computed({
@@ -201,56 +206,17 @@ export default defineComponent({
       { key: "deviceNumber", value: "단말기 번호" },
       { key: "status", value: "상태" },
     ];
-
+//
     const { renmeObjectKey } = useDevice();
 
     let initialState = reactive({
-      swGroupCode: properties.device.swGroupCode,
-      //SW_GROUP_NM: properties.device.swGroupNm ,
-      description: properties.device.description,
+      swGroupCode: "",//properties.device.swGroupCode,
+      description: "",//properties.device.description,
       data: []
     })
 
     const changeForm = reactive({ ...initialState });
 
-    async function getTerminal(param) {
-      var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
-
-      var param = param + "&van_id="+ vanId + "&gubun_code=FA" 
-      if(token == null) token = "" 
-
-      let data: any[] = [];
-
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
-          {
-            headers: {
-                Authorization: token
-            }
-          }
-        )
-        .then(response => {
-          console.log("response11", response)
-          return response.data;
-        });
-      
-      return responset
-    };
-
-    function setValue(data) {
-      var list = data.list
-      var dataArr = []
-      for (var object of list){
-        var obj = renmeObjectKey(object);
-        dataArr.push(obj);
-      }   
-      console.log("dataArr", dataArr)
-      changeForm.data = dataArr
-    }
-
-    getTerminal("page=1&page_count=10").then( data => {
-      setValue(data)
-    })   
     return {
       header,
       isOpen,
@@ -259,7 +225,6 @@ export default defineComponent({
       },
       changeForm,
       //setValue,
-      
     };
   },
 });

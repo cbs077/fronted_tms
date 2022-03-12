@@ -19,13 +19,13 @@
             단말기 모델명
           </div>
           <div class="col-span-6 my-auto">
-            <el-input  v-model="changeForm.CAT_MODEL_NM" size="large" />
+            <el-input  v-model="device.modelName" size="large" />
           </div>
         </div>
         <div class="my-3 grid grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">설명</div>
           <div class="col-span-6 my-auto">
-            <el-input size="large"  v-model="changeForm.description" type="textarea" rows="5" />
+            <el-input size="large"  v-model="device.description" type="textarea" rows="5" />
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -92,7 +92,7 @@ export default defineComponent({
     ];
 
     let initialState = reactive({
-      CAT_MODEL_NM: "",
+      CAT_MODEL_NM: "",//properties.device.swGroupNm,
       description: "",
       regDt: dateYYYYMMDD(new Date())
     })
@@ -108,8 +108,8 @@ export default defineComponent({
         {
           "VAN_ID": vanId,
           "CAT_MODEL_ID": properties.device.modelCode,
-          "CAT_MODEL_NM": changeForm.CAT_MODEL_NM,
-          "DESCRIPTION": changeForm.description,
+          "CAT_MODEL_NM": properties.device.modelName,
+          "DESCRIPTION": properties.device.description,
           'REG_DT': new Date(),
         }, 
         {

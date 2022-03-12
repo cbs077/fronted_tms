@@ -72,7 +72,12 @@
     /> 
   </div>
 
-  <sw-upgrade-detail-modal v-model="swDetail.modal" />
+  <sw-upgrade-detail-modal 
+    v-model="swDetail.modal" 
+    :headerDate="swDetail.headerDate"
+    :device="swDetail.data"
+    :fileInfo="swDetail.fileInfo"
+  />
 </template>
 <script lang="ts">
 import { Search } from "@element-plus/icons-vue";
@@ -96,8 +101,7 @@ export default defineComponent({
     SwUpgradeDetailModal,
   },
   setup() {
-    const { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
-    //const { searchOptions } = useConst();
+    let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
     const searchOptions = [
       { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
       { id: 2, key: "sw_version", value: "S/W Version" }
@@ -106,18 +110,32 @@ export default defineComponent({
 
     const swDetail = reactive({
       modal: false,
+      data: {},
+      headerDate: {},
+      fileInfo: {}
     });
 
     const swCreate = reactive({
       modal: false,
     });
 
-    const onRowClicked = (row: IDevice) => {
-      swDetail.modal = true;
-    };
-
 ////////////////
     // page
+    const query = ref("");
+    let pageVal = reactive({
+      page: 1,
+      pageCount: 10,
+      total: 10
+    })
+
+    let changeForm = reactive({
+      swGroupCodes: [{ value: "-" }],
+      deviceModels: [{ value: "-" }],
+      swVersions: [{ value: "-" }],
+    })
+
+    let excelValue = "";
+
     const paginate = (page) => {
       //console.log("paginate", page);
       pageVal.page = page
@@ -137,20 +155,6 @@ export default defineComponent({
         setValue(data)
       })
     }; 
-    const query = ref("");
-    let pageVal = reactive({
-      page: 1,
-      pageCount: 10,
-      total: 10
-    })
-
-    let changeForm = reactive({
-      swGroupCodes: [{ value: "-" }],
-      deviceModels: [{ value: "-" }],
-      swVersions: [{ value: "-" }],
-    })
-
-    let excelValue = "";
 
     const onSearch = (event) => {
       console.log()
@@ -162,9 +166,83 @@ export default defineComponent({
       })
     };
 
+    const onRowClicked = (row: IDevice) => {
+      console.log("row", row)
+      swDetail.headerDate = row
+      var swGroupCode = row.swGroupCode
+      var swVersion = row.swVersion
+      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
+      getDetail(param).then( data => {     
+        var list = data.list
+        var dataArr = []
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          dataArr.push(obj);
+        }   
+        //console.log("dataArr2", dataArr)
+        swDetail.data = dataArr 
+        swDetail.modal = true
+      })
+
+      getSwVersion(param).then( data => {     
+        var list = data.list
+        var dataArr = []
+        for (var object of list){
+          var obj = renmeObjectKey(object);
+          dataArr.push(obj);
+        }   
+        //console.log("dataArr1", dataArr)
+        swDetail.fileInfo = dataArr[0] 
+        swDetail.modal = true
+      })
+    };
+
+    async function getSwVersion(param) {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = param + "&van_id="+ vanId    
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/upgrade/list?' + param,
+        {
+          headers: {
+              Authorization: token
+          }
+        }
+      )
+      .then(response => {
+        return response.data;
+      });
+
+      return responset
+    };
+
+    async function getDetail(param) {
+       var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var param = param + "&van_id="+ vanId + "&gubun_code=FA"
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
+          }
+        )
+        .then(response => {
+          return response.data;
+        });
+      
+      return responset
+    };
+
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {

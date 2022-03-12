@@ -20,7 +20,7 @@
         <div class="my-auto w-1/12">검색조건</div>
         <div class="flex w-4/12">
           <el-select
-            v-model="searchOptions"
+            v-model="selectOption"
             clearable
             placeholder="선택"
             size="large"
@@ -93,7 +93,7 @@
       />
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column prop="modelCode" label="S/W Group명" align="center" />
-      <el-table-column prop="swOldVersion" label="S/W Version" align="center" />
+      <el-table-column prop="swVersion" label="S/W Version" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column prop="request" label="요청내용" align="center" />
       <el-table-column prop="regDt" label="요청일시" align="center" />
@@ -162,7 +162,8 @@ export default defineComponent({
       modal: false,
       text: "선택한 항목을 삭제 하시겠습니까?",
     });
-
+    
+    const selectOption = ref();
     const condition = reactive({
       start: new Date(),
       end: new Date(),
@@ -188,16 +189,13 @@ export default defineComponent({
 
     let excelValue = "";
 
-     function common_query(){
-       console.log("searchOptions", searchOptions)
+    function common_query(){
+      console.log("searchOptions", changeForm.deviceNumber)
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
-      if(query.value != "") param = param + "&" + searchOptions.value+ "=" + query.value
+      if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
       if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
       
-      param = param + "&cat_serial_no=" + changeForm.response
-      param = param + "&cat_serial_no=" + changeForm.server
-      //param = param + "&cat_model_id=" + query.value
       excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
@@ -229,7 +227,6 @@ export default defineComponent({
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -321,12 +318,12 @@ export default defineComponent({
     changeForm.server = ref("운영서버")
     changeForm.response = ref("일반")
     return {
-      //selectOption,
+      selectOption,
       update,
       deviceUnRegistration,
       headers,
       devices,
-      searchOptions,
+      //searchOptions,
       displayOptions,
       condition,
       //

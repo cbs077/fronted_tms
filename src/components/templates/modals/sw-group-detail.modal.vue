@@ -20,7 +20,7 @@
             S/W Group 명
           </div>
           <div class="col-span-6 my-auto">
-            <el-input v-model="changeForm.SW_GROUP_NM" />
+            <el-input v-model="device.swGroupNm" />
           </div>
         </div>
         <div class="my-3 grid grid-cols-8">
@@ -29,7 +29,7 @@
           </div>
           <div class="col-span-6 my-auto">
             <el-input
-              v-model="changeForm.description"
+              v-model="device.description"
               rows="5"
               type="textarea"
             />
@@ -116,8 +116,8 @@ export default defineComponent({
         {
           "VAN_ID": vanId,
           "SW_GROUP_ID": properties.device.swGroupCode,
-          "SW_GROUP_NM": changeForm.SW_GROUP_NM,
-          "DESCRIPTION": changeForm.description
+          "SW_GROUP_NM": properties.device.swGroupNm,
+          "DESCRIPTION": properties.device.description
         }, 
         {
           headers: { Authorization: token} // header의 속성
