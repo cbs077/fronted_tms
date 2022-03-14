@@ -79,9 +79,6 @@ export default defineComponent({
 
     const displayLnbs = computed(() => {    
       data.isVan =  eval(window.localStorage.getItem("is_van")) === true
-      
-      console.log("data.isVan1", data.isVan)
-      console.log("displayLnbs", store.getters.userRight)
 
       const { path } = router.currentRoute.value;
 

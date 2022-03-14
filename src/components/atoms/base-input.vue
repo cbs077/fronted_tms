@@ -30,12 +30,9 @@ export default defineComponent({
   setup(properties, { emit }) {
     const query = computed({
       get: () => {
-        //console.log("properties.modelValue", properties.modelValue) 
         return properties.modelValue
       },
       set: (value) => {
-        //console.log("query_set", value)
-        //return value
         emit("update:modelValue", value);
         return value;
       },

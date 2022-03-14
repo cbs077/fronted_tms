@@ -94,7 +94,7 @@ import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn } from "element-plus";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 import { defineComponent, reactive, ref } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -183,7 +183,6 @@ export default defineComponent({
 ////////////////
     // page
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -193,7 +192,6 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -204,8 +202,8 @@ export default defineComponent({
     const query = ref("");
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -272,16 +270,40 @@ export default defineComponent({
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        console.log("renmeObjectKey", renmeObjectKey(data.list))
-        var dataWS = XLSX.utils.json_to_sheet(data.list, { origin: 'A2', skipHeader: true });
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'swGroup.xlsx');
+        const columns = [{},{},{},{width: 25},{}]
+
+        var headerData = 
+          ["VAN_ID", "SW_GROUP_ID", "SW_GROUP_NM", "REG_DT", "REG_USER"]
+        var headerName =
+          ["VNA사명", "S/W 그룹코드", "S/W 그룹명",  "등록일", "등록일"]
+        
+        var dataT = []
+        var arr = []
+
+        headerName.forEach((val)=>{
+          arr.push({
+            value:val,
+            backgroundColor: '#eeeeee',
+            fontWeight: 'bold',
+            align: 'center',
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          headerData.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+
+        writeXlsxFile(
+          dataT, { 
+          columns,
+          fileName: 'S/W 그룹.xlsx'
+        })
       })
     }
 
@@ -289,19 +311,20 @@ export default defineComponent({
       swGroupCreate.modal = false
       swGroupCreate.data = {}
   
-      getTerminal("page=1&page_count=10").then( data => {
+      getTerminal("page=1&page_count=20").then( data => {
         setValue(data)
       })   
     }
 
     const onSaveDetail = ( val : any) => {
       swGroupDetail.modal =false
-      getTerminal("page=1&page_count=10").then( data => {
+      getTerminal("page=1&page_count=20").then( data => {
         setValue(data)
       })   
     }
 
-    getTerminal("page=1&page_count=10").then( data => {
+    pageVal.total = 20
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
 

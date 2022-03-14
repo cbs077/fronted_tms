@@ -124,8 +124,8 @@ export default defineComponent({
     const query = ref("");
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -137,7 +137,6 @@ export default defineComponent({
     let excelValue = "";
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -147,7 +146,6 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -171,7 +169,7 @@ export default defineComponent({
       swDetail.headerDate = row
       var swGroupCode = row.swGroupCode
       var swVersion = row.swVersion
-      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
+      var param = "page=1&page_count=20&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
       getDetail(param).then( data => {     
         var list = data.list
         var dataArr = []
@@ -191,7 +189,6 @@ export default defineComponent({
           var obj = renmeObjectKey(object);
           dataArr.push(obj);
         }   
-        //console.log("dataArr1", dataArr)
         swDetail.fileInfo = dataArr[0] 
         swDetail.modal = true
       })
@@ -330,7 +327,7 @@ export default defineComponent({
     };
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
     return {

@@ -44,13 +44,13 @@
     <div class="col-span-4 my-3 flex">
       <div class="label-width my-auto w-2/12">패스워드</div>
       <div class="w-9/12">
-        <el-input v-model="changeForm.PWD" size="large" placeholder="Please Input" />
+        <el-input type="password" v-model="changeForm.PWD" size="large" placeholder="Please Input" />
       </div>
     </div>
     <div class="col-span-4 my-3 flex">
       <div class="label-width my-auto w-2/12">패스워드 확인</div>
       <div class="w-10/12">
-        <el-input v-model="changeForm.PWD" size="large" placeholder="Please Input" />
+        <el-input type="password" v-model="changeForm.PWD1" size="large" placeholder="Please Input" />
       </div>
     </div>
   </div>
@@ -125,6 +125,7 @@ export default defineComponent({
       USER_NM: "",
       COMP_ID: "",
       PWD:"",
+      PWD1:"",
       USER_RIGHTS: "",
       PHONE: "",
       FAX:"",
@@ -135,10 +136,34 @@ export default defineComponent({
       RIGHT: [{ value: "S"}, {value: "-"}],
       data: []
     })
+    const changePassword = (param: string) => {
+    
+      var token = window.localStorage.getItem("token")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.put('http://tms-test-server.p-e.kr:8081/updatepwd?' ,
+        {
+            "USER_ID": changeForm.USER_ID,
+            "PWD": changeForm.PWD
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var list = response.data.list
+        console.log("성공")
+      });
+    };
 
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
+
+      if(changeForm.PWD !=""&& changeForm.PWD1 !=""){
+          if( changeForm.PWD != changeForm.PWD1){ alert("패스워드 확인을 해주세요."); return}
+          changePassword()
+      }
 
       axios.put('http://tms-test-server.p-e.kr:8081/updateUserInfo?' ,
         {
@@ -159,9 +184,12 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
+
+        alert("정보가 변경되었습니다.")
         //console.log("response", response)
       });
     };
+
     async function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
       var userId = window.localStorage.getItem("userId")
@@ -178,9 +206,13 @@ export default defineComponent({
               }
             )
             .then(response => {
-              //console.log("response.data:" ,response.data)
               changeForm.USER_ID = userId
               changeForm.VAN_NM = response.data[0].user_rights_nm
+              changeForm.USER_NM = response.data[0].USER_NM
+              changeForm.FAX = response.data[0].FAX
+              changeForm.PHONE = response.data[0].PHONE
+              changeForm.ADDR1 = response.data[0].ADDR1
+
               return response.data;   
             });
             return response;    

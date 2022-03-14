@@ -16,6 +16,7 @@ export interface IDevice {
   swFileNm: string;
   swFileSize: number;
   status: string;
+  resultCode: string;
   description: string;
   applicationDate: Date | string;
   lastAccessDate: Date | string;
@@ -106,15 +107,16 @@ export const useDevice = () => {
       lastAccessDate: object.UPDATE_DT,
       modelCode: object.CAT_MODEL_ID,
       status: object.STATUS,
+      resultCode: object.RESULT_CODE,
       swGroupCode: object.SW_GROUP_ID,
       swGroupNm: object.SW_GROUP_NM,
       vanCode: object.VAN_ID,
       van: object.VAN_NM,
       applicationUser: "SK TMS",
       deviceCount: object.tw_count,
-      init: 3,
-      running: 8,
-      idle: 10,
+      init: object.init_count,
+      running: object.cur_count,
+      idle: object.stop_count,
       swDownload: object.sw_count,
       address: object.ADDR1,
       contact: object.PHONE,

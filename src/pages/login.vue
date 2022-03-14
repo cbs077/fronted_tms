@@ -63,6 +63,8 @@
               store.state.userRight  = true  
               store.commit("userRight", true);
             } 
+          }else if(response.data.status == 405){
+            alert("패스워드를 확인해주세요.")
           }
         });
       };

@@ -242,8 +242,8 @@ const lnbs = (isVan: boolean) => {
 };
 
 const take = reactive({
-  select: "10개씩",
-  available: [{ key: 10, value: "10개씩" }, { key: 20, value: "20개씩" }, { key: 30, value: "30개씩" }],
+  select: "20개씩",
+  available: [{ key: 20, value: "20개씩" }, { key: 50, value: "50개씩" }, { key: 100, value: "100개씩" }],
 });
 
 export const useConst = () => {

@@ -81,7 +81,7 @@
       <el-table-column v-if="tableHeader.applicationDate==true" prop="applicationDate" label="등록일" align="center" />
       <el-table-column
         v-if="tableHeader.lastAccessDate==true"
-        prop="lastAccessDate"
+        prop="lastUseDt"
         label="최종접속일"
         align="center"
       />
@@ -117,15 +117,11 @@
 </template>
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
-//import { saveAs } from 'file-saver';
-//import * as XLXS from "xlsx-style" 
 import writeXlsxFile from 'write-excel-file'
 
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn, ElPagination } from "element-plus";
 import Pagination from '@/components/Pagination'
-
-
 
 import { defineComponent, reactive, ref } from "vue";
 
@@ -169,8 +165,8 @@ export default defineComponent({
     let excelValue = "";
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let initialState = reactive({
@@ -260,13 +256,11 @@ export default defineComponent({
     }; 
 
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
-        //defaultCheckbox()
       })
     }; 
 
@@ -348,7 +342,7 @@ export default defineComponent({
 
 
         writeXlsxFile(dataa, {
-          fileName: '단말기조회.xlsx'
+          fileName: '단말기모델.xlsx'
         })
       })
     }
@@ -356,7 +350,7 @@ export default defineComponent({
     const onSaveDetail = ( val : any) => {
       deviceDetail.modal = false
 
-      getTerminal("page=1&page_count=10").then( data => {
+      getTerminal("page=1&page_count=20").then( data => {
         setValue(data)
         defaultCheckbox()
       })
@@ -385,8 +379,9 @@ export default defineComponent({
     }
 
     const selectOption = ref();
-
-    getTerminal("page=1&page_count=10").then( data => {
+    pageVal.pageCount = 20
+    console.log("pageVal.pageCount", pageVal.pageCount)
+    getTerminal("page=1&page_count=" + pageVal.pageCount ).then( data => {
       setValue(data)
       defaultCheckbox()
     })

@@ -93,7 +93,7 @@ import { ElTable, ElTableColumn } from "element-plus";
 import { defineComponent, reactive, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import DeviceUpdateDetailModal from "~/components/templates/modals/device-update-detail.modal.vue";
@@ -140,8 +140,8 @@ export default defineComponent({
     // page
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -200,7 +200,7 @@ export default defineComponent({
       deviceUpdateDetail.headerDate = row
       var swGroupCode = row.swGroupCode
       var swVersion = row.swVersion
-      var param = "page=1&page_count=10&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
+      var param = "page=1&page_count=20&sw_group_id=" + swGroupCode + "&sw_version=" + swVersion
 
       getDetail(param).then( data => {     
         var list = data.list
@@ -257,7 +257,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter/default?' + param,
           {
             headers: {
                 Authorization: token
@@ -305,7 +305,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter/default?' + param,
           {
             headers: {
                 Authorization: token
@@ -321,17 +321,42 @@ export default defineComponent({
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'swOperation.xlsx');
+        const columns = [{},{},{width: 15},{width: 15},{ width: 15 },{width: 15},{width: 15},{width: 20},{width: 20}]
+
+        var headerData = 
+          ["VAN_ID",  "CAT_SERIAL_NO", "CAT_MODEL_ID", "SW_GROUP_ID", ,"SW_VERSION", "GUBUN", "STATUS", "REG_DT", "LAST_USE_DT"]
+        var headerName =
+          ["VNA사명",  "단말기번호", "단말기모델코드", "S/W 그룹 코드", "S/W 버전", "구분", "상태", "등록일", "최종접속일"]
+        
+        var dataT = []
+        var arr = []
+
+        headerName.forEach((val)=>{
+          arr.push({
+            value:val,
+            fontWeight: 'bold',
+            backgroundColor: '#bfbfbf',
+            width: 120
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          headerData.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+
+        writeXlsxFile(dataT, {
+          columns,
+          fileName: 'S/W 업데이트.xlsx'
+        })
       })
     }
+    
     function onSave() {
       swCreate.modal = false
       swCreate.data = {}
@@ -339,7 +364,7 @@ export default defineComponent({
 
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
     return {

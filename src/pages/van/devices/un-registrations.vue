@@ -163,8 +163,8 @@ export default defineComponent({
     let excelValue = "";
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let data = reactive({
@@ -206,13 +206,11 @@ export default defineComponent({
     }; 
 
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
-        //defaultCheckbox()
       })
     }; 
     const seTtotalCount = (pageCount) => {
@@ -263,7 +261,7 @@ export default defineComponent({
           }
         )
         .then(response => {
-          getTerminal("page=1&page_count=10").then( data => {
+          getTerminal("page=1&page_count=20").then( data => {
             setValue(data)
             defaultCheckbox()
           })
@@ -272,11 +270,6 @@ export default defineComponent({
         });
       return responset
     };
-
-    const onSaveDetail = ( val : any) => {
-      //console.log("onSaveDetail", val.modelCode)
-    }
-
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
         var dataWS = XLSX.utils.json_to_sheet(data.list);
@@ -319,28 +312,15 @@ export default defineComponent({
         console.log('array index: ' + index + ' value : ' + value);
       })
       deviceUnRegistration.modal = false
-      console.log("onDeleteItems")
     }
-
-    // function onRowClicked() {  
-    //   console.log("onRowClicked", data.checkbox)
-    // }
-
-    // function onCheckboxT(event) {
-    //   console.log("onRowClicked", event)
-    //   data.checkbox = _.map(event, "deviceNumber")
-    //   console.log(" data.checkbox ",  data.checkbox )
-    // }
 
     function onSelectChange(event) {
       console.log("onSelectChange", event)
       data.checkbox = _.map(event, "deviceNumber")
       console.log("onSelectChange", data.checkbox)
-      //data.checkbox = _.map(event, "deviceNumber")
-      //console.log(" data.checkbox ",  data.checkbox )
     }
 
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
       defaultCheckbox()
     })
@@ -363,10 +343,8 @@ export default defineComponent({
       pageVal,
       excelValue,
       onDeleteItems,
-      //onRowClicked,
       delTerminal,
       data,
-      //onCheckboxT,
       onReset,
       onSelectChange
     };

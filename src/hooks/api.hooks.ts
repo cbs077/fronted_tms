@@ -63,32 +63,32 @@ export const useDevice = () => {
     );
   };
 
-  let renmeObjectKey = (object: any) => {
-    const temporary: IDevice = {   
-      deviceNumberFrom: object.SERIAL_NO_FROM,
-      deviceNumberTo: object.SERIAL_NO_TO,
-      modelName: object.CAT_MODEL_NM,
-      swVersion: object.SW_VERSION,
-      description: object.DESCRIPTION,
-      applicationDate:  object.REG_DT,
-      deviceNumber:  object.CAT_SERIAL_NO,
-      lastAccessDate: object.UPDATE_DT,
-      modelCode: object.CAT_MODEL_ID,
-      status: object.STATUS,
-      swGroupCode: object.SW_GROUP_ID,
-      van: object.VAN_ID,
-      applicationUser: "SK TMS",
-      deviceCount: 10,
-      init: 3,
-      running: 8,
-      idle: 10,
-      swDownload: 20,
-    };
+  // let renmeObjectKey = (object: any) => {
+  //   const temporary: IDevice = {   
+  //     deviceNumberFrom: object.SERIAL_NO_FROM,
+  //     deviceNumberTo: object.SERIAL_NO_TO,
+  //     modelName: object.CAT_MODEL_NM,
+  //     swVersion: object.SW_VERSION,
+  //     description: object.DESCRIPTION,
+  //     applicationDate:  object.REG_DT,
+  //     deviceNumber:  object.CAT_SERIAL_NO,
+  //     lastAccessDate: object.UPDATE_DT,
+  //     modelCode: object.CAT_MODEL_ID,
+  //     status: object.STATUS,
+  //     swGroupCode: object.SW_GROUP_ID,
+  //     van: object.VAN_ID,
+  //     applicationUser: "SK TMS",
+  //     deviceCount: 10,
+  //     init: 3,
+  //     running: 8,
+  //     idle: 10,
+  //     swDownload: 20,
+  //   };
 
-    ////console.log("temporary", temporary)
-    //delete object.CAT_SERIAL_NO;
-    return temporary
-  };
+  //   ////console.log("temporary", temporary)
+  //   //delete object.CAT_SERIAL_NO;
+  //   return temporary
+  // };
 
   return {
     registrationHeaders,

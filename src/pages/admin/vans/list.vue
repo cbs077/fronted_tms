@@ -143,8 +143,8 @@ export default defineComponent({
 
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -251,7 +251,7 @@ export default defineComponent({
     }
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
 

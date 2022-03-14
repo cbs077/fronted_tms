@@ -196,36 +196,30 @@ export default defineComponent({
           return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
 
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
     function onSelectGroupId(event){
-      //console.log("onSelectGroupId", event)
       var groupRename = _.find(changeForm.deviceModels, function(data) {
         return data.value == event }
       );
-      //console.log("groupRename", groupRename)
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key     
     }
 
     function onSelectGroupNm(event){
-      //console.log("onSelectGroupNm", event)
       var groupRename = _.find(changeForm.deviceModels, function(data) {
         return data.value == event }
       );
-      //console.log("onSelectGroupNm", groupRename)
+
       changeForm.SW_GROUP_ID = groupRename.value
       changeForm.SW_GROUP_NM = groupRename.key
     }
 
     // 파일 변경 시 이벤트 핸들러
-    function selectFile(event) {
-      //this.swfile = swfile;    
+    function selectFile(event) { 
       var swfile = event.target.files[0]
       changeForm.swfile = swfile
-      //console.log("selectFile", swfile)
       changeForm.DATA_SIZE = swfile.size
       changeForm.FILE_PATH = swfile.name
       changeForm.FILE_NM = swfile.name
@@ -319,8 +313,6 @@ export default defineComponent({
     getTerminalMdl()
 
     return {
-      //groupIds,
-      //groupNames,
       deviceModels,
       swVersions,
       swGroupCodes,

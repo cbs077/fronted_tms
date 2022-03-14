@@ -67,7 +67,7 @@
       <el-table-column prop="regDt" label="등록일" align="center" />
       <el-table-column prop="regUser" label="등록자" align="center" />
       <el-table-column label="패스워드 초기화" align="center">
-        <template #default>
+        <template functional>
           <base-button text="초기화" @click.capture.prevent.stop
         /></template>
       </el-table-column>
@@ -138,7 +138,6 @@ export default defineComponent({
     });
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" + filter.query.value
@@ -148,7 +147,6 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" + filter.query.value
@@ -159,8 +157,8 @@ export default defineComponent({
 
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -176,7 +174,6 @@ export default defineComponent({
       
       if(selectOption.value != "") param = param + "&van_id=" + selectOption.value 
 
-      //console.log("param", param)
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
@@ -185,7 +182,6 @@ export default defineComponent({
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     function setValue(data) {
@@ -196,13 +192,11 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      //console.log("dataArr", dataArr)
       vanList.data = dataArr
     }
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      //var vanId = window.localStorage.getItem("vanId")
       var param //= "van_id="+ vanId      
       if(token == null) token = "" 
 
@@ -222,15 +216,12 @@ export default defineComponent({
           return {"key": n.VAN_ID, "value": n.VAN_NM}
         })
 
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
-      //var vanId = window.localStorage.getItem("vanId")
       var param = param //+ "&van_id="+ vanId
       if(token == null) token = "" 
 
@@ -246,7 +237,6 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
@@ -264,13 +254,11 @@ export default defineComponent({
       })
     }
 
-    // getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
     return { 
       filter, 
-      //items, 
       userDetail, onRowClicked,
       //
       vanList,

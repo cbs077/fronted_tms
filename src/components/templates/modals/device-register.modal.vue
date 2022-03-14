@@ -246,11 +246,9 @@ export default defineComponent({
         changeForm.swGroupCodes = _.map(list, function square(n) {
           return {"key": n.SW_GROUP_NM, "value": n.SW_GROUP_ID}
         })
-        //console.log("getswGroupCodes", list)
         
         return response.data.total_count;
       });
-      //console.log("response", response)
       return response
     };
 
@@ -281,8 +279,6 @@ export default defineComponent({
         changeForm.deviceModels = _.map(list, function square(n) {
           return {"key" :  n.CAT_MODEL_NM, "value": n.CAT_MODEL_ID}
         })
-
-        ////console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
     const onPreSave = () => {

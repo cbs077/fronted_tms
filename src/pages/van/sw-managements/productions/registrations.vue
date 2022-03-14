@@ -155,8 +155,8 @@ export default defineComponent({
     const query = ref("");
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let changeForm = reactive({
@@ -169,7 +169,6 @@ export default defineComponent({
     let excelValue = "";
 
     const onSearch = (event) => {
-      console.log()
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       excelValue = param //엑셀 다운로드에서 필요함.
@@ -179,7 +178,6 @@ export default defineComponent({
     };
 
     const onReset = (event) => {
-      console.log("reset")
       selectOption.value = ""
       query.value = ""
       
@@ -253,7 +251,7 @@ export default defineComponent({
       console.log("onSaveDetail")
       swDetail.modal =false
       getTerminalMdl()
-      getTerminal("page=1&page_count=10").then( data => {
+      getTerminal("page=1&page_count=20").then( data => {
         setValue(data)
       })     
     }
@@ -275,13 +273,14 @@ export default defineComponent({
       swCreate.modal = false
       swCreate.data = {}
       getTerminalMdl()
-      getTerminal("page=1&page_count=10").then( data => {
+      getTerminal("page=1&page_count=20").then( data => {
         setValue(data)
       })
     }
 
+    onTake()
     getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
 

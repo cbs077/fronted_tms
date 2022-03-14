@@ -9,9 +9,9 @@
 
   <div class="mb-6 rounded border border-sk-gray">
     <el-table
-      :data="devices"
+      :data="changeForm.vanData"
       fit
-      height="300"
+      height="320"
       class="rounded"
       :span-method="arraySpanMethod"
     >
@@ -22,7 +22,7 @@
         header-align="center"
       />
       <el-table-column
-        prop="modelName"
+        prop="modelCode"
         label="단말기모델"
         align="center"
         header-align="center"
@@ -30,25 +30,25 @@
       <el-table-column
         prop="deviceCount"
         label="단말기 수량"
-        align="right"
+        align="center"
         header-align="center"
       />
       <el-table-column
         prop="init"
         label="초기상태"
-        align="right"
+        align="center"
         header-align="center"
       />
       <el-table-column
         prop="running"
         label="사용중"
-        align="right"
+        align="center"
         header-align="center"
       />
       <el-table-column
         prop="idle"
         label="휴면상태"
-        align="right"
+        align="center"
         header-align="center"
       />
     </el-table>
@@ -123,7 +123,7 @@
   </table-common-button>
 
   <div class="mb-6 rounded border border-sk-gray">
-    <el-table :data="devices" fit class="rounded" @row-click="onRowClicked">
+    <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column
         prop="swGroupNm"
@@ -210,8 +210,8 @@ export default defineComponent({
 
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
     })
 
     let initialState = reactive({
@@ -236,6 +236,8 @@ export default defineComponent({
       REG_USER: window.localStorage.getItem("userNm"),
 
       deviceModels: [],
+      data: [],
+      vanData: []
     })
     
     const changeForm = reactive({ ...initialStateA });
@@ -263,42 +265,37 @@ export default defineComponent({
       searchKey = event
     };
 
-    const onSearch = (event) => {
+    function common_query(){
       var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
-      excelValue = param //엑셀 다운로드에서 필요함.
+      if(changeForm.CAT_MODEL_ID != "") param = param + "&cat_model_id=" + changeForm.CAT_MODEL_ID
+      if(changeForm.SW_GROUP_ID != "") param = param + "&sw_group_id=" + changeForm.SW_GROUP_ID
+
+      excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
-        //defaultCheckbox()
       })
+      return param
+    }
+
+    const onSearch = (event) => {
+      common_query()
     };
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-        //defaultCheckbox()
-      })
+      common_query()
     }; 
 
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
       pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
-      getTerminal(param).then( data => {
-        setValue(data)
-        //defaultCheckbox()
-      })
+      common_query()
     }; 
 
     const onReset = (event) => {
       console.log("reset")
-      selectOption.value = ""
-      query.value = ""
+      changeForm.CAT_MODEL_ID = ""
+      changeForm.SW_GROUP_ID = ""
 
       defaultCheckbox()
       Object.assign(tableHeader, initialState);
@@ -360,6 +357,27 @@ export default defineComponent({
       });
     };
 
+    async function getTerminalStat(param) {
+      var vanId = window.localStorage.getItem("vanId")
+      var token = window.localStorage.getItem("token")
+      var param = param + "&van_id="+ vanId
+      if(token == null) token = "" 
+
+      let data: any[] = [];
+
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/stat/van/list?' + param,
+          {
+            headers: {
+                Authorization: token
+            }
+          }
+        )
+        .then(response => {
+          return response.data;
+        });
+      return responset
+    };
+
     async function getTerminal(param) {
       var vanId = window.localStorage.getItem("vanId")
       var token = window.localStorage.getItem("token")
@@ -408,7 +426,18 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      update(dataArr); 
+      changeForm.data = dataArr
+    }
+
+    function setVanValue(data) {
+      var list = data.list
+      var dataArr = []
+      for (var object of list){
+        var obj = renmeObjectKey(object);
+        dataArr.push(obj);
+      }   
+      seTtotalCount(data.total_count)
+      changeForm.vanData = dataArr 
     }
 
     function defaultCheckbox() {
@@ -423,11 +452,16 @@ export default defineComponent({
     }
 
     const selectOption = ref();
-
-    getTerminal("page=1&page_count=10").then( data => {
+    Object.assign(tableHeader, initialState);
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
       defaultCheckbox()
     })
+    getTerminalStat("page=1&page_count=20").then( data => {
+      setVanValue(data)
+      defaultCheckbox()
+    })
+
     getTerminalMdl()
     getSwGroup()
 

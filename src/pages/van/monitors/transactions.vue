@@ -44,8 +44,8 @@
         <div class="mr-12 flex">
           <div class="mr-12 flex">
             <el-radio-group v-model="changeForm.response">
-              <el-radio label="일반" />
-              <el-radio label="오류" />
+              <el-radio value="normal" label="일반" />
+              <el-radio value="error" label="오류" />
             </el-radio-group>
           </div>
         </div>
@@ -76,7 +76,7 @@
     @update:take="onTake"
   >
     <template #body>
-      <base-button class="mr-1" text="사용 중지" />
+      <base-button class="mr-1" text="사용 중지"  @click="onStopTirminal" />
       <base-button class="ml-1" text="사용 재개" />
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
@@ -84,7 +84,7 @@
   </table-common-button>
 
   <div class="rounded border border-sk-gray">
-    <el-table :data="changeForm.data" fit class="rounded">
+    <el-table :data="changeForm.data" fit class="rounded" @selection-change="onSelectChange">
       <el-table-column
         type="selection"
         primary-text
@@ -97,7 +97,7 @@
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column prop="request" label="요청내용" align="center" />
       <el-table-column prop="regDt" label="요청일시" align="center" />
-      <el-table-column prop="status" label="응답코드" align="center" />
+      <el-table-column prop="resultCode" label="응답코드" align="center" />
     </el-table>
   </div>
 
@@ -123,7 +123,7 @@
 import { defineComponent, reactive, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 import { defineComponent, reactive, ref } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -173,8 +173,12 @@ export default defineComponent({
     const query = ref("");
     let pageVal = reactive({
       page: 1,
-      pageCount: 10,
-      total: 10
+      pageCount: 20,
+      total: 20
+    })
+
+    let data = reactive({
+      checkbox: 1,
     })
 
     let changeForm = reactive({
@@ -195,7 +199,8 @@ export default defineComponent({
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
       if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
       if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
-      
+      if(changeForm.response == "오류") param = param + "&response=fail" 
+        
       excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
@@ -238,7 +243,6 @@ export default defineComponent({
       }   
       seTtotalCount(data.total_count)
       changeForm.data = dataArr
-      //update(dataArr); 
     }
 
     function getTerminalMdl() {
@@ -263,13 +267,10 @@ export default defineComponent({
           return {"value": n.CAT_MODEL_NM}
         })
 
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
-
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
@@ -291,28 +292,88 @@ export default defineComponent({
       return responset
     };
 
+    function onStopTirminal() {
+      data.checkbox.forEach(function(value, index) {
+        onUpdateRc(value)
+        console.log('array index: ' + index + ' value : ' + value);
+      })
+      deviceUnRegistration.modal = false
+    }
+
+    function onSelectChange(event) {
+      console.log("onSelectChange", event)
+      data.checkbox = _.map(event, "deviceNumber")
+      console.log("onSelectChange", data.checkbox)
+    }
+
+    const onUpdateRc = (deviceNumber) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post ('http://tms-test-server.p-e.kr:8081/rccmd?' ,
+        {
+          "VAN_ID" : vanId,
+          "CAT_SERIAL_NO": deviceNumber,
+          "CMD": "DT",    
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        console.log("tt")
+      });
+    };
+
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'swGroup.xlsx');
+        const columns = [{},{},{width: 15},{width: 15},{ width: 25 }]
+
+        var headerData = 
+          ["VAN_ID", "CAT_MODEL_ID", "CAT_MODEL_NM", "DESCRIPTION", "GUBUN", "RESULT_CODE", "REG_DT"]
+        var headerName =
+          ["VNA사명", "모델코드", "모델명", "설명", "구분", "결과", "등록일"]
+        
+        var dataT = []
+        var arr = []
+
+        headerName.forEach((val)=>{
+          arr.push({
+            value:val,
+            backgroundColor: '#eeeeee',
+            fontWeight: 'bold',
+            align: 'center',
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          headerData.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+
+        writeXlsxFile(
+          dataT, { 
+          columns,
+          fileName: '모니터링.xlsx'
+        })
       })
     }
 
     function onSave() {
       swGroupCreate.modal = false
       swGroupCreate.data = {}
-      //console.log("onSave")
     }
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=10").then( data => {
+    getTerminal("page=1&page_count=20").then( data => {
       setValue(data)
     })
     changeForm.server = ref("운영서버")
@@ -340,7 +401,10 @@ export default defineComponent({
       renmeObjectKey,
       onSave,
       common_query,
-      onReset
+      onReset,
+      onStopTirminal,
+      onSelectChange,
+      onUpdateRc,
     };
   },
 });
