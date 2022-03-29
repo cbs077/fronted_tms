@@ -1,10 +1,11 @@
 import vue from "@vitejs/plugin-vue";
 // eslint-disable-next-line unicorn/prefer-node-protocol
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
+import envCompatible from 'vite-plugin-env-compatible'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(),envCompatible(/* options */)],
   resolve: {
     alias: {
       // eslint-disable-next-line unicorn/prefer-module
@@ -14,5 +15,6 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 8083,
-  },
+  }
+  
 });

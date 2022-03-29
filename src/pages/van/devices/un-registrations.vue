@@ -118,6 +118,7 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import ConfirmModal from "~/components/templates/modals/confirm.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { useDevice } from "~/hooks/devices.hooks";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -131,6 +132,8 @@ export default defineComponent({
     let { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
     const { searchOptions } = useConst();
     const query = ref("");
+    const store = useStore();
+
     const displayOptions = reactive({
       all: false,
       modelCode: false,
@@ -185,7 +188,7 @@ export default defineComponent({
 
     const onSearch = (event) => {
       console.log("onSearch", selectOption)
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
@@ -197,7 +200,7 @@ export default defineComponent({
     const paginate = (page) => {
       //console.log("paginate", page);
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -206,8 +209,9 @@ export default defineComponent({
     }; 
 
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -261,7 +265,7 @@ export default defineComponent({
           }
         )
         .then(response => {
-          getTerminal("page=1&page_count=20").then( data => {
+          getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
             setValue(data)
             defaultCheckbox()
           })
@@ -320,7 +324,7 @@ export default defineComponent({
       console.log("onSelectChange", data.checkbox)
     }
 
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
       defaultCheckbox()
     })

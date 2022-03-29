@@ -3,7 +3,7 @@
   <table-common-button no-take>
     <template #body>
       <div class="grow" />
-      <excel-button class="mr-1" />
+      <excel-button  @click:excel="onSaveExcel" class="mr-1" />
     </template>
   </table-common-button>
 
@@ -118,7 +118,7 @@
   >
     <template #body>
       <div class="grow" />
-      <excel-button class="mr-1" />
+      <excel-button @click:excel="onSaveExcel1" class="mr-1" />
     </template>
   </table-common-button>
 
@@ -155,10 +155,8 @@
 import { TableColumnCtx } from "element-plus/es/components/table/src/table-column/defaults";
 import { defineComponent, reactive, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 import { Search } from "@element-plus/icons-vue";
-//import { ElTable, ElTableColumn, ElPagination } from "element-plus";
-//rt Pagination from '@/components/Pagination'
 import * as _ from "lodash";
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -166,8 +164,8 @@ import ExcelButton from "~/components/molecules/excel-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import DeviceLogModal from "~/components/templates/modals/device-log.modal.vue";
 import VanDetailModal from "~/components/templates/modals/van-detail.modal.vue";
-import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+import { useStore } from "vuex";
 
 interface SpanMethodProperties {
   row: IDevice;
@@ -186,8 +184,9 @@ export default defineComponent({
     DeviceLogModal,
   },
   setup() {
-    const { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
-    //const { searchOptions } = useConst();
+    const { registrationHeaders_a: headers, devices, update, renmeObjectKey, renmeObjectAKey} = useDevice();
+    const store = useStore();
+
     const searchOptions =  [
       { id: 1, key: "sw_group_id", value: "초기상태" },
       { id: 2, key: "sw_version", value: "사용중" },
@@ -266,7 +265,7 @@ export default defineComponent({
     };
 
     function common_query(){
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       if(changeForm.CAT_MODEL_ID != "") param = param + "&cat_model_id=" + changeForm.CAT_MODEL_ID
       if(changeForm.SW_GROUP_ID != "") param = param + "&sw_group_id=" + changeForm.SW_GROUP_ID
@@ -288,7 +287,8 @@ export default defineComponent({
     }; 
 
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
       common_query()
     }; 
 
@@ -405,16 +405,76 @@ export default defineComponent({
     }
 
     const onSaveExcel = () => {   
+      var data = getTerminalStat("page=1&page_count=1000").then( data => {
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
+
+        if(data.list == undefined) return
+        var header = _.keys(data.list[0])
+ 
+        var dataT = []
+        var arr = []
+
+        header.forEach((val)=>{  
+          
+          arr.push({
+            value:renmeObjectAKey[val],
+            backgroundColor: '#eeeeee',
+            fontWeight: 'bold',
+            align: 'center'
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          header.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+        writeXlsxFile(
+          dataT, { 
+          columns,
+          fileName: 'VAN사별 현황.xlsx'
+        })
+      })
+    }
+
+    const onSaveExcel1 = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'terminal.xlsx');
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
+
+        if(data.list == undefined) return
+        var header = _.keys(data.list[0])
+ 
+        var dataT = []
+        var arr = []
+
+        header.forEach((val)=>{  
+          
+          arr.push({
+            value:renmeObjectAKey[val],
+            backgroundColor: '#eeeeee',
+            fontWeight: 'bold',
+            align: 'center'
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          header.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+        writeXlsxFile(
+          dataT, { 
+          columns,
+          fileName: 'VAN사별 현황(상세).xlsx'
+        })
       })
     }
 
@@ -453,11 +513,11 @@ export default defineComponent({
 
     const selectOption = ref();
     Object.assign(tableHeader, initialState);
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
       defaultCheckbox()
     })
-    getTerminalStat("page=1&page_count=20").then( data => {
+    getTerminalStat("page=1&page_count="+store.state.pageCount).then( data => {
       setVanValue(data)
       defaultCheckbox()
     })
@@ -486,6 +546,7 @@ export default defineComponent({
       onTake,
       onCheckbox,
       onSaveExcel,
+      onSaveExcel1,
       pageVal,
       excelValue,
       onReset,

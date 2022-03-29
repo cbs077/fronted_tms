@@ -2,7 +2,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import axios from "axios";
 
-import adminRoutes from "~/routes/admin";
+//import adminRoutes from "~/routes/admin";
 import vanRoutes from "~/routes/van";
 import accountRoutes from "~/routes/accounts";
 import { useStore } from "vuex";
@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
     redirect: "/van/devices/registrations",
   },
   ...vanRoutes,
-  ...adminRoutes,
+  //...adminRoutes,
 ];
 
 const router = createRouter({
@@ -28,16 +28,12 @@ router.beforeEach((to, from, next) => {
   const authRequired = !publicPages.includes(to.path);
   const loggedIn = window.localStorage.getItem('token');
 
-  //console.log("beforeEach", authRequired)
   // trying to access a restricted page + not logged in
   // redirect to login page
   if (authRequired && !loggedIn) {
     next('/login');
   } 
-  // else if( !authRequired && loggedIn ) { //로그인 페이지이면
-  //   console.log("aa2")
-  //   next('/van/devices/registrations');
-  // }
+
   else {
     next();
   }

@@ -6,15 +6,15 @@ const accountRoutes: RouteRecordRaw[] = [
     component: () => import("../pages/accounts/my.vue"),
   },
   {
-    path: "/admin/accounts/users/my",
+    path: "/van/accounts/users/my",
     component: () => import("../pages/accounts/my.vue"),
   },
   {
-    path: "/admin/accounts/users",
+    path: "/van/accounts/users",
     component: () => import("../pages/accounts/users.vue"),
   },
   {
-    path: "/admin/accounts/users/registration",
+    path: "/van/accounts/users/registration",
     component: () => import("../pages/accounts/registration.vue"),
   },
   {

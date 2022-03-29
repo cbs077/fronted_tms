@@ -1,6 +1,27 @@
 <template>
   <bread-crumb text="S/W Upgrade 이력" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
+    <div v-if="!isVan" class="my-3 flex flex-row">
+      <div class="my-auto mr-6 w-1/12">VAN사</div>
+
+      <div class="my-auto w-5/12 pr-5">
+        <el-select
+          v-model="changeForm.vanSelect"
+          clearable
+          placeholder="선택"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in changeForm.vanList"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>
+    </div>
+
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>
 
@@ -39,7 +60,9 @@
     />
   </div>
 
-  <table-common-button>
+  <table-common-button
+    @update:take="onTake"
+  >
     <template #body>
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
@@ -82,15 +105,17 @@
 <script lang="ts">
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn } from "element-plus";
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, reactive, computed, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import SwUpgradeDetailModal from "~/components/templates/modals/sw-upgrade-detail.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceRegistrations",
@@ -101,12 +126,14 @@ export default defineComponent({
     SwUpgradeDetailModal,
   },
   setup() {
-    let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
+    let { registrationHeaders: headers, devices, update, renmeObjectKey, renmeObjectAKey } = useDevice();
     const searchOptions = [
       { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
       { id: 2, key: "sw_version", value: "S/W Version" }
     ];
     const selectOption = ref();
+    const store = useStore();
+    let isVan = computed(() => store.state.isVan); 
 
     const swDetail = reactive({
       modal: false,
@@ -120,7 +147,6 @@ export default defineComponent({
     });
 
 ////////////////
-    // page
     const query = ref("");
     let pageVal = reactive({
       page: 1,
@@ -132,13 +158,15 @@ export default defineComponent({
       swGroupCodes: [{ value: "-" }],
       deviceModels: [{ value: "-" }],
       swVersions: [{ value: "-" }],
+      vanList: [{ value: "-" }],
+      vanSelect: ""
     })
 
     let excelValue = "";
 
     const paginate = (page) => {
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -146,8 +174,8 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -155,8 +183,7 @@ export default defineComponent({
     }; 
 
     const onSearch = (event) => {
-      console.log()
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
@@ -165,7 +192,6 @@ export default defineComponent({
     };
 
     const onRowClicked = (row: IDevice) => {
-      console.log("row", row)
       swDetail.headerDate = row
       var swGroupCode = row.swGroupCode
       var swVersion = row.swVersion
@@ -177,20 +203,24 @@ export default defineComponent({
           var obj = renmeObjectKey(object);
           dataArr.push(obj);
         }   
-        //console.log("dataArr2", dataArr)
-        swDetail.data = dataArr 
-        swDetail.modal = true
-      })
 
-      getSwVersion(param).then( data => {     
-        var list = data.list
-        var dataArr = []
-        for (var object of list){
-          var obj = renmeObjectKey(object);
-          dataArr.push(obj);
-        }   
-        swDetail.fileInfo = dataArr[0] 
-        swDetail.modal = true
+        let status = _.countBy(dataArr, (rec) => {
+            return rec.resultCode == "" ? 'pass': 'fail';
+        });
+
+        Object.assign(swDetail.headerDate, status);
+        swDetail.data = dataArr 
+
+        getSwVersion(param).then( data => {     
+          var list = data.list
+          var dataArr = []
+          for (var object of list){
+            var obj = renmeObjectKey(object);
+            dataArr.push(obj);
+          }   
+          swDetail.fileInfo = dataArr[0] 
+          swDetail.modal = true
+        })
       })
     };
 
@@ -224,7 +254,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter/default?' + param,
           {
             headers: {
                 Authorization: token
@@ -280,9 +310,10 @@ export default defineComponent({
 
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
+      if(isVan.value) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
 
@@ -298,36 +329,66 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'swOperation.xlsx');
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
+
+        if(data.list == undefined) return
+        var header = _.keys(data.list[0])
+ 
+        var dataT = []
+        var arr = []
+
+        header.forEach((val)=>{  
+          
+          arr.push({
+            value:renmeObjectAKey[val],
+            backgroundColor: '#eeeeee',
+            fontWeight: 'bold',
+            align: 'center'
+          })
+        })
+        dataT.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          header.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataT.push(list)
+        })
+
+        writeXlsxFile(
+          dataT, { 
+          columns,
+          fileName: 'S/W 업그레이드 이력.xlsx'
+        })
       })
     }
+    
     function onSave() {
       swCreate.modal = false
       swCreate.data = {}
     }
 
     const onReset = (event) => {
-      console.log("reset")
       selectOption.value = ""
       query.value = ""
+      changeForm.vanSelect =""
     };
 
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
+
     getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
     return {
@@ -350,8 +411,10 @@ export default defineComponent({
       paginate,
       onTake,
       update,
-      renmeObjectKey   ,
-      onReset   
+      renmeObjectKey,
+      renmeObjectAKey,
+      onReset,
+      isVan,
     };
   },
 });

@@ -1,5 +1,6 @@
 module.exports = {
   env: {
+    node: true,
     browser: true,
     es2021: true,
   },
@@ -15,7 +16,15 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
   },
-  plugins: ["vue", "@typescript-eslint", "simple-import-sort", "unicorn", "sonarjs", "import", "prettier"],
+  plugins: [
+    "vue",
+    "@typescript-eslint",
+    "simple-import-sort",
+    "unicorn",
+    "sonarjs",
+    "import",
+    "prettier",
+  ],
   rules: {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",

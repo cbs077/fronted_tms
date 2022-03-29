@@ -16,12 +16,12 @@
             v-for="item in changeForm.deviceModels"
             :key="item.value"
             :label="item.value"
-            :value="item.value"
+            :value="item.key"
           />
         </el-select>
       </div>
     </div>
-
+<!--
     <div class="my-3 flex flex-row">
       <div class="my-auto w-1/12">검색조건</div>
 
@@ -46,17 +46,18 @@
       <div class="w-5/12 pr-5">
         <el-input v-model="filter.query" size="large" />
       </div>
-    </div>
+    </div>-->
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
   <table-common-button>
     <template #body>
       <div class="grow" />
-      <excel-button class="mr-1" />
+      <excel-button @click:excel="onSaveExcel" class="mr-1" />
     </template>
   </table-common-button>
   <div class="rounded border border-sk-gray">
@@ -91,7 +92,7 @@
 import faker from "@faker-js/faker";
 import axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import * as XLSX from 'xlsx/xlsx.mjs';
+import writeXlsxFile from 'write-excel-file'
 import { defineComponent, reactive, ref } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -100,6 +101,7 @@ import UserDetailModal from "~/components/templates/modals/user-detail.modal.vue
 import { IAdminUser } from "~/interfaces/data.interface";
 import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 import { useDevice } from "~/hooks/devices.hooks";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceRegistrationLogs",
@@ -111,7 +113,8 @@ export default defineComponent({
   setup() {
     let {update, renmeObjectKey} = useDevice();
     const selectOption = ref();
-    //
+    const store = useStore();
+
     const filter = reactive({
       squad: {
         available: [{ value: "test" }],
@@ -137,19 +140,25 @@ export default defineComponent({
       data: []
     });
 
+    const onReset = (event) => {
+      selectOption.value = ""
+    };
+
     const paginate = (page) => {
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" + filter.query.value
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
+      if(selectOption != "") param = param + "&van_id=" + selectOption.value 
+
       getTerminal(param).then( data => {
         setValue(data)
       })
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" + filter.query.value
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
+      if(selectOption != "") param = param + "&van_id=" + selectOption.value 
+
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -170,9 +179,9 @@ export default defineComponent({
     let excelValue = "";
 
     const onSearch = () => {
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       
-      if(selectOption.value != "") param = param + "&van_id=" + selectOption.value 
+      if(selectOption.value != undefined) param = param + "&van_id=" + selectOption.value 
 
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
@@ -242,19 +251,42 @@ export default defineComponent({
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var dataWS = XLSX.utils.json_to_sheet(data.list);
-        // 엑셀의 workbook을 만든다
-        // workbook은 엑셀파일에 지정된 이름이다.
-        var wb = XLSX.utils.book_new();
-        // workbook에 워크시트 추가
-        // 시트명은 'nameData'
-        XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-        // 엑셀 파일을 내보낸다.
-        XLSX.writeFile(wb, 'terminalmdl.xlsx');
+        var headerData = 
+          ["USER_ID", "USER_NM", "ADDR1", "COMP_ID", "PHONE", "USER_RIGHTS", "REG_USER"]
+        var headerName =
+          ["유저 ID", "유저 이름", "주소", "VAN사명", "전화번호", "권한", "등록자"]
+        
+        var dataa = []
+        var arr = []
+
+        headerName.forEach((val)=>{
+          arr.push({
+            value:val,
+            fontWeight: 'bold',
+            backgroundColor: '#bfbfbf',
+            width: 120
+          })
+        })
+        dataa.push(arr)
+
+        data.list.forEach((value)=>{
+          var list = []
+          headerData.forEach((val)=>{
+            list.push({value: value[val]})
+          })
+          dataa.push(list)
+        })
+
+
+        writeXlsxFile(dataa, {
+          fileName: '사용자 정보.xlsx'
+        })
       })
     }
 
-    getTerminal("page=1&page_count=20").then( data => {
+
+    getTerminalMdl()
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
     return { 
@@ -269,7 +301,8 @@ export default defineComponent({
       onSaveExcel,
       paginate,
       onTake,
-      selectOption 
+      selectOption,
+      onReset 
       };
   },
 });

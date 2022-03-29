@@ -2,6 +2,27 @@
   <bread-crumb text="Transaction 조회" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
     <div class="my-3">
+      <div v-if="!isVan" class="my-3 flex flex-row">
+        <div class="my-auto w-1/12">VAN사</div>
+
+        <div class="my-auto w-5/12 pr-5">
+          <el-select
+            v-model="changeForm.vanSelect"
+            clearable
+            placeholder="선택"
+            size="large"
+            class="w-full"
+          >
+            <el-option
+              v-for="item in changeForm.vanList"
+              :key="item.value"
+              :label="item.value"
+              :value="item.key"
+            />
+          </el-select>
+        </div>
+      </div>
+
       <div class="my-3 flex">
         <div class="my-auto w-1/12">조회일</div>
 
@@ -76,8 +97,8 @@
     @update:take="onTake"
   >
     <template #body>
-      <base-button class="mr-1" text="사용 중지"  @click="onStopTirminal" />
-      <base-button class="ml-1" text="사용 재개" />
+      <base-button class="mr-1" text="사용 중지" @click="onStopTirminal(true)" />
+      <base-button class="ml-1" text="사용 재개" @click="onStopTirminal(false)"/>
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
     </template>
@@ -120,7 +141,7 @@
   />
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, reactive, computed, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
 import writeXlsxFile from 'write-excel-file'
@@ -129,9 +150,10 @@ import { defineComponent, reactive, ref } from "vue";
 import BaseButton from "~/components/atoms/base-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import ConfirmModal from "~/components/templates/modals/confirm.modal.vue";
-import { useConst } from "~/hooks/const.hooks";
 import { useDevice } from "~/hooks/devices.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -141,14 +163,15 @@ export default defineComponent({
     ConfirmModal,
   },
   setup() {
-    let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
-    //const { searchOptions } = useConst();
+    let { registrationHeaders: headers, devices, update, renmeObjectKey, renmeObjectAKey} = useDevice();
+
+    let isVan = computed(() => store.state.isVan); 
     const SGsearchOptions = [
       { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
       { id: 2, key: "sw_version", value: "S/W Version" },
     ];
     const searchOptions = ref();
-
+    const store = useStore();
     const displayOptions = reactive({
       all: false,
       modelCode: false,
@@ -188,14 +211,17 @@ export default defineComponent({
       swVersions: [{ value: "-" }], 
       response: "normal",
       server: "prod",
-      data: []
+      data: [],
+      vanList: [{ value: "-" }],
+      vanSelect: ""
     })
-
+    changeForm.server = ref("운영서버")
+    changeForm.response = ref("일반")
     let excelValue = "";
 
     function common_query(){
       console.log("searchOptions", changeForm.deviceNumber)
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
       if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
       if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
@@ -214,7 +240,8 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
       common_query()
     }; 
 
@@ -228,6 +255,7 @@ export default defineComponent({
       condition.start = new Date()
       condition.end = new Date()
       query.value = ""
+      changeForm.vanSelect = ""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -271,8 +299,10 @@ export default defineComponent({
     };
 
     async function getTerminal(param) {
+      if(isVan.value) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
 
@@ -288,13 +318,12 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
-    function onStopTirminal() {
+    function onStopTirminal(flag) {
       data.checkbox.forEach(function(value, index) {
-        onUpdateRc(value)
+        onUpdateRc(value, flag)
         console.log('array index: ' + index + ' value : ' + value);
       })
       deviceUnRegistration.modal = false
@@ -306,7 +335,7 @@ export default defineComponent({
       console.log("onSelectChange", data.checkbox)
     }
 
-    const onUpdateRc = (deviceNumber) => {
+    const onUpdateRc = (deviceNumber, flag) => {
       var token = window.localStorage.getItem("token")
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
@@ -315,7 +344,8 @@ export default defineComponent({
         {
           "VAN_ID" : vanId,
           "CAT_SERIAL_NO": deviceNumber,
-          "CMD": "DT",    
+          "CMD": "DT",   
+          "CMD_SUB": flag,    
           'REG_DT': new Date(),
           'REG_USER': userNM,
         }, 
@@ -330,39 +360,37 @@ export default defineComponent({
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        const columns = [{},{},{width: 15},{width: 15},{ width: 25 }]
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
 
-        var headerData = 
-          ["VAN_ID", "CAT_MODEL_ID", "CAT_MODEL_NM", "DESCRIPTION", "GUBUN", "RESULT_CODE", "REG_DT"]
-        var headerName =
-          ["VNA사명", "모델코드", "모델명", "설명", "구분", "결과", "등록일"]
-        
+        if(data.list == undefined) return
+        var header = ["VAN_ID", "VAN_NM", "CAT_MODEL_ID", "CAT_SERIAL_NO", "DESCRIPTION", "GUBUN","MANAGER_NM", "SW_GROUP_ID", "SW_GROUP_NM", "SW_VERSION", "UPDATE_DT",   ]
+        //_.keys(data.list[0])
+
         var dataT = []
         var arr = []
 
-        headerName.forEach((val)=>{
+        header.forEach((val)=>{         
           arr.push({
-            value:val,
+            value:renmeObjectAKey[val],
             backgroundColor: '#eeeeee',
             fontWeight: 'bold',
-            align: 'center',
+            align: 'center'
           })
         })
         dataT.push(arr)
 
         data.list.forEach((value)=>{
           var list = []
-          headerData.forEach((val)=>{
+          header.forEach((val)=>{
             list.push({value: value[val]})
           })
           dataT.push(list)
         })
 
-
         writeXlsxFile(
           dataT, { 
           columns,
-          fileName: '모니터링.xlsx'
+          fileName: 'S/W 업데이트.xlsx'
         })
       })
     }
@@ -372,12 +400,16 @@ export default defineComponent({
       swGroupCreate.data = {}
     }
 
-    getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
-      setValue(data)
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
     })
-    changeForm.server = ref("운영서버")
-    changeForm.response = ref("일반")
+
+    getTerminalMdl()
+    common_query()
+
     return {
       selectOption,
       update,
@@ -405,6 +437,7 @@ export default defineComponent({
       onStopTirminal,
       onSelectChange,
       onUpdateRc,
+      isVan,
     };
   },
 });

@@ -78,7 +78,7 @@ export default defineComponent({
     BaseButton,
   },
   setup() {
-    const { registrationHeaders: headers, devices, renmeObjectKey } = useDevice();
+    const { registrationHeaders: headers, devices, renmeObjectKey, renmeObjectAKey} = useDevice();
     const { searchOptions } = useConst();
 
     const deviceRegistration = reactive({
@@ -183,10 +183,12 @@ export default defineComponent({
         },
       )
       .then(response => {
-        var list = response.data.list
-
+        console.log("response.data.list",response)
+        if(response.data.status == 400){
+          alert("실패하였습니다.")
+        }
         alert("정보가 변경되었습니다.")
-        //console.log("response", response)
+
       });
     };
 

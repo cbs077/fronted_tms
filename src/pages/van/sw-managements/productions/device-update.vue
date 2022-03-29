@@ -1,6 +1,27 @@
 <template>
   <bread-crumb text="단말기 Update 이력" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
+    <div v-if="!isVan" class="my-3 flex flex-row">
+      <div class="my-auto w-1/12">VAN사</div>
+
+      <div class="my-auto w-5/12 pr-5">
+        <el-select
+          v-model="changeForm.vanSelect"
+          clearable
+          placeholder="선택"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in changeForm.vanList"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>
+    </div>
+
     <div class="my-3">
       <div class="my-3 flex">
         <div class="my-auto w-1/12">Update 일</div>
@@ -47,10 +68,13 @@
     </div>
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
-  <table-common-button>
+  <table-common-button
+    @update:take="onTake"
+  >
     <template #body>
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
@@ -90,7 +114,7 @@
 <script lang="ts">
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn } from "element-plus";
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, reactive, computed, ref } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
 import writeXlsxFile from 'write-excel-file'
@@ -99,7 +123,9 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import DeviceUpdateDetailModal from "~/components/templates/modals/device-update-detail.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { useDevice } from "~/hooks/devices.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -108,7 +134,10 @@ export default defineComponent({
     DeviceUpdateDetailModal,
   },
   setup() {
-    let { registrationHeaders: headers, devices, update, renmeObjectKey } = useDevice();
+    let { registrationHeaders: headers, devices, update, renmeObjectKey, renmeObjectAKey} = useDevice();
+    const store = useStore();
+    let isVan = computed(() => store.state.isVan); 
+
     const searchOptions = [
       { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
       { id: 2, key: "sw_version", value: "S/W Version" },
@@ -149,12 +178,14 @@ export default defineComponent({
       deviceModels: [{ value: "-" }],
       swVersions: [{ value: "-" }],
       deviceNumber: "",
+      vanList: [{ value: "-" }],
+      vanSelect: ""
     })
 
     let excelValue = "";
     function common_query(){
       console.log("searchOptions", changeForm.deviceNumber)
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
       if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
       if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
@@ -172,12 +203,14 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
       common_query()
     }; 
 
     const onSearch = (event) => {
       common_query()
+      console.log("store.state.pageCount", store.state.pageCount)
     };
 
     const seTtotalCount = (pageCount) => {
@@ -193,7 +226,6 @@ export default defineComponent({
       }   
       seTtotalCount(data.total_count)
       changeForm.data =dataArr
-      //update(dataArr); 
     }
 
     const onRowClicked = (row) => {
@@ -209,21 +241,28 @@ export default defineComponent({
           var obj = renmeObjectKey(object);
           dataArr.push(obj);
         }  
-        deviceUpdateDetail.data = dataArr 
-        deviceUpdateDetail.modal = true
-      })
 
-      getSwVersion(param).then( data => {     
-        var list = data.list
-        var dataArr = []
-        for (var object of list){
-          var obj = renmeObjectKey(object);
-          dataArr.push(obj);
-        }   
-        //계속 상세보기 누르면 이상함
-        console.log("dataArr1", dataArr)
-        deviceUpdateDetail.fileInfo = dataArr[0]
-        deviceUpdateDetail.modal = true
+        let status = _.countBy(dataArr, (rec) => {
+            return rec.resultCode == "" ? 'pass': 'fail';
+        });
+        
+        Object.assign(deviceUpdateDetail.headerDate, status);
+        console.log("deviceUpdateDetail.headerDate", deviceUpdateDetail.headerDate)
+        deviceUpdateDetail.data = dataArr 
+
+        getSwVersion(param).then( data => {     
+          var list = data.list
+          var dataArr = []
+          for (var object of list){
+            var obj = renmeObjectKey(object);
+            dataArr.push(obj);
+          }   
+          //계속 상세보기 누르면 이상함
+          console.log("dataArr1", dataArr)
+
+          deviceUpdateDetail.fileInfo = dataArr[0]
+          deviceUpdateDetail.modal = true
+        })
       })
     };
 
@@ -292,14 +331,14 @@ export default defineComponent({
         changeForm.deviceModels = _.map(list, function square(n) {
           return {"value": n.CAT_MODEL_NM}
         })
-
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
     async function getTerminal(param) {
+      if(isVan.value) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId + "&gubun_code=FA"
       if(token == null) token = "" 
 
@@ -315,42 +354,40 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        const columns = [{},{},{width: 15},{width: 15},{ width: 15 },{width: 15},{width: 15},{width: 20},{width: 20}]
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
 
-        var headerData = 
-          ["VAN_ID",  "CAT_SERIAL_NO", "CAT_MODEL_ID", "SW_GROUP_ID", ,"SW_VERSION", "GUBUN", "STATUS", "REG_DT", "LAST_USE_DT"]
-        var headerName =
-          ["VNA사명",  "단말기번호", "단말기모델코드", "S/W 그룹 코드", "S/W 버전", "구분", "상태", "등록일", "최종접속일"]
-        
+        if(data.list == undefined) return
+        var header = ["VAN_ID", "VAN_NM", "CAT_MODEL_ID", "CAT_SERIAL_NO", "DESCRIPTION", "GUBUN","MANAGER_NM", "SW_GROUP_ID", "SW_GROUP_NM", "SW_VERSION", "UPDATE_DT",   ]
+        //_.keys(data.list[0])
+
         var dataT = []
         var arr = []
 
-        headerName.forEach((val)=>{
+        header.forEach((val)=>{         
           arr.push({
-            value:val,
+            value:renmeObjectAKey[val],
+            backgroundColor: '#eeeeee',
             fontWeight: 'bold',
-            backgroundColor: '#bfbfbf',
-            width: 120
+            align: 'center'
           })
         })
         dataT.push(arr)
 
         data.list.forEach((value)=>{
           var list = []
-          headerData.forEach((val)=>{
+          header.forEach((val)=>{
             list.push({value: value[val]})
           })
           dataT.push(list)
         })
 
-
-        writeXlsxFile(dataT, {
+        writeXlsxFile(
+          dataT, { 
           columns,
           fileName: 'S/W 업데이트.xlsx'
         })
@@ -360,13 +397,27 @@ export default defineComponent({
     function onSave() {
       swCreate.modal = false
       swCreate.data = {}
-    }
+    }   
 
+    const onReset = (event) => {
+      console.log("reset")
+      searchOptions.value = ""
+      condition.start = new Date()
+      condition.end = new Date()
+      query.value = ""
+      changeForm.vanSelect = ""
+      changeForm.deviceNumber = ""
+    };
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
-      setValue(data)
-    })
+    common_query()
+
     return {
       onRowClicked,
       deviceUpdateDetail,
@@ -389,7 +440,9 @@ export default defineComponent({
       onTake,
       update,
       renmeObjectKey,    
-      condition    
+      condition,
+      onReset,    
+      isVan,
     };
   },
 });

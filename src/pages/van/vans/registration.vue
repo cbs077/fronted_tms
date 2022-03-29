@@ -18,10 +18,10 @@
     </div>
 
     <div class="col-span-4 mt-1 flex">
-      <div class="label-width my-auto w-2/12"></div>
+      <!--<div class="label-width my-auto w-2/12"></div>
       <div class="w-7/12 text-left text-sk-red">
         이미 등록된 VAN사 코드입니다.
-      </div>
+      </div>-->
     </div>
     <div class="col-span-4 my-3 flex"></div>
 
@@ -97,26 +97,7 @@ export default defineComponent({
     const registrationResult = reactive({
       modal: false,
       items: [
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
+
       ],
     });
 
@@ -175,7 +156,7 @@ export default defineComponent({
       )
       .then(response => {
         var list = response.data.list
-        //console.log("response", response)
+
       });
     };
 

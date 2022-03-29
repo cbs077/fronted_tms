@@ -1,0 +1,299 @@
+5:58:35 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:88: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, changeForm)
+     |                                                                                          ^
+  25 |          .then(response => {
+  26 |            var list = response.data.list
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+5:59:37 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:77: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                               ^
+  25 |          {changeForm})
+  26 |          .then(response => {
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+5:59:49 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:77: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                               ^
+  25 |          {changeForm})
+  26 |          .then(response => {
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:01:02 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:77: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                               ^
+  25 |          	params: {
+  26 |             user_id: changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:02:09 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:77: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                               ^
+  25 |          	params: {
+  26 |             "user_id": changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:02:20 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:77: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.get('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                               ^
+  25 |          	data: {
+  26 |             "user_id": changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:02:23 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:78: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr:8081/login?, 
+     |                                                                                ^
+  25 |          	data: {
+  26 |             "user_id": changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:03:53 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:73: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login?, 
+     |                                                                           ^
+  25 |          	data: {
+  26 |             "user_id": changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:04:39 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:24:73: ERROR: Unterminated string literal
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Unterminated string literal
+  22 |  
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login?, 
+     |                                                                           ^
+  25 |          	data: {
+  26 |             "user_id": changeForm.userId,
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:04:57 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:25:13: ERROR: Expected ")" but found ":"
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Expected ")" but found ":"
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login', 
+  25 |          	data: {
+     |               ^
+  26 |             "user_id": changeForm.userId,
+  27 |             "password": changeForm.password
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:04:59 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:25:13: ERROR: Expected ")" but found ":"
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Expected ")" but found ":"
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login', 
+  25 |          	data: {
+     |               ^
+  26 |             "user_id": changeForm.userId,
+  27 |             "password": changeForm.password
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:05:13 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:25:13: ERROR: Expected ")" but found ":"
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Expected ")" but found ":"
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login', 
+  25 |          	data: {
+     |               ^
+  26 |             "user_id": changeForm.userId,
+  27 |             "password": changeForm.password
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)
+6:05:16 AM [vite] Internal server error: Transform failed with 1 error:
+/home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue:25:13: ERROR: Expected ")" but found ":"
+  Plugin: vite:vue
+  File: /home/ubuntu/Tms_server/frontend_jayden/src/pages/login.vue
+  
+  Expected ")" but found ":"
+  23 |        function login() {
+  24 |          let response = axios.post('http://tms-test-server.p-e.kr/login', 
+  25 |          	data: {
+     |               ^
+  26 |             "user_id": changeForm.userId,
+  27 |             "password": changeForm.password
+  
+      at failureErrorWithLog (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1601:15)
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:1390:29
+      at /home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:664:9
+      at handleIncomingPacket (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:761:9)
+      at Socket.readFromStdout (/home/ubuntu/Tms_server/frontend_jayden/node_modules/esbuild/lib/main.js:631:7)
+      at Socket.emit (node:events:520:28)
+      at addChunk (node:internal/streams/readable:315:12)
+      at readableAddChunk (node:internal/streams/readable:289:9)
+      at Socket.Readable.push (node:internal/streams/readable:228:10)
+      at Pipe.onStreamRead (node:internal/stream_base_commons:190:23)

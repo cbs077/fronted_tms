@@ -2,10 +2,31 @@
   <bread-crumb text="단말기 모델 조회" />
 
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
-    <div class="my-3 flex flex-row">
-      <div class="my-auto w-1/12">모델명</div>
+    <div v-if="!isVan" class="my-3 flex flex-row">
+      <div class="my-auto mr-6 w-1/12">VAN사</div>
 
-      <div class="my-auto ml-5 w-5/12">
+      <div class="my-auto w-5/12 pr-5">
+        <el-select
+          v-model="changeForm.vanSelect"
+          clearable
+          placeholder="선택"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in changeForm.vanList"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>
+    </div>
+
+    <div class="my-3 flex flex-row">
+      <div class="my-auto mr-6 w-1/12">모델명</div>
+
+      <div class="my-auto w-5/12 pr-5">
         <el-select
           v-model="selectOption"
           clearable
@@ -41,6 +62,7 @@
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
       <base-button
+        v-if="isVan"
         text="단말기 모델 등록"
         class="ml-1 w-36"
         @click="modelCreate.modal = true"
@@ -86,7 +108,7 @@
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
 import * as _ from "lodash";
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, reactive, computed, ref } from "vue";
 import writeXlsxFile from 'write-excel-file'
 
 import BaseButton from "~/components/atoms/base-button.vue";
@@ -94,8 +116,9 @@ import TableCommonButton from "~/components/molecules/table/table-common-button.
 import ConfirmModal from "~/components/templates/modals/confirm.modal.vue";
 import ModelCreateModal from "~/components/templates/modals/model-create.modal.vue";
 import ModelDetailModal from "~/components/templates/modals/model-detail.modal.vue";
-import { useConst } from "~/hooks/const.hooks";
-import { useDevice } from "~/hooks/devices.hooks";
+import { useDevice, } from "~/hooks/devices.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -108,9 +131,11 @@ export default defineComponent({
     BaseButton,
   },
   setup() {
-    let { registrationHeaders: headers, devices, renmeObjectKey} = useDevice();
-    //const { deviceModels } = useConst();
+    let { registrationHeaders: headers, devices, renmeObjectKey, renmeObjectAKey } = useDevice();
+    const store = useStore();
     const query = ref("");
+    let isVan = computed(() => store.state.isVan); 
+
     const displayOptions = reactive({
       all: false,
       modelCode: false,
@@ -155,15 +180,16 @@ export default defineComponent({
       swGroupCodes: [{ value: "-" }],
       deviceModels: [],
       swVersions: [{ value: "-" }],
-      data: []
+      data: [],
+      vanList: [{ value: "-" }],
+      vanSelect: ""
     })
 
     let excelValue = "";
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       //검색어
       if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
       else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
@@ -174,9 +200,9 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      console.log("onTake", pageCount)
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
 
       if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
       else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
@@ -187,13 +213,10 @@ export default defineComponent({
     }; 
 
     const onSearch = (event) => {
-      console.log("onSearch11", selectOption)
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       
       if(query.value != "") { param = param + "&cat_model_id=" + query.value }
-      else { param = param + "&cat_model_id=" + selectOption.value }
       
-      console.log("param" , param)
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
@@ -201,9 +224,9 @@ export default defineComponent({
     };
 
     const onReset = (event) => {
-      console.log("reset")
       selectOption.value = ""
       query.value = ""
+      changeForm.vanSelect =""
     };
 
     const seTtotalCount = (pageCount) => {
@@ -248,9 +271,10 @@ export default defineComponent({
 
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
+      if(isVan.value) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
 
@@ -266,45 +290,42 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        const columns = [{},{},{width: 15},{width: 15},{ width: 25 }]
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
 
-        var headerData = 
-          ["VAN_ID", "CAT_MODEL_ID", "CAT_MODEL_NM", "DESCRIPTION", "REG_DT"]
-        var headerName =
-          ["VNA사명", "모델코드", "모델명", "설명", "등록일"]
-        
+        if(data.list == undefined) return
+        var header = _.keys(data.list[0])
+ 
         var dataT = []
         var arr = []
 
-        headerName.forEach((val)=>{
+        header.forEach((val)=>{  
+          
           arr.push({
-            value:val,
+            value:renmeObjectAKey[val],
             backgroundColor: '#eeeeee',
             fontWeight: 'bold',
-            align: 'center',
+            align: 'center'
           })
         })
         dataT.push(arr)
 
         data.list.forEach((value)=>{
           var list = []
-          headerData.forEach((val)=>{
+          header.forEach((val)=>{
             list.push({value: value[val]})
           })
           dataT.push(list)
         })
 
-
         writeXlsxFile(
           dataT, { 
           columns,
-          fileName: '단말기조회.xlsx'
+          fileName: '단말기모델 조회.xlsx'
         })
       })
     }
@@ -313,23 +334,20 @@ export default defineComponent({
       modelCreate.modal = false
       modelCreate.data = {}
       getTerminalMdl()
-      getTerminal("page=1&page_count=20").then( data => {
+      getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
         setValue(data)
       })   
-      //console.log("onSave", event)
     }
 
-    const onSaveDetail = ( val : any) => {
-      console.log("onSaveDetail")
-      modelDetail.modal =false
-      getTerminalMdl()
-      getTerminal("page=1&page_count=20").then( data => {
-        setValue(data)
-      })      
-    }
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
 
@@ -347,6 +365,7 @@ export default defineComponent({
       //
       pageVal, 
       changeForm,
+      renmeObjectAKey ,
       onSearch,
       onReset,
       excelValue,
@@ -354,7 +373,7 @@ export default defineComponent({
       paginate,
       onTake,
       onSave,
-      onSaveDetail
+      isVan,
     };
   },
 });

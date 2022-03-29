@@ -134,12 +134,55 @@ export const useDevice = () => {
     return temporary
   };
 
+  const renmeObjectAKey = {
+    "SERIAL_NO_FROM": "단말기 시작 번호",
+    "SERIAL_NO_TO": "단말기 마지막 번호",
+    "CAT_MODEL_NM": "모델이름",
+    "SW_VERSION": "버전",
+    "OLD_SW_VERSION": "오래된버전",
+    "UPLOAD_FILE_NM": "파일이름",
+    "DATA_SIZE": "파일크기",
+    "DESCRIPTION": "설명",
+    "CAT_SERIAL_NO": "단말기번호",
+    "UPDATE_DT": "업데이트날짜",
+    "CAT_MODEL_ID": "모델코드",
+    "STATUS": "상태",
+    "RESULT_CODE": "결과상태",
+    "SW_GROUP_ID": "S/W그룹코드",
+    "SW_GROUP_NM": "S/W그룹이름",
+    "VAN_ID": "VAN사",
+    "VAN_NM": "VAN사명",
+    "ADDR1": "주소",
+    "PHONE": "핸드폰",
+    "MANAGER_NM": "매니저",
+    "REG_DT": "등록일",
+    "REG_USER": "등록자",
+    "USER_ID": "아이디",
+    "USER_NM": "유저이름",
+    "USER_RIGHTS_NM": "권한",
+    "GUBUN": "구분",
+    "FIRST_USE_DT": "첫사용",
+    "LAST_USE_DT": "마지막사용",
+    "FILE_PATH": "파일위치",
+    "FILE_NM": "파일이름",
+    "APPL_DT": "어플날짜",
+    "FAX": "팩스",
+    "USE_YN": "사용유무",
+    "sw_count": "S/W 다운로드 수",
+    "tw_count": "단말기 수량",
+    "reg_dt": "등록일",
+    "stop_count": "정지 수량",
+    "init_count": "초기 수량",
+    "cur_count": "현재 수량"
+  }
+  
   return {
     registrationHeaders,
     registrationHeaders_a,
     logHeaders,
     devices,
     update,
-    renmeObjectKey    
+    renmeObjectKey,
+    renmeObjectAKey    
   };
 };

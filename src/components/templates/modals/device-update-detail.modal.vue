@@ -89,7 +89,7 @@
                 업데이트 이력 (완료)
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                 {{headerDate.pass}}
               </td>
             </tr>
             <tr>
@@ -99,7 +99,7 @@
                 업데이트 이력 (실패)
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{headerDate.fail}}
               </td>
             </tr>
           </tbody>
@@ -109,7 +109,7 @@
         <el-table :data="device" class="rounded">
           <el-table-column
             prop="swGroupCode"
-            label="S/W Group 코드"
+            label="Group 코드"
             align="center"
           />          
           <el-table-column
@@ -213,7 +213,7 @@ export default defineComponent({
       { key: "status", value: "상태" },
     ];
 //
-    const { renmeObjectKey } = useDevice();
+    const { renmeObjectKey, renmeObjectAKey} = useDevice();
 
     let initialState = reactive({
       swGroupCode: "",//properties.device.swGroupCode,

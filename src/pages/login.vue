@@ -37,7 +37,11 @@
       })
 
       function login() {
-        let response = axios.get('http://tms-test-server.p-e.kr:8081/login?user_id=' + changeForm.userId + '&password=' + changeForm.password)
+        let response = axios.post('http://tms-test-server.p-e.kr/login', 
+        	{
+           "user_id": changeForm.userId,
+           "password": changeForm.password
+        })
         .then(response => {
           var list = response.data.list
           if( response.data.status == 200){
@@ -55,13 +59,13 @@
 
             if( response.data.messages.user_right == "S" ){
               window.localStorage.setItem("is_van", false)
-              store.state.userRight  = false
-              store.commit("userRight", false);
+              store.state.isVan  = false
+              store.commit("isVan", false);
             }  
             else { // van
               window.localStorage.setItem("is_van", true)
-              store.state.userRight  = true  
-              store.commit("userRight", true);
+              store.state.isVan  = true  
+              store.commit("isVan", true);
             } 
           }else if(response.data.status == 405){
             alert("패스워드를 확인해주세요.")

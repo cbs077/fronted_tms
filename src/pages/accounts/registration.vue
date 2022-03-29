@@ -26,13 +26,13 @@
     <div class="col-span-4 my-3 flex">
       <div class="label-width my-auto w-2/12">패스워드</div>
       <div class="w-9/12">
-        <el-input v-model="changeForm.PWD" size="large" placeholder="Please Input" />
+        <el-input type="password" v-model="changeForm.PWD" size="large" placeholder="Please Input" />
       </div>
     </div>
     <div class="col-span-4 my-3 flex">
       <div class="label-width my-auto w-2/12">패스워드 확인</div>
       <div class="w-10/12">
-        <el-input v-model="changeForm.PWD" size="large" placeholder="Please Input" />
+        <el-input type="password" v-model="changeForm.PWD1" size="large" placeholder="Please Input" />
       </div>
     </div>
     <hr class="col-span-8 my-6" />
@@ -104,6 +104,7 @@ import { defineComponent, reactive, ref } from "vue";
 import BaseButton from "~/components/atoms/base-button.vue";
 import { useConst } from "~/hooks/const.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceRegistrations",
@@ -113,6 +114,7 @@ export default defineComponent({
   setup() {
     const { registrationHeaders: headers, devices } = useDevice();
     const { searchOptions } = useConst();
+    const store = useStore();
 
     const deviceRegistration = reactive({
       modal: false,
@@ -121,26 +123,6 @@ export default defineComponent({
     const registrationResult = reactive({
       modal: false,
       items: [
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
       ],
     });
 
@@ -170,6 +152,7 @@ export default defineComponent({
       USER_NM: "",
       COMP_ID: "",
       PWD:"",
+      PWD1: "",
       USER_RIGHTS: "",
       PHONE: "",
       FAX:"",
@@ -201,16 +184,16 @@ export default defineComponent({
         changeForm.deviceModels = _.map(list, function square(n) {
           return {"key": n.VAN_ID, "value": n.VAN_NM}
         })
-
-        //changeForm.deviceModels = [{"value": "Asas"}]
-
-        ////console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
+
+      if(changeForm.PWD !=""&& changeForm.PWD1 !=""){
+          if( changeForm.PWD != changeForm.PWD1){ alert("패스워드 확인을 해주세요."); return}
+      }
 
       axios.post ('http://tms-test-server.p-e.kr:8081/user?' ,
         {
@@ -231,8 +214,12 @@ export default defineComponent({
         },
       )
       .then(response => {
-        var list = response.data.list
-        //console.log("response", response)
+        console.log("response", response.data.status)
+        if(response.data.status == 400){
+          alert("실패하였습니다.")
+          return
+        }
+        alert("등록되었습니다.")
       });
     };
     getTerminalMdl()

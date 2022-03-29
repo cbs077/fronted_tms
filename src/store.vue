@@ -4,23 +4,30 @@ import { createStore } from "vuex";
 export default createStore({
   state: {
     isLoginPage: false,
-    userRight: false,
+    isVan: false,
+    pageCount: 20,
     menuss: []
   },
   getters: {
     isLoginPage(state) {
       return state.isLoginPage;
     },
-    userRight(state) {
-      return state.userRight;
-    }
+    isVan(state) {
+      return state.isVan;
+    },
+    pageCount(state) {
+      return state.pageCount;
+    },   
   },
   mutations: {
     setisLoginPage(state, value) {
       state.isLoginPage = value;
     },
-    userRight(state, value) {
-      state.userRight = value;
+    isVan(state, value) {
+      state.isVan = value;
+    },
+    pageCount(state, value) {
+      state.pageCount = value;
     }
   }
 });

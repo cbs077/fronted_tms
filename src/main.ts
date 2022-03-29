@@ -12,6 +12,7 @@ import OptionsSearchButton from "~/components/molecules/options-search-button.vu
 import App from "./App.vue";
 import router from "./routes";
 import store from "./store.vue";
+//const api_key = import.meta.env.VITE_KEY;
 
 createApp(App)
   .component(BaseButton.name, BaseButton)

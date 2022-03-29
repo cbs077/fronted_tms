@@ -1,6 +1,27 @@
 <template>
   <bread-crumb text="단말기 조회 및 등록" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
+    <div v-if="!isVan" class="my-3 flex flex-row">
+      <div class="my-auto mr-6 w-1/12">VAN사</div>
+
+      <div class="my-auto w-5/12 pr-5">
+        <el-select
+          v-model="changeForm.vanSelect"
+          clearable
+          placeholder="선택"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in changeForm.vanList"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>
+    </div>
+
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>
 
@@ -59,6 +80,7 @@
       <div class="grow" />
        <excel-button @click:excel="onSaveExcel" class="mr-1" />
       <base-button
+        v-if="isVan"
         text="단말기 등록"
         class="ml-1"
         @click="deviceRegistration.modal = true"
@@ -117,14 +139,13 @@
 </template>
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
+import * as _ from "lodash";
 import writeXlsxFile from 'write-excel-file'
-
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElTableColumn, ElPagination } from "element-plus";
 import Pagination from '@/components/Pagination'
 
-import { defineComponent, reactive, ref } from "vue";
-
+import { defineComponent, reactive, computed, ref } from "vue";
 import BaseButton from "~/components/atoms/base-button.vue";
 
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
@@ -132,10 +153,9 @@ import DeviceDetailModal from "~/components/templates/modals/device-detail.modal
 import DeviceRegisterModal from "~/components/templates/modals/device-register.modal.vue";
 import ResultModal from "~/components/templates/modals/result.modal.vue";
 import { useConst } from "~/hooks/const.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
-
-//import {makeExcelFile5} from "~/components/molecules/excel-button.vue";
-
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceRegistrations",
@@ -152,7 +172,9 @@ export default defineComponent({
   setup() {
     const { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
     const { searchOptions } = useConst();
-
+    const store = useStore();
+    
+    let isVan = computed(() => store.state.isVan); 
     const deviceRegistration = reactive({
       modal: false,
     });
@@ -167,6 +189,11 @@ export default defineComponent({
       page: 1,
       pageCount: 20,
       total: 20
+    })
+
+    let changeForm = reactive({
+      vanList: [{ value: "-" }],
+      vanSelect: ""
     })
 
     let initialState = reactive({
@@ -185,31 +212,10 @@ export default defineComponent({
     const registrationResult = reactive({
       modal: false,
       items: [
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
       ],
     });
 
     const onRegistration = (value) => {
-      //console.log("onRegistration", value)
       if( value.type == "multi"){
         registrationResult.items = value.data
         deviceRegistration.modal = false;
@@ -225,39 +231,33 @@ export default defineComponent({
       console.log("onRowClicked", row)
       deviceDetail.data = row;
       deviceDetail.modal = true;
-
-
     };
 
-// 없애야 함.
     const onSelect = (event) => {
       searchKey = event
     };
 
     const onSearch = (event) => {
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
-        //defaultCheckbox()
       })
     };
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
-        //defaultCheckbox()
       })
     }; 
 
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -275,16 +275,16 @@ export default defineComponent({
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
 
     const onCheckbox = (name, tst) => {
       tableHeader[name] = tst
-    //  tableHeader.checkAll["van"] = true
     }
 
     async function getTerminal(param) {
-      var vanId = window.localStorage.getItem("vanId")
+      if(isVan.value) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+      
       var token = window.localStorage.getItem("token")
       var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
@@ -301,7 +301,6 @@ export default defineComponent({
         .then(response => {
           return response.data;
         });
-      //console.log("response", responset)
       return responset
     };
 
@@ -342,7 +341,7 @@ export default defineComponent({
 
 
         writeXlsxFile(dataa, {
-          fileName: '단말기모델.xlsx'
+          fileName: '단말기.xlsx'
         })
       })
     }
@@ -350,7 +349,7 @@ export default defineComponent({
     const onSaveDetail = ( val : any) => {
       deviceDetail.modal = false
 
-      getTerminal("page=1&page_count=20").then( data => {
+      getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
         setValue(data)
         defaultCheckbox()
       })
@@ -368,7 +367,6 @@ export default defineComponent({
     }
 
     function defaultCheckbox() {
-     //tableHeader.checkAll["van"] = true
       tableHeader.checkAll["modelCode"] = true
       tableHeader.checkAll["deviceNumber"] = true
       tableHeader.checkAll["swGroupCode"] = true
@@ -377,18 +375,21 @@ export default defineComponent({
       tableHeader.checkAll["applicationDate"] = true
       tableHeader.checkAll["lastAccessDate"] = true
     }
-
     const selectOption = ref();
-    pageVal.pageCount = 20
-    console.log("pageVal.pageCount", pageVal.pageCount)
-    getTerminal("page=1&page_count=" + pageVal.pageCount ).then( data => {
+
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
+
+    getTerminal("page=1&page_count=" + store.state.pageCount ).then( data => {
       setValue(data)
       defaultCheckbox()
     })
 
     return {
-      // searchKey,
-      // searchVal,
       selectOption,
       onRowClicked,
       onRegistration,
@@ -411,7 +412,9 @@ export default defineComponent({
       pageVal,
       excelValue,
       onReset,
-      onSaveDetail  
+      onSaveDetail,
+      isVan,
+      changeForm  
     };
   },
 });

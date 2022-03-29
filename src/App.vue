@@ -73,9 +73,9 @@ export default defineComponent({
     let isLoginPage = computed(() => store.state.isLoginPage); // 상태값 가져오기
     let data = reactive({
        gnbs: [],
-       isVan: store.state.userRight //window.localStorage.getItem("is_van"),
+       isVan: store.state.isVan //window.localStorage.getItem("is_van"),
     })
-    store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
+    store.state.isVan = eval(window.localStorage.getItem("is_van")) === true
 
     const displayLnbs = computed(() => {    
       data.isVan =  eval(window.localStorage.getItem("is_van")) === true
@@ -132,7 +132,7 @@ export default defineComponent({
     });
 
     function checkLoginPage(){
-      store.state.userRight = eval(window.localStorage.getItem("is_van")) === true
+      store.state.isVan = eval(window.localStorage.getItem("is_van")) === true
       store.state.menuss= [...gnbs(data.isVan)]
 
     }
@@ -154,9 +154,6 @@ export default defineComponent({
       data,
       onClickLnb,
       isLoginPage,
-      //data.isVan
-      //onLogin
-      //updateVal
     };
   },
 });

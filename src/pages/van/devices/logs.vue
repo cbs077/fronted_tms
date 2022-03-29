@@ -88,9 +88,9 @@ import { defineComponent, reactive, ref } from "vue";
 import BreadCrumb from "~/components/atoms/breadcrumb.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import { useConst } from "~/hooks/const.hooks";
-//mport { IDeviceLog } from "~/interfaces/data.interface";
 import { useDevice } from "~/hooks/devices.hooks";
 import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceRegistrationLogs",
@@ -99,8 +99,8 @@ export default defineComponent({
     TableCommonButton,
   },
   setup() {
-    let { renmeObjectKey} = useDevice();
-
+    let { renmeObjectKey, renmeObjectAKey } = useDevice();
+    const store = useStore();
     const condition = reactive({
       start: new Date(),
       end: new Date(),
@@ -122,7 +122,7 @@ export default defineComponent({
     let excelValue = "";
 
     function common_query(){
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
       if(query.value != "") param = param + "&cat_model_id=" + query.value
 
@@ -139,7 +139,8 @@ export default defineComponent({
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      pageVal.pageCount = pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
       common_query()
     }; 
 
@@ -148,7 +149,7 @@ export default defineComponent({
     };
 
     const onReset = (event) => {
-      console.log("reset")
+
       condition.start = new Date()
       condition.end = new Date()
       query.value = ""
@@ -221,34 +222,36 @@ export default defineComponent({
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        var headerData = 
-          ["VAN_ID", "CAT_MODEL_ID", "CAT_SERIAL_NO", "SW_GROUP_ID", "SW_VERSION", "STATUS", "REG_DT", "LAST_USE_DT"]
-        var headerName =
-          ["VNA사명", "단말기모델코드", "단말기번호", "S/W 그룹 코드", "S/W 버전", "상태", "등록일", "최종접속일"]
-        
-        var dataa = []
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
+
+        if(data.list == undefined) return
+        var header = _.keys(data.list[0])
+ 
+        var dataT = []
         var arr = []
 
-        headerName.forEach((val)=>{
+        header.forEach((val)=>{  
+          
           arr.push({
-            value:val,
+            value:renmeObjectAKey[val],
+            backgroundColor: '#eeeeee',
             fontWeight: 'bold',
-            backgroundColor: '#bfbfbf',
-            width: 120
+            align: 'center'
           })
         })
-        dataa.push(arr)
+        dataT.push(arr)
 
         data.list.forEach((value)=>{
           var list = []
-          headerData.forEach((val)=>{
+          header.forEach((val)=>{
             list.push({value: value[val]})
           })
-          dataa.push(list)
+          dataT.push(list)
         })
 
-
-        writeXlsxFile(dataa, {
+        writeXlsxFile(
+          dataT, { 
+          columns,
           fileName: '등록이력.xlsx'
         })
       })
@@ -257,11 +260,10 @@ export default defineComponent({
     function onSave(event) {
       modelCreate.modal = false
       modelCreate.data = {}
-      //console.log("onSave", event)
     }
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
     return { 

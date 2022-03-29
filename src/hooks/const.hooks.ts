@@ -11,28 +11,35 @@ const rawGnb: INavMenuItem[] = [
 const gnbs = (isVan): INavMenuItem[] => {
   const store = useStore();
   isVan = window.localStorage.getItem("is_van")
-  isVan = store.getters.userRight
+  isVan = store.getters.isVan
   let prefix = isVan ? "/van" : "/admin";
   
   let temporary = [...rawGnb];
-   
-  console.log("gnbs1", store.state.userRight )
-  console.log("gnbs2", store.getters.userRight )
-  console.log("gnbs3", window.localStorage.getItem("is_van") )
-  console.log("gnbs4", isVan)
 
   if (!isVan) { // admin
-    console.log("van~~")
+    console.log("admin~~")
     temporary.push(
+      {
+        text: "단말기관리",
+        to: `/devices/registrations`,
+      },
       {
         text: "사용자관리",
         to: `/accounts/users/my`,
       },
       {
+        text: "모니터링",
+        to: `/monitors/transactions`,
+      },
+      {
+        text: "S/W 관리",
+        to: `/sw-managements/groups/registrations`,
+      },
+      {
         text: "VAN사 관리",
         to: `/vans`,
       },
-);
+    );
   }
 
   if (isVan) { // admin
@@ -53,7 +60,7 @@ const gnbs = (isVan): INavMenuItem[] => {
       {
         text: "S/W 관리",
         to: `/sw-managements/groups/registrations`,
-      }
+      },
     );
   }
 
@@ -71,11 +78,6 @@ const searchOptions = [
   { id: 4, key: "cat_model_id", value: "단말기 모델" },
 ];
 
-// const SGsearchOptions = [
-//   { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
-//   { id: 2, key: "sw_group_nm", value: "S/W Group 명" },
-// ];
-
 const SWsearchOptions = [
   { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
   { id: 2, key: "sw_version", value: "S/W Version" },
@@ -88,7 +90,8 @@ const deviceModels = [{ value: "3001" }, { value: "3002" }, { value: "3003" }];
 
 
 const lnbs = (isVan: boolean) => {
-  const prefix = isVan ? "/van" : "/admin";
+  //const prefix = isVan ? "/van" : "/admin";
+  const prefix = "/van" 
   return {
     devices: (): ILnbMenuItem[] => [
       {
@@ -114,15 +117,15 @@ const lnbs = (isVan: boolean) => {
           ? [{ text: "조회", to: `${prefix}/devices/usages` }]
           : [
               { text: "조회", to: `${prefix}/devices/usages` },
-              { text: "VAN사 사용조회", to: `${prefix}/devices/vans-usage` },
-              {
-                text: "일자별 VAN사 사용조회",
-                to: `${prefix}/devices/vans-usage-daily`,
-              },
-              {
-                text: "일자별 단말기 사용조회",
-                to: `${prefix}/devices/devices-usage-daily`,
-              },
+              // { text: "VAN사 사용조회", to: `${prefix}/devices/vans-usage` },
+              // {
+              //   text: "일자별 VAN사 사용조회",
+              //   to: `${prefix}/devices/vans-usage-daily`,
+              // },
+              // {
+              //   text: "일자별 단말기 사용조회",
+              //   to: `${prefix}/devices/devices-usage-daily`,
+              // },
             ],
       },
       {

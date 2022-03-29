@@ -91,7 +91,7 @@
                 업데이트 이력 (완료)
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{headerDate.pass}}
               </td>
             </tr>
             <tr>
@@ -101,7 +101,7 @@
                 업데이트 이력 (실패)
               </td>
               <td class="border border-sk-gray text-center" colspan="2">
-                TEST
+                {{headerDate.fail}}
               </td>
             </tr>
           </tbody>
@@ -110,8 +110,8 @@
       <div v-show="!admin" class="mt-3 rounded border border-sk-gray">
         <el-table :data="device" fit class="rounded">
           <el-table-column
-            prop="deviceNumber"
-            label="S/W Group 코드"
+            prop="swGroupCode"
+            label="Group 코드"
             align="center"
           />
           <el-table-column
@@ -124,19 +124,26 @@
             label="S/W Group 명"
             align="center"
           />
-          <el-table-column
+          <el-table-status
             prop="status"
             label="에러코드"
             align="center"
           />
-          <el-table-column prop="status" label="상태" align="center" />
-          <el-table-column
-            prop="responseCode"
-            label="업그레이드"
-            align="center"
-          >
-            <template #default>
-              <div><base-button text="업데이트" /></div>
+          <el-table-column prop="resultCode" label="상태" align="center" >
+             <template v-slot="props">
+                <div v-if="props.row.resultCode==''">
+                  <span>ok</span>
+                </div>
+                 <div v-else="props.row.resultCode!=''">
+                  <span>fail</span>
+                </div>
+            </template>
+          </el-table-column>
+          <el-table-column>
+             <template v-slot="props">
+                <div v-if="props.row.resultCode!=''">
+                  <base-button @click="onUpdate(props.row.deviceNumber)" text="업데이트" />
+                </div>
             </template>
           </el-table-column>
         </el-table>
@@ -207,6 +214,30 @@ export default defineComponent({
 
     const changeForm = reactive({ ...initialState });
 
+
+    const onUpdate = (deviceNumber) => {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post ('http://tms-test-server.p-e.kr:8081/rccmd?' ,
+        {
+          "VAN_ID" : vanId,
+          "CAT_SERIAL_NO": deviceNumber,
+          "CMD": "FD",    
+          'REG_DT': new Date(),
+          'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        console.log("tt")
+      });
+    };
+
+
     return {
       header,
       isOpen,
@@ -214,6 +245,7 @@ export default defineComponent({
         isOpen.value = false;
       },
       changeForm,
+      onUpdate
     };
   },
 });

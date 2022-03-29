@@ -24,6 +24,7 @@
 
     <options-search-button 
       @click:search="onSearch"
+      @click:reset="onReset"
     />
   </div>
 
@@ -74,7 +75,7 @@ import VanDetailModal from "~/components/templates/modals/van-detail.modal.vue";
 import { IAdminVan } from "~/interfaces/data.interface";
 import { dateYYYYMMDD, duplicateMockData } from "~/utils/filter";
 import { useDevice } from "~/hooks/devices.hooks";
-
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "DeviceUnRegistrations",
@@ -86,55 +87,40 @@ export default defineComponent({
   setup() {
     let {update, renmeObjectKey} = useDevice();
     const selectOption = ref();
+    const store = useStore();
     const filter = reactive({
       available: [{ value: "test" }],
       select: undefined,
     });
 
-
-    const example: IAdminVan = [{
-      fax: "",
-      address: faker.lorem.word(),
-      contact: faker.lorem.word(),
-      manager: faker.lorem.word(),
-      user: faker.lorem.word(),
-      van: faker.lorem.word(),
-      vanCode: faker.lorem.word(),
-      date: dateYYYYMMDD(new Date()),
-    }];
-
     const vanDetail = reactive({
       modal: false,
-      data: example,
+      data: [],
     });
 
     const onRowClicked = (row: IAdminVan) => {
       vanDetail.data = row;
       vanDetail.modal = true;
     };
-    //const registrationHeaders: IAdminVan[] = [
-    //let items = example
-    //const items: IAdminVan[] = [...duplicateMockData<IAdminVan>(example)];
-////////////////
-    // page
+   
+    ////
     const vanList = reactive({
-      data: example,
+      data: [],
     });
 
     const paginate = (page) => {
-      //console.log("paginate", page);
       pageVal.page = page
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
-      param = param + "&" + selectOption.value+ "=" +query.value
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
+      param = param + "&van_io" + selectOption.value //+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
       })
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
-      //console.log("onTake", pageCount)
-      pageVal.pageCount = pageCount
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      store.state.pageCount = pageCount
+      store.commit("pageCount", pageCount);
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
       getTerminal(param).then( data => {
         setValue(data)
@@ -156,11 +142,10 @@ export default defineComponent({
     let excelValue = "";
 
     const onSearch = () => {
-      var param = "page=" + pageVal.page + "&page_count=" + pageVal.pageCount
+      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       
       if(selectOption.value != "") param = param + "&van_id=" + selectOption.value 
 
-      //console.log("param", param)
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
@@ -169,8 +154,11 @@ export default defineComponent({
 
     const seTtotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
     }
+
+    const onReset = (event) => {
+      selectOption.value = ""
+    };
 
     function setValue(data) {
       var list = data.list
@@ -180,15 +168,12 @@ export default defineComponent({
         dataArr.push(obj);
       }   
       seTtotalCount(data.total_count)
-      //console.log("dataArr", dataArr)
       vanList.data = dataArr
-      //items = example;
-      //update(dataArr); 
+
     }
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      //var vanId = window.localStorage.getItem("vanId")
       var param //= "van_id="+ vanId      
       if(token == null) token = "" 
 
@@ -208,21 +193,18 @@ export default defineComponent({
           return {"key": n.VAN_ID, "value": n.VAN_NM}
         })
 
-        //console.log("changeForm.deviceModels", changeForm.deviceModels)
       });
     };
 
 
     async function getTerminal(param) {
-      //console.log("getTerminal",param)
       var token = window.localStorage.getItem("token")
-      //var vanId = window.localStorage.getItem("vanId")
       var param = param //+ "&van_id="+ vanId
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/van/list?' + param,
+      let responset = await axios.get( import.meta.env.VITE_BASE_URL + '/van/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -251,12 +233,11 @@ export default defineComponent({
     }
 
     getTerminalMdl()
-    getTerminal("page=1&page_count=20").then( data => {
+    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
 
     return { 
-      //items,
       filter, vanDetail, onRowClicked,
       //
       vanList,
@@ -267,7 +248,8 @@ export default defineComponent({
       onSaveExcel,
       paginate,
       onTake,
-      selectOption 
+      selectOption,
+      onReset 
       };
   },
 });
