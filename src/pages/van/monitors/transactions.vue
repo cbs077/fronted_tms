@@ -82,7 +82,7 @@
         <div class="mr-12 flex">
           <el-radio-group  v-model="changeForm.server">
             <el-radio label="운영서버" />
-            <el-radio label="테스트서버" />
+            <!--<el-radio label="테스트서버" />-->
           </el-radio-group>
         </div>
       </div>
@@ -97,8 +97,10 @@
     @update:take="onTake"
   >
     <template #body>
+      <!--
       <base-button class="mr-1" text="사용 중지" @click="onStopTirminal(true)" />
       <base-button class="ml-1" text="사용 재개" @click="onStopTirminal(false)"/>
+      -->
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
     </template>
@@ -106,15 +108,17 @@
 
   <div class="rounded border border-sk-gray">
     <el-table :data="changeForm.data" fit class="rounded" @selection-change="onSelectChange">
+      <!--
       <el-table-column
         type="selection"
         primary-text
         class="text-black"
         align="center"
       />
+      -->
       <el-table-column prop="van" label="VAN사명" align="center" />
       <el-table-column prop="modelCode" label="S/W Group명" align="center" />
-      <el-table-column prop="swVersion" label="S/W Version" align="center" />
+      <el-table-column prop="swOldVersion" label="S/W Version" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column prop="request" label="요청내용" align="center" />
       <el-table-column prop="regDt" label="요청일시" align="center" />
@@ -221,13 +225,16 @@ export default defineComponent({
 
     function common_query(){
       console.log("searchOptions", changeForm.deviceNumber)
-      var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
+      var param = "page=" + pageVal.page 
       param = param + "&search_start_dt=" + dateYYYYMMDD(condition.start) + "&search_end_dt=" + dateYYYYMMDD(condition.end)
+      if(changeForm.response == "오류") param = param + "&response=fail" 
+      excelValue = param // 엑셀은 페이지 카운터 제외
+
+      param = param + "&page_count=" + store.state.pageCount
       if(query.value != "") param = param + "&" + selectOption.value+ "=" + query.value
       if(changeForm.deviceNumber != "") param = param + "&cat_serial_no=" + changeForm.deviceNumber
-      if(changeForm.response == "오류") param = param + "&response=fail" 
+      
         
-      excelValue = param 
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -281,7 +288,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -308,7 +315,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/up/moniter?' + param,
+      let responset = await axios.get( '/api' +  '/swoprmg/up/moniter?' + param,
           {
             headers: {
                 Authorization: token
@@ -340,7 +347,7 @@ export default defineComponent({
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/rccmd?' ,
+      axios.post( '/api' +  '/rccmd?' ,
         {
           "VAN_ID" : vanId,
           "CAT_SERIAL_NO": deviceNumber,
@@ -359,11 +366,11 @@ export default defineComponent({
     };
 
     const onSaveExcel = () => {   
-      var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
-        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
+      var data = getTerminal("page=1&page_count=100000&"+ excelValue).then( data => {
+        const columns = [{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20},{width: 20}]
 
-        if(data.list == undefined) return
-        var header = ["VAN_ID", "VAN_NM", "CAT_MODEL_ID", "CAT_SERIAL_NO", "DESCRIPTION", "GUBUN","MANAGER_NM", "SW_GROUP_ID", "SW_GROUP_NM", "SW_VERSION", "UPDATE_DT",   ]
+        if(data.list == undefined) return  
+        var header = ["REG_DT", "VAN_ID", "VAN_NM", "CAT_MODEL_ID", "CAT_SERIAL_NO", "DESCRIPTION", "GUBUN", "RESULT_CODE", "OLD_SW_VERSION", "SW_GROUP_ID", "SW_GROUP_NM", ]
         //_.keys(data.list[0])
 
         var dataT = []

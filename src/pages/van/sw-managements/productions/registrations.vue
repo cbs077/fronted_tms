@@ -67,7 +67,6 @@
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
       <base-button
-        v-if="isVan"
         text="S/W 등록"
         class="ml-1"
         @click="swCreate.modal = true"
@@ -238,7 +237,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -264,7 +263,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/list?' + param,
+      let responset = await axios.get( '/api' +  '/swoprmg/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -369,6 +368,7 @@ export default defineComponent({
       onReset,
       onSaveDetail,
       isVan,
+      getTerminalVan
     };
   },
 });

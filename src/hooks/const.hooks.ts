@@ -12,8 +12,8 @@ const gnbs = (isVan): INavMenuItem[] => {
   const store = useStore();
   isVan = window.localStorage.getItem("is_van")
   isVan = store.getters.isVan
-  let prefix = isVan ? "/van" : "/admin";
-  
+  //let prefix = isVan ? "/van" : "/admin";
+  let prefix = "/van" 
   let temporary = [...rawGnb];
 
   if (!isVan) { // admin
@@ -70,6 +70,13 @@ const gnbs = (isVan): INavMenuItem[] => {
     return { ...gnb, to: `${prefix}${gnb.to}` };
   });
 };
+
+const statusOptions = [
+  { id: 1, key: "R", value: "휴면상태" },
+  { id: 2, key: "U", value: "사용중" },
+  { id: 3, key: "A", value: "초기상태" },
+  { id: 4, key: "ST", value: "거래정지" },
+];
 
 const searchOptions = [
   { id: 1, key: "sw_group_id", value: "S/W Group 코드" },
@@ -204,23 +211,23 @@ const lnbs = (isVan: boolean) => {
             },
           ],
         },
-        {
-          text: "테스트 S/W 관리",
-          childs: [
-            {
-              text: isVan ? "S/W 조회 및 등록" : "S/W 조회 및 등록",
-              to: `${prefix}/sw-managements/sandboxes/registrations`,
-            },
-            {
-              text: "S/W Upgrade 이력",
-              to: `${prefix}/sw-managements/sandboxes/sw-upgrades`,
-            },
-            {
-              text: "단말기 Update 이력",
-              to: `${prefix}/sw-managements/sandboxes/device-updates`,
-            },
-          ],
-        },
+        // {
+        //   text: "테스트 S/W 관리",
+        //   childs: [
+        //     {
+        //       text: isVan ? "S/W 조회 및 등록" : "S/W 조회 및 등록",
+        //       to: `${prefix}/sw-managements/sandboxes/registrations`,
+        //     },
+        //     {
+        //       text: "S/W Upgrade 이력",
+        //       to: `${prefix}/sw-managements/sandboxes/sw-upgrades`,
+        //     },
+        //     {
+        //       text: "단말기 Update 이력",
+        //       to: `${prefix}/sw-managements/sandboxes/device-updates`,
+        //     },
+        //   ],
+        // },
       ];
     },
     vans: (): ILnbMenuItem[] => {
@@ -257,6 +264,7 @@ export const useConst = () => {
     gnbs,
     lnbs,
     searchOptions,
+    statusOptions,
     //SGsearchOptions,
     SWsearchOptions,
     take,

@@ -1,10 +1,12 @@
 <template>
+
   <base-modal
     v-model="isOpen"
     class="w-2/3"
-    title="단말기 모델 신규 등록"
+    title="단말기 모델 상세"
     no-action
   >
+   
     <template #modalBody>
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -104,7 +106,7 @@ export default defineComponent({
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.put ('http://tms-test-server.p-e.kr:8081/terminal_mdl/?' ,
+      axios.post( '/api' +  '/modify/terminal_mdl' ,
         {
           "VAN_ID": vanId,
           "CAT_MODEL_ID": properties.device.modelCode,

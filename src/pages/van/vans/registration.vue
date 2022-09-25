@@ -137,7 +137,7 @@ export default defineComponent({
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/van?' ,
+      axios.post( '/api' +  '/van?' ,
         {
             "VAN_ID": changeForm.VAN_ID,
             "VAN_NM": changeForm.VAN_NM,

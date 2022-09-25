@@ -134,7 +134,6 @@ export default defineComponent({
     function checkLoginPage(){
       store.state.isVan = eval(window.localStorage.getItem("is_van")) === true
       store.state.menuss= [...gnbs(data.isVan)]
-
     }
 
     const onGnbMenuClicked = ({ to }: INavMenuItem)  =>{

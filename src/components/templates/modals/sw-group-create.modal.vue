@@ -7,6 +7,26 @@
     no-action
   >
     <template #modalBody>
+      <div v-if="!isVan" class="my-3 grid h-12 grid-cols-8">
+        <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
+
+        <div class="col-span-4 my-auto">
+          <el-select
+            v-model="changeForm.vanSelect"
+            clearable
+            placeholder="선택"
+            size="large"
+            class="w-full"
+          >
+            <el-option
+              v-for="item in changeForm.vanList"
+              :key="item.value"
+              :label="item.value"
+              :value="item.key"
+            />
+          </el-select>
+        </div>    
+      </div>
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -84,12 +104,13 @@
 <script lang="ts">
 import  axios, { AxiosResponse } from "axios";
 import { computed, defineComponent, reactive, onMounted  } from "vue";
+import * as _ from "lodash";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
 import SelectBox from "~/components/organisms/select-box.vue";
 import { useConst } from "~/hooks/const.hooks";
-
+import { getTerminalVan } from "~/hooks/api.hooks";
 
 export default defineComponent({
   components: {
@@ -107,7 +128,7 @@ export default defineComponent({
       type: Boolean,
       required: false,
       default: true,
-    },
+    }
   },
   emits: ["update:modelValue", "click:positive", "click:negative"],
 
@@ -117,6 +138,7 @@ export default defineComponent({
       changeForm.SW_GROUP_ID = ""
     })
 
+    let isVan = computed(() => store.state.isVan); 
     const isOpen = computed({
       get: () => properties.modelValue,
       set: (value: boolean) => {
@@ -135,14 +157,17 @@ export default defineComponent({
       DESCRIPTION: "",
       REG_DT: formatDate(new Date()),
       REG_USER: window.localStorage.getItem("userNm"),
-      isExistId: ""
+      isExistId: "",
+      vanList: [{ value: "-" }],
+      vanSelect: ""   
     })
     const changeForm = reactive({ ...initialState });
 
     
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
       if( changeForm.isExistId == "true" || changeForm.isExistId == "" ){
@@ -150,7 +175,7 @@ export default defineComponent({
         return
       } 
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/swgroup/?' ,
+      axios.post( '/api' +  '/swgroup?' ,
         {
           "VAN_ID" : vanId,
           "SW_GROUP_ID": changeForm.SW_GROUP_ID,
@@ -172,14 +197,15 @@ export default defineComponent({
 
     const onIdCheck = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
       console.log("changeForm.SW_GROUP_ID.length", changeForm.SW_GROUP_ID.length)
       if(changeForm.SW_GROUP_ID == "" ){ alert("그룹코드 is null"); return}
       if(changeForm.SW_GROUP_ID.length > 4 ) {alert("4자리 이상입니다."); return}
 
-      axios.get('http://tms-test-server.p-e.kr:8081/swgroup/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID ,
+      axios.get( '/api' +  '/swgroup/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID ,
         {
           headers: { Authorization: token} // header의 속성
         },
@@ -197,6 +223,13 @@ export default defineComponent({
       });
     };
 
+    getTerminalVan().then( data => {
+      console.log("getTerminalVan", data)
+      var list = data.list
+      changeForm.vanList = _.map(list, function square(n) {
+        return {"key": n.VAN_ID, "value": n.VAN_NM}
+      })
+    })
 
     return {
       deviceModels,
@@ -209,7 +242,8 @@ export default defineComponent({
       //
       changeForm,
       onSave,
-      onIdCheck
+      onIdCheck,
+      getTerminalVan
       //onExit
     };
   },

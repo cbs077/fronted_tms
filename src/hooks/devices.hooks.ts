@@ -17,6 +17,7 @@ export interface IDevice {
   swFileSize: number;
   status: string;
   resultCode: string;
+  bussRegNo: string;
   description: string;
   applicationDate: Date | string;
   lastAccessDate: Date | string;
@@ -65,7 +66,7 @@ export const useDevice = () => {
     { key: "deviceNumber", value: "단말기 번호", align: "center" },
     { key: "swGroupCode", value: "S/W Group 코드", align: "center" },
     { key: "swVersion", value: "S/W Version", align: "center" },
-    { key: "status", value: "상태", align: "center" },
+    { key: "statusA", value: "상태", align: "center" },
     { key: "applicationDate", value: "등록일", align: "center" },
     { key: "lastAccessDate", value: "최종 접속일", align: "center" },
   ];
@@ -85,12 +86,31 @@ export const useDevice = () => {
       ...newDevices.map((device) => {
         return {
           ...device,
+          statusA: changeStatus(device.status),
           applicationDate: dateFormat(device.applicationDate),
           lastAccessDate: dateFormat(device.lastAccessDate),
         };
       })
     );
   };
+  let changeStatus = (val) => {
+    switch(val) {
+      case 'A':  
+        return "초기상태"
+    
+      case 'U': 
+        return "사용중"
+      
+      case 'R': 
+        return "휴면상태"  
+
+      case 'ST': 
+        return "거래 중지"
+
+      default:
+        return  "값없음"
+    }   
+  }
 
   let renmeObjectKey = (object: any) => {
     const temporary: IDevice = {   
@@ -107,7 +127,8 @@ export const useDevice = () => {
       lastAccessDate: object.UPDATE_DT,
       modelCode: object.CAT_MODEL_ID,
       status: object.STATUS,
-      resultCode: object.RESULT_CODE,
+      resultCode: object.RESULT_CODE == ""? "ok":"fail",
+      bussRegNo: object.BUSS_REG_NO,
       swGroupCode: object.SW_GROUP_ID,
       swGroupNm: object.SW_GROUP_NM,
       vanCode: object.VAN_ID,
@@ -139,7 +160,7 @@ export const useDevice = () => {
     "SERIAL_NO_TO": "단말기 마지막 번호",
     "CAT_MODEL_NM": "모델이름",
     "SW_VERSION": "버전",
-    "OLD_SW_VERSION": "오래된버전",
+    "OLD_SW_VERSION": "설치된 버전",
     "UPLOAD_FILE_NM": "파일이름",
     "DATA_SIZE": "파일크기",
     "DESCRIPTION": "설명",
@@ -182,6 +203,7 @@ export const useDevice = () => {
     logHeaders,
     devices,
     update,
+    changeStatus,
     renmeObjectKey,
     renmeObjectAKey    
   };

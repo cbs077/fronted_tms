@@ -5,7 +5,7 @@ export function getTerminalVan() {
   var param //= "van_id="+ vanId      
   if(token == null) token = "" 
 
-  let response = axios.get('http://tms-test-server.p-e.kr:8081/van/list',
+  let response = axios.get( '/api' +  '/van/list',
           {
             headers: {
                 Authorization: token
@@ -13,7 +13,6 @@ export function getTerminalVan() {
           }
         )
         .then(response => {
-          console.log("getTerminalVan", response)
 
           return response.data;   
         });

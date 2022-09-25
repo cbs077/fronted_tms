@@ -211,7 +211,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/van/list?' + param,
+      let response = axios.get( '/api' +  '/van/list?' + param,
         {
           headers: {
               Authorization: token
@@ -236,7 +236,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/getUserMgList?' + param,
+      let responset = await axios.get( '/api' +  '/getUserMgList?' + param,
           {
             headers: {
                 Authorization: token

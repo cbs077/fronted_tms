@@ -6,6 +6,28 @@
   >
     <template #modalBody>
       <div>
+        <div v-if="!isVan" class="my-3 flex flex-row">
+          <div class="my-3 grid h-6 grid-cols-8">
+            <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
+
+            <div class="my-auto">
+              <el-select
+                v-model="changeForm.vanSelect"
+                clearable
+                placeholder="선택"
+                size="large"
+                class="w-full"
+              >
+                <el-option
+                  v-for="item in changeForm.vanList"
+                  :key="item.value"
+                  :label="item.value"
+                  :value="item.key"
+                />
+              </el-select>
+            </div>
+          </div>      
+        </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             모델 코드
@@ -69,6 +91,7 @@ import { computed, defineComponent, reactive } from "vue";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { IDataTableHeader } from "~/interfaces/data.interface";
 
 export default defineComponent({
@@ -92,6 +115,7 @@ export default defineComponent({
         emit("update:modelValue", value);
       },
     });
+    let isVan = computed(() => store.state.isVan); 
 
     
     const header: IDataTableHeader[] = [
@@ -107,7 +131,9 @@ export default defineComponent({
       DESCRIPTION: "",
       REG_DT: formatDate(new Date()),
       REG_USER: window.localStorage.getItem("userNm"),
-      isExistId: ""
+      isExistId: "",
+      vanList: [{ value: "-" }],
+      vanSelect: ""      
     })
     
     const onSave = (param: string) => {
@@ -115,12 +141,13 @@ export default defineComponent({
         alert("모델 코드 중복값을 확인해주세요.") 
         return
       } 
-       
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
+
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/terminal_mdl/?' ,
+      axios.post( '/api' +  '/terminal_mdl?' ,
         {
           "VAN_ID" : vanId,
           "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
@@ -137,7 +164,6 @@ export default defineComponent({
       .then(response => {
         var list = response.data.list
         emit("click:positiveA")
-        //console.log("response", response)
       });
     };
 
@@ -149,7 +175,7 @@ export default defineComponent({
       if(changeForm.CAT_MODEL_ID == "" ) {alert("모델코드 is null"); return}
       if(changeForm.CAT_MODEL_ID.length > 4 ) {alert("4자리 이상입니다."); return}
 
-      axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl/idcheck/' + vanId + "/" + changeForm.CAT_MODEL_ID ,
+      axios.get( '/api' +  '/terminal_mdl/idcheck/' + vanId + "/" + changeForm.CAT_MODEL_ID ,
         {
           headers: { Authorization: token} // header의 속성
         },
@@ -167,6 +193,13 @@ export default defineComponent({
       });
     };
 
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
+
     changeForm.userNM = window.localStorage.getItem("userNm")
 
     return {
@@ -178,7 +211,8 @@ export default defineComponent({
       //
       onSave,
       changeForm,
-      onIdCheck
+      onIdCheck,
+      getTerminalVan
     };
   },
 });

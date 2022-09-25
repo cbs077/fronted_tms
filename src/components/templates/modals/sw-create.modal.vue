@@ -8,6 +8,27 @@
     @click:positive="uploadFile"
   >
     <template #modalBody>
+      <div v-if="!isVan" class="my-3 grid h-12 grid-cols-8">
+        <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
+
+        <div class="col-span-4 my-auto">
+          <el-select
+            v-model="changeForm.vanSelect"
+            clearable
+            placeholder="선택"
+            @change="onSelectVanId"
+            size="large"
+            class="w-full"
+          >
+            <el-option
+              v-for="item in changeForm.vanList"
+              :key="item.value"
+              :label="item.value"
+              :value="item.key"
+            />
+          </el-select>
+        </div>    
+      </div>    
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -121,6 +142,7 @@ import * as _ from "lodash";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { useConst } from "~/hooks/const.hooks";
 
 export default defineComponent({
@@ -151,7 +173,7 @@ export default defineComponent({
     });
 
     const { deviceModels, swVersions, swGroupCodes } = useConst();
-
+    let isVan = computed(() => store.state.isVan); 
     ///
     function formatDate(date) { var d = new Date(date), month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear(); if (month.length < 2) month = '0' + month; if (day.length < 2) day = '0' + day; return [year, month, day].join('-'); }
 
@@ -169,20 +191,23 @@ export default defineComponent({
 
       deviceModels: [],
       swfile: [],
-      isExistId: ""
+      isExistId: "",
+      vanList: [{ value: "-" }],
+      vanSelect: ""  
       //selectOGroupId: "",
       //selectOGroupNm: ""
     })
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var param = "van_id="+ vanId      
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+      let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
               Authorization: token
@@ -238,7 +263,7 @@ export default defineComponent({
 
       try {
         const { data } = await axios.post(
-          "http://tms-test-server.p-e.kr:8081/upload",
+          '/api' + "/upload",
           formData,
           {
             headers: {
@@ -257,11 +282,11 @@ export default defineComponent({
 
     async function onSave (param) {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
 
-       
-      await axios.post ('http://tms-test-server.p-e.kr:8081/swoprmg/?' ,
+      await axios.post( '/api' +  '/swoprmg?' ,
         {
           "VAN_ID" : vanId,
           "SW_GROUP_ID": changeForm.SW_GROUP_ID,
@@ -286,13 +311,14 @@ export default defineComponent({
 
     const onIdCheck = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
       if(changeForm.SW_GROUP_ID == "" ) {alert("그룹 아이디 is null"); return}
       if(changeForm.SW_VERSION == "" ) {alert("버전 is null"); return}
 
-      axios.get('http://tms-test-server.p-e.kr:8081/swoprmg/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID + "/" + changeForm.SW_VERSION.padStart(10, '0') ,
+      axios.get( '/api' +  '/swoprmg/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID + "/" + changeForm.SW_VERSION.padStart(10, '0') ,
         {
           headers: { Authorization: token} // header의 속성
         },
@@ -309,6 +335,23 @@ export default defineComponent({
         }
       });
     };
+
+    function onSelectVanId(){
+      console.log("onSelectVanId")
+      // changeForm.deviceModels = ""
+      // changeForm.swGroupCodes = ""
+      // changeForm.CAT_MODEL_ID = "" 
+      changeForm.SW_GROUP_ID = ""
+      changeForm.SW_GROUP_NM = ""
+      getTerminalMdl()
+    }
+
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
 
     getTerminalMdl()
 
@@ -327,7 +370,9 @@ export default defineComponent({
       onSelectGroupNm,
       selectFile,
       uploadFile,
-      onIdCheck        
+      onIdCheck,
+      getTerminalVan,
+      onSelectVanId     
     };
   },
 });

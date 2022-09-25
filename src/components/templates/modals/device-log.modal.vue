@@ -10,8 +10,9 @@
       <table-common-button no-take>
         <template #body>
           <div class="grow" />
-          <base-button text="거래중지" class="mr-2" />
-          <excel-button class="mr-1" />
+          <base-button v-if="logs.status != 'ST'" text="거래중지" class="mr-2"  @click="onStopTirminal('ST')" />
+          <base-button v-if="logs.status == 'ST'" text="거래재개" class="mr-2"  @click="onStopTirminal('NR')" />
+          <!--<excel-button class="mr-1" />-->
         </template>
       </table-common-button>
 
@@ -24,15 +25,15 @@
               >
                 VAN사명
               </td>
-              <td class="border border-sk-lightgray text-center">TEST</td>
+              <td class="border border-sk-lightgray text-center">{{logs.van}}</td>
             </tr>
             <tr>
               <td
                 class="h-10 w-3/12 border border-sk-lightgray bg-sk-lightgray text-center"
               >
-                단말기 번호
+                단말기 번호1
               </td>
-              <td class="border border-sk-lightgray text-center">TEST</td>
+              <td class="border border-sk-lightgray text-center">{{logs.deviceNumber}}</td>
             </tr>
             <tr>
               <td
@@ -40,7 +41,7 @@
               >
                 주유소 코드(SS 코드)
               </td>
-              <td class="border border-sk-lightgray text-center">TEST</td>
+              <td class="border border-sk-lightgray text-center">{{logs.deviceNumber}}</td>
             </tr>
           </tbody>
         </table>
@@ -67,6 +68,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive } from "vue";
+import  axios, { AxiosResponse } from "axios";
 
 import BaseButton from "~/components/atoms/base-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
@@ -84,6 +86,11 @@ export default defineComponent({
       type: Boolean,
       required: false,
       default: true,
+    },
+    logs: {
+      type: Object,
+      required: true,
+      default: () => {},
     },
     items: {
       type: Array,
@@ -106,9 +113,32 @@ export default defineComponent({
       { key: "status", value: "상태" },
     ];
 
+    function onStopTirminal(flag) {
+      var token = window.localStorage.getItem("token")
+      var vanId = window.localStorage.getItem("vanId")
+      var userNM = window.localStorage.getItem("userNm")
+
+      axios.post( '/api' +  '/modify/terminal?' ,
+        {
+          "VAN_ID" : vanId,
+          "CAT_SERIAL_NO": this.logs.deviceNumber,
+          "STATUS": flag,    
+          // 'REG_DT': new Date(),
+          // 'REG_USER': userNM,
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        console.log("tt")
+      });
+    }
+
     return {
       header,
       isOpen,
+      onStopTirminal,
       closeModal() {
         isOpen.value = false;
       },

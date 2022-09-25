@@ -1,5 +1,5 @@
 <template>
-  <bread-crumb text="단말기 조회 및 등록" />
+  <bread-crumb text="단말기 조회" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
     <div v-if="!isVan" class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">VAN사</div>
@@ -66,7 +66,28 @@
           />
       </div>
     </div>
-    
+
+    <div class="my-3 flex flex-row">
+      <div class="my-auto mr-6 w-1/12">상태</div>
+      <!--<div class="my-auto w-5/12 pr-5">-->
+      <div class="w-80 w-5/12">
+        <el-select
+          v-model="statusSelectOption"
+          clearable
+          placeholder="선택"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>
+    </div> 
+
     <options-search-button
       @click:search="onSearch"
       @click:reset="onReset"
@@ -80,7 +101,6 @@
       <div class="grow" />
        <excel-button @click:excel="onSaveExcel" class="mr-1" />
       <base-button
-        v-if="isVan"
         text="단말기 등록"
         class="ml-1"
         @click="deviceRegistration.modal = true"
@@ -99,7 +119,8 @@
         align="center"
       />
       <el-table-column v-if="tableHeader.swVersion==true" prop="swVersion" label="S/W Version" align="center" />
-      <el-table-column v-if="tableHeader.status==true" prop="status" label="상태" align="center" />
+      <!--<el-table-column v-if="tableHeader.status==true" prop="status" label="상태" align="center" />-->
+      <el-table-column v-if="tableHeader.statusA==true" prop="statusA" label="상태" align="center" />
       <el-table-column v-if="tableHeader.applicationDate==true" prop="applicationDate" label="등록일" align="center" />
       <el-table-column
         v-if="tableHeader.lastAccessDate==true"
@@ -169,9 +190,13 @@ export default defineComponent({
     BaseButton,
     DeviceDetailModal,
   },
+  mounted() {
+    console.log("Aa", this.foo); // bar
+  },
   setup() {
+    //console.log("Aa", this.foo); // bar
     const { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
-    const { searchOptions } = useConst();
+    const { searchOptions, statusOptions } = useConst();
     const store = useStore();
     
     let isVan = computed(() => store.state.isVan); 
@@ -203,6 +228,7 @@ export default defineComponent({
       swGroupCode: true,
       swVersion: true,
       status: true,
+      statusA: true,
       applicationDate: true,
       lastAccessDate: true,
       checkAll: []
@@ -240,6 +266,8 @@ export default defineComponent({
     const onSearch = (event) => {
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
+      if(statusSelectOption.value != undefined) param = param + "&status=" + statusSelectOption.value
+
       excelValue = param //엑셀 다운로드에서 필요함.
       getTerminal(param).then( data => {
         setValue(data)
@@ -250,6 +278,8 @@ export default defineComponent({
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
+      if(statusSelectOption.value != undefined) param = param + "&status=" + statusSelectOption.value
+
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -259,6 +289,8 @@ export default defineComponent({
       store.commit("pageCount", pageCount);
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
+      if(statusSelectOption.value != undefined) param = param + "&status=" + statusSelectOption.value
+
       getTerminal(param).then( data => {
         setValue(data)
       })
@@ -291,7 +323,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let responset = await axios.get( '/api' +  '/terminal/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -372,10 +404,12 @@ export default defineComponent({
       tableHeader.checkAll["swGroupCode"] = true
       tableHeader.checkAll["swVersion"] = true
       tableHeader.checkAll["status"] = true
+      tableHeader.checkAll["statusA"] = true
       tableHeader.checkAll["applicationDate"] = true
       tableHeader.checkAll["lastAccessDate"] = true
     }
     const selectOption = ref();
+    const statusSelectOption = ref();
 
     getTerminalVan().then( data => {
         var list = data.list
@@ -391,6 +425,7 @@ export default defineComponent({
 
     return {
       selectOption,
+      statusSelectOption,
       onRowClicked,
       onRegistration,
       deviceDetail,
@@ -400,6 +435,7 @@ export default defineComponent({
       devices,
       update,
       searchOptions,
+      statusOptions,
       deviceRegistration,
       registrationResult,
       Search,

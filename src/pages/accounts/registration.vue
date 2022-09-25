@@ -171,7 +171,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/van/list?' + param,
+      let response = axios.get( '/api' +  '/van/list?' + param,
         {
           headers: {
               Authorization: token
@@ -191,11 +191,23 @@ export default defineComponent({
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
 
-      if(changeForm.PWD !=""&& changeForm.PWD1 !=""){
-          if( changeForm.PWD != changeForm.PWD1){ alert("패스워드 확인을 해주세요."); return}
+      if(changeForm.USER_ID ==""){
+        alert("아이디 확인을 해주세요."); return;
       }
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/user?' ,
+      if(changeForm.PWD =="" || changeForm.PWD1 ==""){
+        alert("패스워드 확인을 해주세요."); return;       
+      }
+
+      if( changeForm.PWD != changeForm.PWD1){ 
+        alert("패스워드가 동일하지 않습니다."); return;       
+      }
+
+      if(changeForm.COMP_ID ==""){
+          alert("VAN사 확인을 해주세요."); return;
+      }
+      
+      axios.post( '/api' +  '/user?' ,
         {
             "USER_ID": changeForm.USER_ID,
             "USER_NM": changeForm.USER_NM,

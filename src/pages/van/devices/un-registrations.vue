@@ -153,7 +153,7 @@ export default defineComponent({
    let initialState = reactive({
       van: true,
       modelCode: false,
-      deviceNumber: false,
+      deviceNumber: true,
       swGroupCode: true,
       swVersion: false,
       status: true,
@@ -233,7 +233,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let responset = await axios.get( '/api' +  '/terminal/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -253,14 +253,14 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.delete('http://tms-test-server.p-e.kr:8081/terminal?',
-          { 
-            data: {
-              "VAN_ID" : vanId,
-              "CAT_SERIAL_NO": deviceNumber,
-            },
-             headers: {
-                Authorization: token
+      let responset = await axios.post(  '/api' + '/remove/terminal?',
+          {
+            "VAN_ID" : vanId,
+            "CAT_SERIAL_NO": deviceNumber,
+          },
+          {
+            headers: {
+              Authorization: token
             }
           }
         )
@@ -300,9 +300,8 @@ export default defineComponent({
     }
 
     function defaultCheckbox() {
-      //tableHeader.checkAll["van"] = true
       tableHeader.checkAll["modelCode"] = false
-      tableHeader.checkAll["deviceNumber"] = false
+      tableHeader.checkAll["deviceNumber"] = true
       tableHeader.checkAll["swGroupCode"] = true
       tableHeader.checkAll["swVersion"] = false
       tableHeader.checkAll["status"] = true

@@ -47,11 +47,13 @@
             align="center"
           />
           <el-table-column prop="requestDate" label="요청일시" align="center" />
+          <!--
           <el-table-column prop="update" label="업데이트" align="center">
             <template #default>
               <div><base-button text="강제 업데이트" /></div>
             </template>
           </el-table-column>
+          -->
           <el-table-column
             prop="responseCode"
             label="응답코드"

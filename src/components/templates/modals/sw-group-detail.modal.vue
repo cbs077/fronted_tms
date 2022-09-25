@@ -112,7 +112,7 @@ export default defineComponent({
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.put ('http://tms-test-server.p-e.kr:8081/swgroup/?' ,
+      axios.post( '/api' + '/modify/swgroup?' ,
         {
           "VAN_ID": vanId,
           "SW_GROUP_ID": properties.device.swGroupCode,

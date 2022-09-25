@@ -149,7 +149,10 @@
   </div>
 
   <van-detail-modal v-model="vanDetail.modal" />
-  <device-log-modal v-model="deviceLog.modal" />
+  <device-log-modal 
+     v-model="deviceLog.modal" 
+     :logs="deviceLog.data"
+  />
 </template>
 <script lang="ts">
 import { TableColumnCtx } from "element-plus/es/components/table/src/table-column/defaults";
@@ -242,6 +245,8 @@ export default defineComponent({
     const changeForm = reactive({ ...initialStateA });
 
     const onRowClicked = (row: IDevice) => {
+      deviceLog.data = row;
+      console.log("aa", row)
       deviceLog.modal = true;
     };
 
@@ -318,7 +323,7 @@ export default defineComponent({
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+      let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
               Authorization: token
@@ -341,7 +346,7 @@ export default defineComponent({
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -365,7 +370,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/stat/van/list?' + param,
+      let responset = await axios.get( '/api' +  '/terminal/stat/van/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -386,7 +391,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/list?' + param,
+      let responset = await axios.get( '/api' +  '/terminal/list?' + param,
           {
             headers: {
                 Authorization: token

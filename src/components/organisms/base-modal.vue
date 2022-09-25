@@ -14,9 +14,11 @@
       }
     "
   >
+     <hr class="border-sk-gray"><hr/>
     <div
       class="inline-block w-full transform overflow-hidden bg-white text-left align-middle transition-all"
     >
+     
       <slot name="modalBody" />
 
       <slot v-if="noAction !== true" name="modalAction">

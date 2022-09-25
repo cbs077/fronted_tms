@@ -220,7 +220,7 @@ export default defineComponent({
       var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/rccmd?' ,
+      axios.post( '/api' +  '/rccmd?' ,
         {
           "VAN_ID" : vanId,
           "CAT_SERIAL_NO": deviceNumber,

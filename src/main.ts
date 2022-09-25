@@ -1,6 +1,7 @@
 import "./assets/main.css";
 import "./assets/theme.scss";
 
+import "./assets/theme.scss";
 import ElementPlus from "element-plus";
 import { createApp } from "vue";
 
@@ -12,10 +13,9 @@ import OptionsSearchButton from "~/components/molecules/options-search-button.vu
 import App from "./App.vue";
 import router from "./routes";
 import store from "./store.vue";
-//const api_key = import.meta.env.VITE_KEY;
 
-createApp(App)
-  .component(BaseButton.name, BaseButton)
+const app = createApp(App)
+app.component(BaseButton.name, BaseButton)
   .component(ExcelButton.name, ExcelButton)
   .component(OptionsSearchButton.name, OptionsSearchButton)
   .component(Breadcrumb.name, Breadcrumb)
@@ -23,3 +23,5 @@ createApp(App)
   .use(ElementPlus)
   .use(store)
   .mount("#app");
+
+app.config.globalProperties.foo = "bar";

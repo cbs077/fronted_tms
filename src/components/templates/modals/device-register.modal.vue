@@ -31,6 +31,28 @@
           class="ml-4"
         >일괄등록</label>
       </div>
+      <!-- van사 -->
+      <div v-if="!isVan" class="my-3 grid h-12 grid-cols-8">
+          <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
+
+          <div class="col-span-4 my-auto">
+            <el-select
+              v-model="changeForm.vanSelect"
+              clearable
+              placeholder="선택"
+              @change="onSelectVanId"
+              size="large"
+              class="w-full"
+            >
+              <el-option
+                v-for="item in changeForm.vanList"
+                :key="item.value"
+                :label="item.value"
+                :value="item.key"
+              />
+            </el-select>
+          </div>    
+      </div>
 
       <!-- 일반등록 -->
       <div
@@ -40,7 +62,7 @@
         <div class="col-span-2 my-auto text-center font-bold">
           단말기 번호
         </div>
-        <div class="col-span-6 flex">
+        <div class="col-span-5 my-auto">
           <input v-model="changeForm.CAT_SERIAL_NO" class="h-10 w-9/12 rounded border border-sk-gray">
 
           <base-button
@@ -52,6 +74,7 @@
       </div>
 
       <!-- 일괄등록 -->
+
       <div
         v-show="uploadMethodSelection === '일괄등록'"
         class="my-3 grid h-12 grid-cols-8"
@@ -61,8 +84,8 @@
         </div>
 
         <div class="col-span-6 flex">
-          <div class="flex w-9/12">
-            <input v-model="changeForm.CAT_SERIAL_NO_COMMON" class="mr-4 h-10 w-3/12 rounded border border-sk-gray">
+          <div class="flex w-6/12">
+            <input v-model="changeForm.CAT_SERIAL_NO_COMMON" class="mr-4 h-10 w-2/12 rounded border border-sk-gray">
             <input v-model="changeForm.CAT_SERIAL_NO_FROM" class="h-10 w-4/12 rounded border border-sk-gray">
             <div class="my-auto mx-2 w-1/12 text-center">
               ~
@@ -178,6 +201,7 @@ import BaseButton from "~/components/atoms/base-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
 import SelectBox from "~/components/organisms/select-box.vue";
 import { useConst } from "~/hooks/const.hooks";
+import { getTerminalVan } from "~/hooks/api.hooks";
 
 export default defineComponent({
   components: {
@@ -202,6 +226,7 @@ export default defineComponent({
         emit("update:modelValue", value);
       },
     });
+    let isVan = computed(() => store.state.isVan); 
 
     const uploadMethodSelection = ref<DEVICE_REGISTER_TYPE>("일반등록");
 
@@ -220,20 +245,21 @@ export default defineComponent({
       CAT_MODEL_ID: "",
       REG_DT: formatDate(new Date()),
       REG_USER: window.localStorage.getItem("userNm"),
-
       deviceModels: [],
-      //swfile: []
+      vanList: [{ value: "-" }],
+      vanSelect: ""         
     })
     const changeForm = reactive({ ...initialState });
 
     function getswGroupCodes() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       if(token == null) token = "" 
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+      let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
               Authorization: token
@@ -255,18 +281,30 @@ export default defineComponent({
     const onReset = (event) => {
       console.log("reset")
       Object.assign(changeForm, initialState);
-      getswGroupCodes()
-      getTerminalMdl()
+      getTerminalVan_t()
+
     };
-    
+    function getTerminalVan_t() {
+      getTerminalVan().then( data => {
+          var list = data.list
+          changeForm.vanList = _.map(list, function square(n) {
+            return {"key": n.VAN_ID, "value": n.VAN_NM}
+          })
+
+          getswGroupCodes()
+          getTerminalMdl()
+      })
+    }
+
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       if(token == null) token = "" 
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -281,6 +319,17 @@ export default defineComponent({
         })
       });
     };
+
+    function onSelectVanId(){
+      console.log("onSelectVanId")
+      changeForm.deviceModels = ""
+      changeForm.swGroupCodes = ""
+      changeForm.CAT_MODEL_ID = "" 
+      changeForm.SW_GROUP_ID = ""
+      getswGroupCodes()
+      getTerminalMdl()
+    }
+
     const onPreSave = () => {
       if( uploadMethodSelection.value == '일괄등록'){
         for(var i=changeForm.CAT_SERIAL_NO_FROM; i <= changeForm.CAT_SERIAL_NO_TO ; i++){
@@ -297,10 +346,11 @@ export default defineComponent({
 
     function saveRegHist(){
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/reghist?' ,
+      axios.post( '/api' +  '/reghist?' ,
         {
           "VAN_ID" : vanId,
           "CAT_MODEL_ID": changeForm.CAT_MODEL_ID,
@@ -333,15 +383,25 @@ export default defineComponent({
         }
         
       });
-
     }
 
     const onSave = (deviceNumber) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.post ('http://tms-test-server.p-e.kr:8081/terminal?' ,
+      if( changeForm.CAT_SERIAL_NO == ""){
+        alert("단말기번호를 입력하세요.");return;
+      }
+      if( changeForm.CAT_MODEL_ID == ""){
+        alert("모델 아이디를 입력하세요.");return;
+      }
+      if( changeForm.SW_GROUP_ID == ""){
+        alert("S/W 그룹 아이디를 입력하세요.");return;
+      }
+
+      axios.post( '/api' +  '/terminal?' ,
         {
           "VAN_ID" : vanId,
           "CAT_SERIAL_NO": deviceNumber,
@@ -407,10 +467,11 @@ export default defineComponent({
 
     async function onIdCheck(param) {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal/idcheck/' + vanId + "/" + param,
+      let responset = await axios.get( '/api' +  '/terminal/idcheck/' + vanId + "/" + param,
         {
           headers: { Authorization: token} // header의 속성
         },
@@ -428,8 +489,9 @@ export default defineComponent({
       return responset
     };
 
-    getswGroupCodes()
-    getTerminalMdl()
+    getTerminalVan_t()
+    // getswGroupCodes()
+    // getTerminalMdl()
 
     return {
       uploadMethodSelection,
@@ -446,7 +508,10 @@ export default defineComponent({
       onPreIdCheck ,
       onMultiPreIdCheck,
       onIdCheck,
-      onReset
+      onReset,
+      getTerminalVan,
+      getTerminalVan_t,
+      onSelectVanId
     };
   },
 });

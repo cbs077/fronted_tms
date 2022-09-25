@@ -1,7 +1,7 @@
 <template>
   <bread-crumb text="S/W Group 조회 및 등록" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
-     <div v-if="!isVan" class="my-3 flex flex-row">
+    <div v-if="!isVan" class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">VAN사</div>
 
       <div class="my-auto w-5/12 pr-5">
@@ -67,7 +67,6 @@
       <div  class="grow" />
       <excel-button @click:excel="onSaveExcel" class="mr-1" />
       <base-button
-        v-if="isVan"
         text="S/W Group 등록"
         class="ml-1  w-36"
         @click="swGroupCreate.modal = true"
@@ -263,7 +262,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+      let responset = await axios.get( '/api' +  '/swgroup/list?' + param,
           {
             headers: {
                 Authorization: token

@@ -7,6 +7,15 @@
     :no-exit-guard="admin"
   >
     <template #modalBody>
+      <div class="my-3 grid h-1 grid-cols-8"></div>
+      <table-common-button no-take>
+        <template #body>
+          <div class="grow" />
+          <base-button v-if="device.status != 'ST'" text="거래중지" class="mr-2"  @click="onStopTirminal('ST')" />
+          <base-button v-if="device.status == 'ST'" text="거래재개" class="mr-2"  @click="onStopTirminal('U')" />
+        </template>
+      </table-common-button>
+
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -20,7 +29,7 @@
           <div class="col-span-2 my-auto text-center font-bold">
             단말기 모델
           </div>
-          <div class="col-span-6 my-auto">
+
           <div class="col-span-4 my-auto">
             <el-select
               clearable
@@ -37,7 +46,7 @@
                 :value="item.value"
               />
             </el-select>
-          </div>
+
           </div>
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
@@ -95,9 +104,15 @@
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">상태</div>
           <div class="col-span-6 my-auto">
-            {{ device.status }}
+            {{ device.statusA }}
           </div>
         </div>
+        <div class="my-3 grid h-10 grid-cols-8">
+          <div class="col-span-2 my-auto text-center font-bold">사업자 번호</div>
+          <div class="col-span-6 my-auto">
+            {{ device.bussRegNo }}
+          </div>
+        </div>        
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">등록일</div>
           <div class="col-span-6 my-auto">
@@ -130,6 +145,7 @@ import * as _ from "lodash";
 
 
 import BaseButton from "~/components/atoms/base-button.vue";
+import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import BaseModal from "~/components/organisms/base-modal.vue";
 import SelectBox from "~/components/organisms/select-box.vue";
 import { useConst } from "~/hooks/const.hooks";
@@ -138,6 +154,7 @@ import { defineComponent, reactive, ref } from "vue";
 export default defineComponent({
   components: {
     BaseModal,
+    TableCommonButton,
     BaseButton,
     SelectBox,
   },
@@ -180,7 +197,7 @@ export default defineComponent({
 
       let data: any[] = [];
       var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/swgroup/list?' + param,
+      let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
               Authorization: token
@@ -201,12 +218,12 @@ export default defineComponent({
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      // var vanId = device.vanCode //window.localStorage.getItem("vanId")
       if(token == null) token = "" 
 
       let data: any[] = [];
-      var param = "van_id="+ vanId
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      var param = "van_id="+ properties.device.vanCode
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -224,12 +241,12 @@ export default defineComponent({
 
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      //var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.put ('http://tms-test-server.p-e.kr:8081/terminal/?' ,
+      axios.post( '/api' + '/modify/terminal?' ,
         {
-          "VAN_ID": vanId,
+          "VAN_ID": properties.device.vanCode,
           "CAT_MODEL_ID": properties.device.modelCode,
           "SW_GROUP_ID": properties.device.swGroupCode,
           "CAT_SERIAL_NO": properties.device.deviceNumber
@@ -260,7 +277,27 @@ export default defineComponent({
       properties.device.swGroupNm = groupRename.key
     }
 
+    function onStopTirminal(flag) {
+      var token = window.localStorage.getItem("token")
+      // var vanId = window.localStorage.getItem("vanId")
+      // var vanId = device.
+      var userNM = window.localStorage.getItem("userNm")
 
+      axios.post( '/api' +  '/modify/terminal?' ,
+        {
+          "VAN_ID" : properties.device.vanCode,
+          "CAT_SERIAL_NO": this.device.deviceNumber,
+          "STATUS": flag,    
+        }, 
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        this.device.status = flag
+        console.log("tt")
+      });
+    }
 
     getswGroupCodes()
     getTerminalMdl()
@@ -272,7 +309,8 @@ export default defineComponent({
       },
       onSelectGroupId,
       onSelectGroupNm,
-      onSave
+      onSave,
+      onStopTirminal
     };
   },
 });

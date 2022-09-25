@@ -1,5 +1,5 @@
 <template>
-  <bread-crumb text="단말기 모델 조회" />
+  <bread-crumb text="단말기 모델 조회 및 등록" />
 
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
     <div v-if="!isVan" class="my-3 flex flex-row">
@@ -10,6 +10,7 @@
           v-model="changeForm.vanSelect"
           clearable
           placeholder="선택"
+          @change="onSelectVanId"
           size="large"
           class="w-full"
         >
@@ -62,7 +63,6 @@
       <div class="grow" />
       <excel-button  @click:excel="onSaveExcel" class="mr-1" />
       <base-button
-        v-if="isVan"
         text="단말기 모델 등록"
         class="ml-1 w-36"
         @click="modelCreate.modal = true"
@@ -191,21 +191,23 @@ export default defineComponent({
       pageVal.page = page
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       //검색어
-      if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
-      else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
+      if( query.value != "") { param = param + "&cat_model_nm=" + query.value }
+      if( selectOption.value != undefined ) param = param + "&cat_model_id=" + selectOption.value 
       
+      console.log("paginate:", param, selectOption.value)
       getTerminal(param).then( data => {
         setValue(data)
       })
     }; 
     // 10개, 20개, 30개
     const onTake = (pageCount) => {
+      console.log("onTake")
       store.state.pageCount = pageCount
       store.commit("pageCount", pageCount);
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
 
-      if(query.value != "") { param = param + "&cat_model_nm=" + query.value }
-      else if( selectOption.value != "") param = param + "&cat_model_id=" + selectOption.value 
+      if( query.value != "") { param = param + "&cat_model_nm=" + query.value }
+      if( selectOption.value != undefined) param = param + "&cat_model_id=" + selectOption.value 
       
       getTerminal(param).then( data => {
         setValue(data)
@@ -246,13 +248,14 @@ export default defineComponent({
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var param = "van_id="+ vanId      
       if(token == null) token = "" 
 
       let data: any[] = [];
 
-      let response = axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl?' + param,
+      let response = axios.get( '/api' +  '/terminal_mdl?' + param,
         {
           headers: {
               Authorization: token
@@ -280,7 +283,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let responset = await axios.get('http://tms-test-server.p-e.kr:8081/terminal_mdl/list?' + param,
+      let responset = await axios.get( '/api' +  '/terminal_mdl/list?' + param,
           {
             headers: {
                 Authorization: token
@@ -339,6 +342,11 @@ export default defineComponent({
       })   
     }
 
+    function onSelectVanId(){
+      console.log("onSelectVanId")
+      getTerminalMdl()
+    }
+
     getTerminalVan().then( data => {
         var list = data.list
         changeForm.vanList = _.map(list, function square(n) {
@@ -350,6 +358,10 @@ export default defineComponent({
     getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
+
+    const onSaveDetail = ( val : any) => {
+      modelDetail.modal = false
+    }
 
     return {
       modelCreate,
@@ -374,6 +386,8 @@ export default defineComponent({
       onTake,
       onSave,
       isVan,
+      onSaveDetail,
+      onSelectVanId
     };
   },
 });

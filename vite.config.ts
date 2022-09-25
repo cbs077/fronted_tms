@@ -15,6 +15,16 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 8083,
+    proxy: {
+      // string shorthand
+      //'/api' : 'http://tms-test-server.p-e.kr:8081/api',
+      '/api': {
+        target: 'http://tms-test-server.p-e.kr:8081',
+        changeOrigin: true,
+        secure: false,
+        ws: true
+      }
+    }
   }
   
 });

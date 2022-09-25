@@ -141,7 +141,7 @@ export default defineComponent({
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
 
-      axios.put('http://tms-test-server.p-e.kr:8081/updatepwd?' ,
+      axios.post( '/api' +  '/updatepwd?' ,
         {
             "USER_ID": changeForm.USER_ID,
             "PWD": changeForm.PWD
@@ -165,7 +165,7 @@ export default defineComponent({
           changePassword()
       }
 
-      axios.put('http://tms-test-server.p-e.kr:8081/updateUserInfo?' ,
+      axios.post( '/api' + '/updateUserInfo?' ,
         {
             "USER_ID": changeForm.USER_ID,
             "USER_NM": changeForm.USER_NM,
@@ -200,7 +200,7 @@ export default defineComponent({
 
       let data: any[] = [];
 
-      let response = await axios.get('http://tms-test-server.p-e.kr:8081/getUserInfo/' + userId,
+      let response = await axios.get( '/api' +  '/getUserInfo/' + userId,
               {
                 headers: {
                     Authorization: token
