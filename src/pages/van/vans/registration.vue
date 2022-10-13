@@ -8,7 +8,7 @@
       <div class="w-7/12">
         <el-input v-model="changeForm.VAN_ID" size="large" placeholder="Please Input" />
       </div>
-      <base-button class="ml-1" text="중복확인"></base-button>
+      <base-button class="ml-1" text="중복확인" @click="onIdCheck"></base-button>
     </div>
     <div class="col-span-4 my-3 flex">
       <div class="label-width my-auto w-2/12">VAN사명</div>
@@ -133,6 +133,28 @@ export default defineComponent({
       REG_DT: formatDate(new Date()),
       REG_USER: window.localStorage.getItem("userNm")
     })
+
+    const onIdCheck = (param: string) => {
+      var token = window.localStorage.getItem("token")
+
+      axios.get( '/api' +  '/van/idcheck/' + changeForm.VAN_ID,
+        {
+          headers: { Authorization: token} // header의 속성
+        },
+      )
+      .then(response => {
+        var count = response.data.count
+        if( count > 0 ) {
+          alert("이미 등록된 VAN사 입니다.")
+          changeForm.isExistId = "true"
+        }
+        else {
+          alert("등록가능한 VAN사 입니다.")
+          changeForm.isExistId = "false"
+        }
+      });
+    };
+
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
@@ -175,7 +197,8 @@ export default defineComponent({
       Search,
       //
       onSave,
-      changeForm  
+      changeForm,
+      onIdCheck  
     };
   },
 });

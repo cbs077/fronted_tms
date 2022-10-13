@@ -138,6 +138,9 @@ export default defineComponent({
     SwDetailModal,
     SwCreateModal,
   },
+  mounted() {
+    console.log("mounted") // 0
+  },
   setup() {
     const { registrationHeaders: headers, devices, update, renmeObjectKey, renmeObjectAKey} = useDevice();
     const { SWsearchOptions } = useConst();
@@ -213,7 +216,7 @@ export default defineComponent({
       changeForm.vanSelect = ""
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -224,7 +227,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data = dataArr
 
     }

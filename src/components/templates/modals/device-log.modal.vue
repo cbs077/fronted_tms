@@ -41,7 +41,7 @@
               >
                 주유소 코드(SS 코드)
               </td>
-              <td class="border border-sk-lightgray text-center">{{logs.deviceNumber}}</td>
+              <td class="border border-sk-lightgray text-center">{{logs.ssCode}}</td>
             </tr>
           </tbody>
         </table>

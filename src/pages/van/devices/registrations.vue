@@ -191,13 +191,15 @@ export default defineComponent({
     DeviceDetailModal,
   },
   mounted() {
-    console.log("Aa", this.foo); // bar
+    console.log("mounted"); 
+    this.init();
   },
   setup() {
-    //console.log("Aa", this.foo); // bar
     const { registrationHeaders_a: headers, devices, update, renmeObjectKey} = useDevice();
     const { searchOptions, statusOptions } = useConst();
     const store = useStore();
+    const selectOption = ref();
+    const statusSelectOption = ref();
     
     let isVan = computed(() => store.state.isVan); 
     const deviceRegistration = reactive({
@@ -259,10 +261,6 @@ export default defineComponent({
       deviceDetail.modal = true;
     };
 
-    const onSelect = (event) => {
-      searchKey = event
-    };
-
     const onSearch = (event) => {
       var param = "page=" + pageVal.page + "&page_count=" + store.state.pageCount
       param = param + "&" + selectOption.value+ "=" +query.value
@@ -305,7 +303,7 @@ export default defineComponent({
       Object.assign(tableHeader, initialState);
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -335,13 +333,6 @@ export default defineComponent({
         });
       return responset
     };
-
-    function s2ab(s) { 
-        var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
-        var view = new Uint8Array(buf);  //create uint8array as viewer
-        for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
-        return buf;    
-    }
 
     const onSaveExcel = () => {   
       var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
@@ -394,7 +385,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       update(dataArr); 
     }
 
@@ -408,20 +399,20 @@ export default defineComponent({
       tableHeader.checkAll["applicationDate"] = true
       tableHeader.checkAll["lastAccessDate"] = true
     }
-    const selectOption = ref();
-    const statusSelectOption = ref();
 
-    getTerminalVan().then( data => {
+    function init(){
+      getTerminalVan().then( data => {
         var list = data.list
-        changeForm.vanList = _.map(list, function square(n) {
+        this.changeForm.vanList = _.map(list, function square(n) {
           return {"key": n.VAN_ID, "value": n.VAN_NM}
         })
-    })
+      })
 
-    getTerminal("page=1&page_count=" + store.state.pageCount ).then( data => {
-      setValue(data)
-      defaultCheckbox()
-    })
+      getTerminal("page=1&page_count=" + store.state.pageCount ).then( data => {
+        setValue(data)
+        defaultCheckbox()
+      })
+    }
 
     return {
       selectOption,
@@ -439,7 +430,6 @@ export default defineComponent({
       deviceRegistration,
       registrationResult,
       Search,
-      //onSelect,
       onSearch,
       paginate,
       onTake,
@@ -450,7 +440,8 @@ export default defineComponent({
       onReset,
       onSaveDetail,
       isVan,
-      changeForm  
+      changeForm,
+      init  
     };
   },
 });

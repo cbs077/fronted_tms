@@ -41,17 +41,6 @@
         </svg>
 
         <p class="my-auto ml-4 p-0" >엑셀저장</p>
-        <!-- <xlsx-workbook>
-          <xlsx-sheet
-            :collection="sheet.data"
-            v-for="sheet in sheets"
-            :key="sheet.name"
-            :sheet-name="sheet.name"
-          />
-          <xlsx-download>
-            <button>Download</button>
-          </xlsx-download>
-        </xlsx-workbook> -->
       </div>
     </template>
   </base-button>
@@ -60,9 +49,6 @@
 <script>
 import { defineComponent } from "vue";
 import BaseButton from "~/components/atoms/base-button.vue";
-//import * as XLSX from 'xlsx/xlsx.mjs';
-//t { tsXLXS } from 'ts-xlsx-export';
-
 
 export default defineComponent({
   name: "ExcelButton",
@@ -71,19 +57,6 @@ export default defineComponent({
   },
   emits: ["click:excel"],
   setup(properties,{emit}) {
-    // const makeExcelFile5 = (data) => { 
-    //   //console.log("makeExcelFile5", properties.excelValue)
-    //   var dataWS = XLSX.utils.json_to_sheet([{"abc": "abc"}]);
-    //   // 엑셀의 workbook을 만든다
-    //   // workbook은 엑셀파일에 지정된 이름이다.
-    //   var wb = XLSX.utils.book_new();
-    //   // workbook에 워크시트 추가
-    //   // 시트명은 'nameData'
-    //   XLSX.utils.book_append_sheet(wb, dataWS, 'nameData');
-    //   // 엑셀 파일을 내보낸다.
-    //   XLSX.writeFile(wb, 'example.xlsx');
-    // }
-
     return{
       
     }

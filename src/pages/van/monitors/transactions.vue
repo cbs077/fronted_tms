@@ -117,7 +117,7 @@
       />
       -->
       <el-table-column prop="van" label="VAN사명" align="center" />
-      <el-table-column prop="modelCode" label="S/W Group명" align="center" />
+      <el-table-column prop="swGroupNm" label="S/W Group명" align="center" />
       <el-table-column prop="swOldVersion" label="S/W Version" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
       <el-table-column prop="request" label="요청내용" align="center" />
@@ -265,7 +265,7 @@ export default defineComponent({
       changeForm.vanSelect = ""
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -276,7 +276,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data = dataArr
     }
 

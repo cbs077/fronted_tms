@@ -17,7 +17,6 @@ const gnbs = (isVan): INavMenuItem[] => {
   let temporary = [...rawGnb];
 
   if (!isVan) { // admin
-    console.log("admin~~")
     temporary.push(
       {
         text: "단말기관리",
@@ -63,8 +62,6 @@ const gnbs = (isVan): INavMenuItem[] => {
       },
     );
   }
-
-  console.log("temporary", temporary)
   
   return temporary.map((gnb) => {
     return { ...gnb, to: `${prefix}${gnb.to}` };
@@ -90,12 +87,6 @@ const SWsearchOptions = [
   { id: 2, key: "sw_version", value: "S/W Version" },
 ];
 
-const swVersions = [{ value: "1.0" }, { value: "1.1" }, { value: "1.2" }];
-const swGroupCodes = [{ value: "1111" }, { value: "2222" }, { value: "3333" }];
-const deviceModels = [{ value: "3001" }, { value: "3002" }, { value: "3003" }];
-
-
-
 const lnbs = (isVan: boolean) => {
   //const prefix = isVan ? "/van" : "/admin";
   const prefix = "/van" 
@@ -117,6 +108,7 @@ const lnbs = (isVan: boolean) => {
         open: true,
         childs: [{ text: "Van사별 현황", to: `${prefix}/devices/vans` }],
       },
+      /*
       {
         text: "단말기 사용정보",
         open: true,
@@ -134,7 +126,7 @@ const lnbs = (isVan: boolean) => {
               //   to: `${prefix}/devices/devices-usage-daily`,
               // },
             ],
-      },
+      },*/
       {
         text: "단말기 모델",
         open: true,
@@ -156,11 +148,11 @@ const lnbs = (isVan: boolean) => {
                 {
                   text: "개인정보",
                   to: `${prefix}/accounts/users/my`,
-                },
+                },/*
                 {
                   text: "개인정보 조회",
                   to: `${prefix}/accounts/users`,
-                },
+                }, */
                 {
                   text: "개인정보 등록",
                   to: `${prefix}/accounts/users/registration`,
@@ -201,6 +193,7 @@ const lnbs = (isVan: boolean) => {
               text: isVan ? "S/W 조회 및 등록" : "S/W 조회 및 등록",
               to: `${prefix}/sw-managements/productions/registrations`,
             },
+            /* 임시 제한
             {
               text: "S/W Upgrade 이력",
               to: `${prefix}/sw-managements/productions/sw-upgrades`,
@@ -209,6 +202,7 @@ const lnbs = (isVan: boolean) => {
               text: "단말기 Update 이력",
               to: `${prefix}/sw-managements/productions/device-updates`,
             },
+            */
           ],
         },
         // {
@@ -258,9 +252,6 @@ const take = reactive({
 
 export const useConst = () => {
   return {
-    swVersions,
-    swGroupCodes,
-    deviceModels,
     gnbs,
     lnbs,
     searchOptions,

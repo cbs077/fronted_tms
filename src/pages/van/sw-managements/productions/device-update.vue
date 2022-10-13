@@ -213,7 +213,7 @@ export default defineComponent({
       console.log("store.state.pageCount", store.state.pageCount)
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -224,7 +224,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data =dataArr
     }
 

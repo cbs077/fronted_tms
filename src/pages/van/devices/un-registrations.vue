@@ -217,7 +217,7 @@ export default defineComponent({
         setValue(data)
       })
     }; 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -295,7 +295,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       update(dataArr); 
     }
 

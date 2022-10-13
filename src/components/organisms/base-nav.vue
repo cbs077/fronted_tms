@@ -119,6 +119,7 @@ export default defineComponent({
     background-size: 100%;
     width: 150px;
     height: 60px;
+    background-repeat: no-repeat;
   }
 </style>
 

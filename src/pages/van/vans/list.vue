@@ -60,6 +60,7 @@
   <van-detail-modal
     v-model="vanDetail.modal"
     :van="vanDetail.data"
+    @click:positive="onSaveDetail"
   ></van-detail-modal>
 </template>
 <script lang="ts">
@@ -95,10 +96,11 @@ export default defineComponent({
 
     const vanDetail = reactive({
       modal: false,
-      data: [],
+      data: {},
     });
 
-    const onRowClicked = (row: IAdminVan) => {
+    const onRowClicked = (row) => {  
+      console.log("row", row)
       vanDetail.data = row;
       vanDetail.modal = true;
     };
@@ -152,7 +154,7 @@ export default defineComponent({
       })
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -167,7 +169,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       vanList.data = dataArr
 
     }
@@ -232,13 +234,23 @@ export default defineComponent({
       })
     }
 
+    const onSaveDetail = ( val : any) => {
+      vanDetail.modal =false
+      getTerminalMdl()
+      getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
+        setValue(data)
+      })   
+    }
+
     getTerminalMdl()
     getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
     })
 
     return { 
-      filter, vanDetail, onRowClicked,
+      filter,
+      vanDetail,
+      onRowClicked,
       //
       vanList,
       pageVal, 
@@ -249,7 +261,8 @@ export default defineComponent({
       paginate,
       onTake,
       selectOption,
-      onReset 
+      onReset ,
+      onSaveDetail
       };
   },
 });

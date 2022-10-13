@@ -109,10 +109,19 @@
         </div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">사업자 번호</div>
-          <div class="col-span-6 my-auto">
+          <div v-if="device.bussRegNo==device.catBussRegNo" class="col-span-6 my-auto">
             {{ device.bussRegNo }}
           </div>
-        </div>        
+          <div v-if="device.bussRegNo!=device.catBussRegNo" class="col-span-6 my-auto">
+             DB: {{ device.bussRegNo }}, 단말기: {{ device.catBussRegNo }}
+          </div>         
+        </div>    
+        <div class="my-3 grid h-10 grid-cols-8">
+          <div class="col-span-2 my-auto text-center font-bold">주유소 코드</div>
+          <div class="col-span-6 my-auto">
+            {{ device.ssCode }}
+          </div>
+        </div>            
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">등록일</div>
           <div class="col-span-6 my-auto">

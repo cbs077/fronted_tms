@@ -18,6 +18,8 @@ export interface IDevice {
   status: string;
   resultCode: string;
   bussRegNo: string;
+  catBussRegNo: string;
+  ssCode: string;
   description: string;
   applicationDate: Date | string;
   lastAccessDate: Date | string;
@@ -32,6 +34,7 @@ export interface IDevice {
   idle: number;
   swDownload: number;
   address: string;
+  fax: string;
   contact: string;
   manager: string;
   regDt: Date | string;
@@ -129,6 +132,8 @@ export const useDevice = () => {
       status: object.STATUS,
       resultCode: object.RESULT_CODE == ""? "ok":"fail",
       bussRegNo: object.BUSS_REG_NO,
+      catBussRegNo: object.CAT_BUSS_REG_NO,
+      ssCode: object.SS_CODE,
       swGroupCode: object.SW_GROUP_ID,
       swGroupNm: object.SW_GROUP_NM,
       vanCode: object.VAN_ID,
@@ -140,6 +145,7 @@ export const useDevice = () => {
       idle: object.stop_count,
       swDownload: object.sw_count,
       address: object.ADDR1,
+      fax: object.FAX,
       contact: object.PHONE,
       manager: object.MANAGER_NM,
       regDt: object.REG_DT,

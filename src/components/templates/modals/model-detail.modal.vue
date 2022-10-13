@@ -103,12 +103,11 @@ export default defineComponent({
 
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
       axios.post( '/api' +  '/modify/terminal_mdl' ,
         {
-          "VAN_ID": vanId,
+          "VAN_ID": properties.device.vanCode,
           "CAT_MODEL_ID": properties.device.modelCode,
           "CAT_MODEL_NM": properties.device.modelName,
           "DESCRIPTION": properties.device.description,

@@ -130,6 +130,10 @@ export default defineComponent({
     ModelCreateModal,
     BaseButton,
   },
+  mounted() {
+    console.log("mounted"); 
+    this.init();
+  },  
   setup() {
     let { registrationHeaders: headers, devices, renmeObjectKey, renmeObjectAKey } = useDevice();
     const store = useStore();
@@ -147,6 +151,10 @@ export default defineComponent({
     });
     const selectOption = ref();
 
+    const onSaveDetail = ( val : any) => {
+      modelDetail.modal = false
+    }
+
     const deviceUnRegistration = reactive({
       modal: false,
       text: "선택한 항목을 삭제 하시겠습니까?",
@@ -160,16 +168,10 @@ export default defineComponent({
       modal: false,
     });
 
-    const onRowClicked = (row) => {
-      modelDetail.data = row;
-      modelDetail.modal = true;
-    };
-
     const data = reactive({
       slectData: [],
     });   
 
-    ////////////////
     let pageVal = reactive({
       page: 1,
       pageCount: 20,
@@ -186,6 +188,12 @@ export default defineComponent({
     })
 
     let excelValue = "";
+
+    const onRowClicked = (row) => {
+      console.log("row", row)
+      modelDetail.data = row;
+      modelDetail.modal = true;
+    };
 
     const paginate = (page) => {
       pageVal.page = page
@@ -231,7 +239,7 @@ export default defineComponent({
       changeForm.vanSelect =""
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -242,7 +250,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data = dataArr
     }
 
@@ -347,20 +355,18 @@ export default defineComponent({
       getTerminalMdl()
     }
 
-    getTerminalVan().then( data => {
-        var list = data.list
-        changeForm.vanList = _.map(list, function square(n) {
-          return {"key": n.VAN_ID, "value": n.VAN_NM}
-        })
-    })
+    function init(){
+      getTerminalVan().then( data => {
+          var list = data.list
+          changeForm.vanList = _.map(list, function square(n) {
+            return {"key": n.VAN_ID, "value": n.VAN_NM}
+          })
+      })
 
-    getTerminalMdl()
-    getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
-      setValue(data)
-    })
-
-    const onSaveDetail = ( val : any) => {
-      modelDetail.modal = false
+      getTerminalMdl()
+      getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
+        setValue(data)
+      })
     }
 
     return {
@@ -368,13 +374,11 @@ export default defineComponent({
       onRowClicked,
       selectOption,
       modelDetail,
-      //update,
       deviceUnRegistration,
       query,
       headers,
       devices,
       displayOptions,
-      //
       pageVal, 
       changeForm,
       renmeObjectAKey ,
@@ -387,7 +391,8 @@ export default defineComponent({
       onSave,
       isVan,
       onSaveDetail,
-      onSelectVanId
+      onSelectVanId,
+      init
     };
   },
 });

@@ -39,15 +39,6 @@
             <base-button @click="onIdCheck" text="중복확인" class="mr-1" />
           </div>
         </div>
-        <!--<div v-if="changeForm.isExistId=='true'" class="grid grid-cols-8">
-          <div class="col-span-2" />
-          <div class="col-span-6 text-sk-red">
-            이미 등록된 모델 코드 입니다.
-          </div>
-          <p class="col-span-6 col-start-4 text-sk-teal">
-            등록 가능한 번호입니다.
-          </p>          
-        </div>-->
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
             모델명
@@ -169,7 +160,8 @@ export default defineComponent({
 
     const onIdCheck = (param: string) => {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var userNM = window.localStorage.getItem("userNm")
 
       if(changeForm.CAT_MODEL_ID == "" ) {alert("모델코드 is null"); return}

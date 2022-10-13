@@ -21,7 +21,6 @@
         </el-select>
       </div>
     </div>
-
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>
 
@@ -237,7 +236,7 @@ export default defineComponent({
       changeForm.vanSelect = ""
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
     }
 
@@ -248,7 +247,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data = dataArr
     }
 

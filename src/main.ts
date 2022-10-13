@@ -24,4 +24,3 @@ app.component(BaseButton.name, BaseButton)
   .use(store)
   .mount("#app");
 
-app.config.globalProperties.foo = "bar";

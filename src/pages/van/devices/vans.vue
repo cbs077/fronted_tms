@@ -47,7 +47,7 @@
       />
       <el-table-column
         prop="idle"
-        label="휴면상태"
+        label="거래중지"
         align="center"
         header-align="center"
       />
@@ -57,6 +57,27 @@
   <hr class="my-6" />
   <bread-crumb text="VAN사별 현황 (상세)" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
+    <div v-if="!isVan" class="flex w-1/3">
+      <div class="my-auto w-1/4">VAN사</div>
+
+      <div class="col-span-4 my-auto">
+        <el-select
+          v-model="changeForm.vanSelect"
+          clearable
+          placeholder="선택"
+          @change="onSelectVanId"
+          size="large"
+          class="w-full"
+        >
+          <el-option
+            v-for="item in changeForm.vanList"
+            :key="item.value"
+            :label="item.value"
+            :value="item.key"
+          />
+        </el-select>
+      </div>    
+    </div>    
     <div class="my-3 flex flex-row">
       <div class="flex w-1/3">
         <div class="my-auto w-1/4">단말기 모델</div>
@@ -102,9 +123,8 @@
     <div class="my-6 flex flex-row">
       <div class="my-auto block w-1/12 align-middle">결과 데이터</div>
       <div class="flex">
-        <el-checkbox label="전체" size="large" />
-        <el-checkbox label="단말기 모델명" size="large" />
-        <el-checkbox label="주유소 코드" size="large" />
+        <el-checkbox v-model="changeForm.catModelCheck" label="단말기 모델명" size="large" />
+        <el-checkbox v-model="changeForm.ssCodeCheck" label="주유소 코드" size="large" />
       </div>
     </div>
     <options-search-button
@@ -124,13 +144,16 @@
 
   <div class="mb-6 rounded border border-sk-gray">
     <el-table :data="changeForm.data" fit class="rounded" @row-click="onRowClicked">
+      <el-table-column v-if="!isVan" prop="van" label="VAN사" align="center" />
       <el-table-column prop="deviceNumber" label="단말기번호" align="center" />
-      <el-table-column
+      <el-table-column  
         prop="swGroupNm"
-        label="S/W Group명"
+        label="S/W Group"
         class-name="text-blue"
         class="text-blue"
-      />
+      /> <!-- swGroupCode swGroupNm -->
+      <el-table-column v-if="changeForm.catModelCheck==true" prop="modelName" label="단말기 모델" /> <!-- modelCode modelName -->
+      <el-table-column v-if="changeForm.ssCodeCheck==true" prop="ssCode" label="주유소 코드" />
       <el-table-column prop="regDt" label="등록일" />
       <el-table-column prop="firstUseDt" label="최초VC" />
       <el-table-column prop="lastUseDt" label="마지막VC" />
@@ -157,6 +180,7 @@
 <script lang="ts">
 import { TableColumnCtx } from "element-plus/es/components/table/src/table-column/defaults";
 import { defineComponent, reactive, ref } from "vue";
+import { computed, defineComponent, reactive } from "vue";
 import  axios, { AxiosResponse } from "axios";
 import writeXlsxFile from 'write-excel-file'
 import { Search } from "@element-plus/icons-vue";
@@ -167,6 +191,7 @@ import ExcelButton from "~/components/molecules/excel-button.vue";
 import TableCommonButton from "~/components/molecules/table/table-common-button.vue";
 import DeviceLogModal from "~/components/templates/modals/device-log.modal.vue";
 import VanDetailModal from "~/components/templates/modals/van-detail.modal.vue";
+import { getTerminalVan } from "~/hooks/api.hooks";
 import { IDevice, useDevice } from "~/hooks/devices.hooks";
 import { useStore } from "vuex";
 
@@ -189,6 +214,7 @@ export default defineComponent({
   setup() {
     const { registrationHeaders_a: headers, devices, update, renmeObjectKey, renmeObjectAKey} = useDevice();
     const store = useStore();
+    let isVan = computed(() => store.state.isVan); 
 
     const searchOptions =  [
       { id: 1, key: "sw_group_id", value: "초기상태" },
@@ -225,7 +251,9 @@ export default defineComponent({
       status: true,
       applicationDate: true,
       lastAccessDate: true,
-      checkAll: []
+      checkAll: false,
+      ssCodeCheck: false,
+      catModelCheck: false,
     })
     const tableHeader = reactive({ ...initialState });
 
@@ -239,7 +267,9 @@ export default defineComponent({
 
       deviceModels: [],
       data: [],
-      vanData: []
+      vanData: [],
+      vanList: [{ value: "-" }],
+      vanSelect: ""  
     })
     
     const changeForm = reactive({ ...initialStateA });
@@ -302,13 +332,13 @@ export default defineComponent({
       changeForm.CAT_MODEL_ID = ""
       changeForm.SW_GROUP_ID = ""
 
-      defaultCheckbox()
+      //defaultCheckbox()
       Object.assign(tableHeader, initialState);
     };
 
-    const seTtotalCount = (pageCount) => {
+    const setTotalCount = (pageCount) => {
       pageVal.total = pageCount
-      //console.log("seTtotalCount", pageVal.total)
+      //console.log("setTotalCount", pageVal.total)
     }
 
     const onCheckbox = (name, tst) => {
@@ -341,7 +371,8 @@ export default defineComponent({
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       if(token == null) token = "" 
 
       let data: any[] = [];
@@ -384,7 +415,8 @@ export default defineComponent({
     };
 
     async function getTerminal(param) {
-      var vanId = window.localStorage.getItem("vanId")
+      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      else var vanId = changeForm.vanSelect
       var token = window.localStorage.getItem("token")
       var param = param + "&van_id="+ vanId
       if(token == null) token = "" 
@@ -490,7 +522,7 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.data = dataArr
     }
 
@@ -501,30 +533,29 @@ export default defineComponent({
         var obj = renmeObjectKey(object);
         dataArr.push(obj);
       }   
-      seTtotalCount(data.total_count)
+      setTotalCount(data.total_count)
       changeForm.vanData = dataArr 
     }
 
-    function defaultCheckbox() {
-     //tableHeader.checkAll["van"] = true
-      tableHeader.checkAll["modelCode"] = true
-      tableHeader.checkAll["deviceNumber"] = true
-      tableHeader.checkAll["swGroupCode"] = true
-      tableHeader.checkAll["swVersion"] = true
-      tableHeader.checkAll["status"] = true
-      tableHeader.checkAll["applicationDate"] = true
-      tableHeader.checkAll["lastAccessDate"] = true
+    function onSelectVanId(){
+      console.log("onSelectVanId")
+      getTerminalMdl()
     }
+
+    getTerminalVan().then( data => {
+        var list = data.list
+        changeForm.vanList = _.map(list, function square(n) {
+          return {"key": n.VAN_ID, "value": n.VAN_NM}
+        })
+    })
 
     const selectOption = ref();
     Object.assign(tableHeader, initialState);
     getTerminal("page=1&page_count="+store.state.pageCount).then( data => {
       setValue(data)
-      defaultCheckbox()
     })
     getTerminalStat("page=1&page_count="+store.state.pageCount).then( data => {
       setVanValue(data)
-      defaultCheckbox()
     })
 
     getTerminalMdl()
@@ -536,7 +567,6 @@ export default defineComponent({
       query,
       deviceLog,
       devices,
-      searchOptions,
       displayOptions,
       arraySpanMethod,
       onRowClicked,
@@ -556,7 +586,9 @@ export default defineComponent({
       excelValue,
       onReset,
       getSwGroup,
-      getTerminalMdl
+      getTerminalMdl,
+      getTerminalVan,
+      onSelectVanId
     };
   },
 });

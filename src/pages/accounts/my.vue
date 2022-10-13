@@ -85,32 +85,6 @@ export default defineComponent({
       modal: false,
     });
 
-    const registrationResult = reactive({
-      modal: false,
-      items: [
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-        {
-          deviceNumber: "1111",
-          status: "성공",
-        },
-      ],
-    });
-
     const deviceDetail = reactive({
       modal: false,
       van: {},
@@ -228,7 +202,6 @@ export default defineComponent({
       devices,
       searchOptions,
       deviceRegistration,
-      registrationResult,
       Search,
       //
       changeForm,

@@ -129,7 +129,7 @@
       <div class="mx-3 border border-sk-lightgray p-3">
         * S/W Version은 최대 10자리의 숫자로 입력해 주십시오.(문자를 입력하실 경우 10자리를 채워 주십시오.)<br>
         * S/W Version 입력 시 앞서 등록한 Version 이후 Version으로 입력해 주셔야 합니다.<br>
-        * S/W 등록 시 등록 파일의 확장자가 exe와 같은 실행파일은 업로드 불가하며 최대 Upload 파일 크기는 1M입니다.
+        * S/W 등록 시 등록 파일의 확장자가 exe와 같은 실행파일은 업로드 불가하며 최대 Upload 파일 크기는 5M입니다.
       </div>
     </template>
   </base-modal>
@@ -194,8 +194,6 @@ export default defineComponent({
       isExistId: "",
       vanList: [{ value: "-" }],
       vanSelect: ""  
-      //selectOGroupId: "",
-      //selectOGroupNm: ""
     })
 
     function getTerminalMdl() {
@@ -337,10 +335,6 @@ export default defineComponent({
     };
 
     function onSelectVanId(){
-      console.log("onSelectVanId")
-      // changeForm.deviceModels = ""
-      // changeForm.swGroupCodes = ""
-      // changeForm.CAT_MODEL_ID = "" 
       changeForm.SW_GROUP_ID = ""
       changeForm.SW_GROUP_NM = ""
       getTerminalMdl()
