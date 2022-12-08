@@ -1,6 +1,7 @@
 <template>
   <bread-crumb text="S/W Group 조회 및 등록" />
   <div class="mb-4 rounded border border-sk-gray bg-option-background p-3 pl-8">
+    <!--
     <div v-if="!isVan" class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">VAN사</div>
 
@@ -21,6 +22,7 @@
         </el-select>
       </div>
     </div>
+    -->
     <div class="my-3 flex flex-row">
       <div class="my-auto mr-6 w-1/12">검색조건</div>
 
@@ -256,7 +258,8 @@ export default defineComponent({
       else var vanId = changeForm.vanSelect
 
       var token = window.localStorage.getItem("token")
-      var param = param + "&van_id="+ vanId
+      //var param = param + "&van_id="+ vanId
+      var param = param + "&van_id=all"//+ vanId
       if(token == null) token = "" 
 
       let data: any[] = [];

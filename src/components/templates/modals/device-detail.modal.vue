@@ -201,11 +201,13 @@ export default defineComponent({
 
     function getswGroupCodes() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      //var vanId = window.localStorage.getItem("vanId")
       if(token == null) token = "" 
 
       let data: any[] = [];
-      var param = "van_id="+ vanId
+      var param = "van_id=all"//+ vanId
+      //var param = "van_id="+ vanId
+      
       let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
