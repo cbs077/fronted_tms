@@ -7,6 +7,7 @@
     no-action
   >
     <template #modalBody>
+      <!--
       <div v-if="!isVan" class="my-3 grid h-12 grid-cols-8">
         <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
 
@@ -27,6 +28,7 @@
           </el-select>
         </div>    
       </div>
+      -->
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -166,8 +168,9 @@ export default defineComponent({
     
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
-      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
-      else var vanId = changeForm.vanSelect
+      // if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      // else var vanId = changeForm.vanSelect
+      var vanId = "all"
       var userNM = window.localStorage.getItem("userNm")
 
       if( changeForm.isExistId == "true" || changeForm.isExistId == "" ){
@@ -197,15 +200,17 @@ export default defineComponent({
 
     const onIdCheck = (param: string) => {
       var token = window.localStorage.getItem("token")
-      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
-      else var vanId = changeForm.vanSelect
+      // if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      // else var vanId = changeForm.vanSelect
+      //var vanId = "all"
       var userNM = window.localStorage.getItem("userNm")
 
       console.log("changeForm.SW_GROUP_ID.length", changeForm.SW_GROUP_ID.length)
       if(changeForm.SW_GROUP_ID == "" ){ alert("그룹코드 is null"); return}
       if(changeForm.SW_GROUP_ID.length > 4 ) {alert("4자리 이상입니다."); return}
 
-      axios.get( '/api' +  '/swgroup/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID ,
+      //axios.get( '/api' +  '/swgroup/idcheck/' + vanId + "/" + changeForm.SW_GROUP_ID ,
+      axios.get( '/api' +  '/swgroup/idcheck/all/' + changeForm.SW_GROUP_ID ,
         {
           headers: { Authorization: token} // header의 속성
         },

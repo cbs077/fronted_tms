@@ -8,6 +8,7 @@
     @click:positive="uploadFile"
   >
     <template #modalBody>
+      <!--
       <div v-if="!isVan" class="my-3 grid h-12 grid-cols-8">
         <div class="col-span-2 my-auto text-center font-bold">VAN사</div>
 
@@ -29,6 +30,7 @@
           </el-select>
         </div>    
       </div>    
+      -->
       <div>
         <div class="my-3 grid h-10 grid-cols-8">
           <div class="col-span-2 my-auto text-center font-bold">
@@ -198,9 +200,9 @@ export default defineComponent({
 
     function getTerminalMdl() {
       var token = window.localStorage.getItem("token")
-      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
-      else var vanId = changeForm.vanSelect
-      var param = "van_id="+ vanId      
+      // if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      // else var vanId = changeForm.vanSelect
+      var param = "van_id=all"//+ vanId      
       if(token == null) token = "" 
 
       let data: any[] = [];
@@ -281,8 +283,9 @@ export default defineComponent({
     async function onSave (param) {
       var token = window.localStorage.getItem("token")
       var userNM = window.localStorage.getItem("userNm")
-      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
-      else var vanId = changeForm.vanSelect
+      // if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      // else var vanId = changeForm.vanSelect
+      var vanId = "all"
 
       await axios.post( '/api' +  '/swoprmg?' ,
         {
@@ -309,8 +312,9 @@ export default defineComponent({
 
     const onIdCheck = (param: string) => {
       var token = window.localStorage.getItem("token")
-      if( isVan == true) var vanId = window.localStorage.getItem("vanId")
-      else var vanId = changeForm.vanSelect
+      // if( isVan == true) var vanId = window.localStorage.getItem("vanId")
+      // else var vanId = changeForm.vanSelect
+      var vanId = "all"
       var userNM = window.localStorage.getItem("userNm")
 
       if(changeForm.SW_GROUP_ID == "" ) {alert("그룹 아이디 is null"); return}

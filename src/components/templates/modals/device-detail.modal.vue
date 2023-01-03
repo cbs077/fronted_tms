@@ -35,7 +35,7 @@
               clearable
               placeholder="선택"
               v-model="device.modelCode"
-              @change="onSelectGroupId"
+              @click="onSelectModel"
               size="large"
               class="w-full"
             >
@@ -185,7 +185,12 @@ export default defineComponent({
     },
   },
   emits: ["update:modelValue", "click:positive", "click:negative"],
+  mounted() {
+    console.log("mounted"); 
 
+    this.getTerminalMdl()
+    this.getswGroupCodes()
+  }, 
   setup(properties, { emit }) {
     const isOpen = computed({
       get: () => properties.modelValue,
@@ -201,11 +206,13 @@ export default defineComponent({
 
     function getswGroupCodes() {
       var token = window.localStorage.getItem("token")
-      var vanId = window.localStorage.getItem("vanId")
+      //var vanId = window.localStorage.getItem("vanId")
       if(token == null) token = "" 
 
       let data: any[] = [];
-      var param = "van_id="+ vanId
+      var param = "van_id=all"//+ vanId
+      //var param = "van_id="+ vanId
+      
       let response = axios.get( '/api' +  '/swgroup/list?' + param,
         {
           headers: {
@@ -242,6 +249,7 @@ export default defineComponent({
       .then(response => {
         var list = response.data.list
         
+        console.log("getTerminalMdl", list)
         changeForm.deviceModels = _.map(list, function square(n) {
           return {"key":  n.CAT_MODEL_NM,  "value": n.CAT_MODEL_ID}
         })
@@ -250,7 +258,6 @@ export default defineComponent({
 
     const onSave = (param: string) => {
       var token = window.localStorage.getItem("token")
-      //var vanId = window.localStorage.getItem("vanId")
       var userNM = window.localStorage.getItem("userNm")
 
       axios.post( '/api' + '/modify/terminal?' ,
@@ -270,10 +277,16 @@ export default defineComponent({
       });
     };
 
+    function onSelectModel(event){
+      console.log("onSelectModel")
+      //getTerminalMdl()
+    }
+
     function onSelectGroupId(event){
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
+      console.log("onSelectGroupId", groupRename)
       properties.device.swGroupCode = groupRename.value
       properties.device.swGroupNm = groupRename.key     
     }
@@ -282,14 +295,13 @@ export default defineComponent({
       var groupRename = _.find(changeForm.swGroupCodes, function(data) {
         return data.value == event }
       );
+      console.log("onSelectGroupNm", groupRename)
       properties.device.swGroupCode = groupRename.value
       properties.device.swGroupNm = groupRename.key
     }
 
     function onStopTirminal(flag) {
       var token = window.localStorage.getItem("token")
-      // var vanId = window.localStorage.getItem("vanId")
-      // var vanId = device.
       var userNM = window.localStorage.getItem("userNm")
 
       axios.post( '/api' +  '/modify/terminal?' ,
@@ -308,8 +320,6 @@ export default defineComponent({
       });
     }
 
-    getswGroupCodes()
-    getTerminalMdl()
     return {
       changeForm,
       isOpen,
@@ -318,8 +328,11 @@ export default defineComponent({
       },
       onSelectGroupId,
       onSelectGroupNm,
+      onSelectModel,
       onSave,
-      onStopTirminal
+      onStopTirminal,
+      getTerminalMdl,
+      getswGroupCodes
     };
   },
 });

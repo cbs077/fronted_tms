@@ -335,7 +335,7 @@ export default defineComponent({
     };
 
     const onSaveExcel = () => {   
-      var data = getTerminal("page=1&page_count=1000"+ excelValue).then( data => {
+      var data = getTerminal("page=1&"+ excelValue + "&page_count=10000").then( data => {
         var headerData = 
           ["VAN_ID", "CAT_MODEL_ID", "CAT_SERIAL_NO", "SW_GROUP_ID", "SW_VERSION", "STATUS", "REG_DT", "LAST_USE_DT"]
         var headerName =
